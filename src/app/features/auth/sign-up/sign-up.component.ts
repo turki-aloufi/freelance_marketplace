@@ -1,15 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService, SkillDto } from '../../../core/services/auth.service';
 import { Router, RouterModule } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { debounceTime, Subject, switchMap, takeUntil, retry } from 'rxjs';
 
 // Interface for the API response
 interface Skill {
-  skillId: number;
-  skill: string;
-  category: string;
+  SkillId: number;
+  Skill: string;
+  Category: string;
 }
 
 @Component({
@@ -18,16 +19,6 @@ interface Skill {
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="min-h-screen bg-gray-50 flex flex-col">
-      <!-- Header -->
-      <header class="bg-black text-white p-4 flex justify-between items-center">
-        <div class="text-2xl font-bold">FREELANCER</div>
-        <nav class="space-x-4">
-          <a routerLink="/" class="hover:underline">Home</a>
-          <a routerLink="/sign-in" class="hover:underline">Sign In</a>
-          <a routerLink="/sign-up" class="hover:underline">Sign Up</a>
-        </nav>
-      </header>
-
       <!-- Main Content -->
       <main class="flex-1 flex flex-col items-center justify-center py-10">
         <h2 class="text-3xl font-bold mb-6">SIGN UP</h2>
@@ -118,24 +109,36 @@ interface Skill {
                 type="text"
                 [(ngModel)]="skillSearch"
                 name="skillSearch"
-                (input)="filterSkills()"
+                (ngModelChange)="onSkillSearchChange()"
                 placeholder="Search skills..."
                 class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                [disabled]="isLoadingSkills"
               >
+              <!-- Loading Indicator -->
+              <div *ngIf="isLoadingSkills" class="absolute right-2 top-2">
+                <svg class="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+              </div>
               <!-- Dropdown for filtered skills -->
-              <ul *ngIf="filteredSkills.length > 0 && skillSearch" class="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 max-h-40 overflow-y-auto">
+              <ul *ngIf="filteredSkills.length > 0 && skillSearch && !isLoadingSkills" class="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 max-h-40 overflow-y-auto">
                 <li
                   *ngFor="let skill of filteredSkills"
-                  (click)="addSkill(skill.skill)"
+                  (click)="addSkill(skill)"
                   class="p-2 hover:bg-gray-100 cursor-pointer"
                 >
-                  {{ skill.skill }} ({{ skill.category }})
+                  {{ skill.Skill }} ({{ skill.Category }})
                 </li>
               </ul>
             </div>
+            <div *ngIf="error && !isLoadingSkills" class="mt-2 text-red-500 text-sm">
+              {{ error }}
+              <button (click)="fetchSkills()" class="ml-2 underline">Retry</button>
+            </div>
             <div class="mt-2 flex flex-wrap gap-2">
               <span *ngFor="let skill of skills" class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm flex items-center">
-                {{ skill }}
+                {{ skill.Skill }}
                 <button (click)="removeSkill(skill)" class="ml-1 text-red-500">×</button>
               </span>
             </div>
@@ -171,28 +174,28 @@ interface Skill {
           </p>
         </form>
       </main>
-
-      <!-- Footer -->
-      <footer class="bg-black text-white text-center p-4">
-        <p>2025 Freelancer. All right reserved.</p>
-      </footer>
     </div>
   `,
   styles: []
 })
-export class SignUpComponent implements OnInit {
+export class SignUpComponent implements OnInit, OnDestroy {
   firstName: string = '';
   lastName: string = '';
   email: string = '';
   contactNumber: string = '';
   password: string = '';
-  skills: string[] = [];
+  skills: Skill[] = [];
   about: string = '';
   error: string = '';
 
   skillSearch: string = '';
   availableSkills: Skill[] = [];
   filteredSkills: Skill[] = [];
+  isLoadingSkills: boolean = false;
+  private skillSearchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
+  private maxRetries: number = 3;
+  private retryCount: number = 0;
 
   constructor(
     private authService: AuthService,
@@ -202,43 +205,112 @@ export class SignUpComponent implements OnInit {
 
   ngOnInit() {
     this.fetchSkills();
+    this.skillSearchSubject
+      .pipe(
+        debounceTime(300),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.filterSkills();
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   fetchSkills() {
-    // Replace with your API endpoint
-    this.http.get<Skill[]>('http://localhost:5021/api/Skills')
+    if (this.availableSkills.length > 0) {
+      console.log('Using cached skills:', this.availableSkills);
+      this.filteredSkills = [...this.availableSkills];
+      return;
+    }
+
+    this.isLoadingSkills = true;
+    console.log('Fetching skills from API: http://localhost:5021/api/Skills');
+    this.http.get<Skill[]>('http://localhost:5021/api/Skills', { observe: 'response' })
+      .pipe(
+        retry(2),
+        switchMap(response => {
+          console.log('Raw HTTP response:', {
+            status: response.status,
+            headers: response.headers,
+            body: response.body
+          });
+          const skills = response.body || [];
+          const validSkills = skills.filter(
+            (skill): skill is Skill =>
+              skill != null &&
+              typeof skill.SkillId === 'number' &&
+              typeof skill.Skill === 'string' &&
+              skill.Skill.trim() !== '' &&
+              typeof skill.Category === 'string'
+          );
+          console.log('Validated skills:', validSkills);
+          return [validSkills];
+        }),
+        takeUntil(this.destroy$)
+      )
       .subscribe({
         next: (skills) => {
           this.availableSkills = skills;
-          this.filteredSkills = skills;
+          this.filteredSkills = [...this.availableSkills];
+          this.isLoadingSkills = false;
+          this.retryCount = 0; // Reset retry count on success
+          console.log('Fetched skills:', this.availableSkills);
+          if (skills.length === 0 && this.retryCount < this.maxRetries) {
+            this.retryCount++;
+            console.warn(`Skills array is empty. Retry ${this.retryCount}/${this.maxRetries}`);
+            setTimeout(() => this.fetchSkills(), 1000);
+          } else if (skills.length === 0) {
+            this.error = 'No skills available. Please try again later.';
+          }
         },
-        error: (err) => {
-          console.error('Error fetching skills:', err);
+        error: (err: HttpErrorResponse) => {
+          this.isLoadingSkills = false;
+          console.error('Error fetching skills:', {
+            status: err.status,
+            statusText: err.statusText,
+            message: err.message,
+            error: err.error
+          });
           this.error = 'Failed to load skills. Please try again later.';
         }
       });
   }
 
+  onSkillSearchChange() {
+    this.skillSearchSubject.next(this.skillSearch);
+  }
+
   filterSkills() {
-    if (!this.skillSearch) {
-      this.filteredSkills = this.availableSkills;
+    if (this.isLoadingSkills) {
+      this.filteredSkills = [];
       return;
     }
-    this.filteredSkills = this.availableSkills.filter(skill =>
-      skill.skill.toLowerCase().includes(this.skillSearch.toLowerCase())
+    if (!this.skillSearch) {
+      this.filteredSkills = [...this.availableSkills];
+      return;
+    }
+    const searchTerm = this.skillSearch.toLowerCase().trim();
+    this.filteredSkills = this.availableSkills.filter(
+      (skill) =>
+        skill?.Skill?.toLowerCase().includes(searchTerm) ||
+        skill?.Category?.toLowerCase().includes(searchTerm)
     );
   }
 
-  addSkill(skill: string) {
-    if (skill && !this.skills.includes(skill)) {
+  addSkill(skill: Skill) {
+    if (skill && !this.skills.some((s) => s.SkillId === skill.SkillId)) {
       this.skills.push(skill);
-      this.skillSearch = ''; // Clear search input
-      this.filteredSkills = this.availableSkills; // Reset filtered list
+      this.skillSearch = '';
+      this.filteredSkills = [...this.availableSkills];
     }
   }
 
-  removeSkill(skill: string) {
-    this.skills = this.skills.filter(s => s !== skill);
+  removeSkill(skill: Skill) {
+    this.skills = this.skills.filter((s) => s.SkillId !== skill.SkillId);
   }
 
   async signUp() {
@@ -247,12 +319,18 @@ export class SignUpComponent implements OnInit {
         this.error = 'Please fill in all required fields.';
         return;
       }
+      // Map Skill[] to SkillDto[]
+      const skillDtos: SkillDto[] = this.skills.map(skill => ({
+        skillId: skill.SkillId,
+        skill: skill.Skill,
+        category: skill.Category
+      }));
       await this.authService.signUp({
         firstName: this.firstName,
         lastName: this.lastName,
         email: this.email,
         contactNumber: this.contactNumber,
-        skills: this.skills,
+        skills: skillDtos,
         about: this.about,
         password: this.password
       });
