@@ -9,53 +9,99 @@
     <!-- Mobile Menu Button -->
     <button class="md:hidden" (click)="toggleMenu()">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     </button>
 
     <!-- Links (Desktop) -->
     <div class="hidden md:flex items-center space-x-9">
-      <ng-container *ngIf="!loggedIn; else userLinks">
-        <a href="#" class="font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
-        <a href="#" class="font-semibold hover:text-[#DEBD63] transition duration-300">Sign In</a>
-        <a href="#" class="font-semibold hover:text-[#DEBD63] transition duration-300">Sign Up</a>
+      <ng-container *ngIf="!isLoggedIn; else userLinks">
+        <a routerLink="/home" class="font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
+        <a routerLink="/sign-in" class="font-semibold hover:text-[#DEBD63] transition duration-300">Sign In</a>
+        <a routerLink="/sign-up" class="font-semibold hover:text-[#DEBD63] transition duration-300">Sign Up</a>
       </ng-container>
 
       <ng-template #userLinks>
-        <a href="#" class="font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
+        <a routerLink="/home" class="font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
 
         <!-- Client Dropdown -->
         <div class="relative client-dropdown" (click)="$event.stopPropagation()">
-          <button (click)="toggleClientDropdown()"
-                  class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300">
+          <button
+            (click)="toggleClientDropdown()"
+            class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300"
+          >
             <span>Client Projects</span>
             <i class="fa fa-angle-down pt-1"></i>
           </button>
 
-          <div *ngIf="isClientDropdownOpen"
-               class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50">
-            <a href="#" class="flex items-center px-4 py-2  hover:bg-gray-800 transition-colors duration-300">
+          <div
+            *ngIf="isClientDropdownOpen"
+            class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50"
+          >
+            <a
+              routerLink="/client/projects"
+              class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
+            >
               <i class="fa fa-folder-open mr-2 text-[#DEBD63]"></i> Client Projects
             </a>
-            <a href="#" class="flex items-center px-4 py-2  hover:bg-gray-800 transition-colors duration-300">
+            <a
+              routerLink="/client/approved"
+              class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
+            >
               <i class="fa fa-check-circle mr-2 text-[#DEBD63]"></i> Approved Projects
             </a>
           </div>
         </div>
 
-        <a href="#" class="font-semibold hover:text-[#DEBD63] transition duration-300">Freelance Projects</a>
+        <a routerLink="/freelance/projects" class="font-semibold hover:text-[#DEBD63] transition duration-300"
+          >Freelance Projects</a
+        >
 
         <!-- Icons -->
         <div class="flex items-center space-x-6 text-2xm">
-          <a href="#" class="text-white hover:text-[#DEBD63] transition duration-300"><i class="fa fa-dollar-sign"></i></a>
-          <a href="#" class="text-white hover:text-[#DEBD63] transition duration-300"><i class="fa fa-envelope"></i></a>
-          <a href="#" class="text-white hover:text-[#DEBD63] transition duration-300"><i class="fa fa-bell"></i></a>
-          <a href="#" class="text-white hover:text-[#DEBD63] transition duration-300">
-            <img src="https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg"
-                 alt="User Profile"
-                 class="rounded-full w-10 h-10 object-cover">
-          </a>
+          <a routerLink="/payments" class="text-white hover:text-[#DEBD63] transition duration-300"
+            ><i class="fa fa-dollar-sign"></i
+          ></a>
+          <a routerLink="/messages" class="text-white hover:text-[#DEBD63] transition duration-300"
+            ><i class="fa fa-envelope"></i
+          ></a>
+          <a routerLink="/notifications" class="text-white hover:text-[#DEBD63] transition duration-300"
+            ><i class="fa fa-bell"></i
+          ></a>
+
+          <!-- Profile Dropdown -->
+          <div class="relative profile-dropdown" (click)="$event.stopPropagation()">
+            <button
+              (click)="toggleProfileDropdown()"
+              class="text-white hover:text-[#DEBD63] transition duration-300 flex items-center"
+            >
+              <img
+                src="https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg"
+                alt="User Profile"
+                class="rounded-full w-10 h-10 object-cover"
+              />
+              <i class="fa fa-angle-down ml-2"></i>
+            </button>
+
+            <div
+              *ngIf="isProfileDropdownOpen"
+              class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50"
+            >
+              <a
+                routerLink="/profile"
+                class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
+              >
+                <i class="fa fa-user mr-2 text-[#DEBD63]"></i> View Profile
+              </a>
+              <a
+                href="javascript:void(0)"
+                (click)="logout()"
+                class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
+              >
+                <i class="fa fa-sign-out-alt mr-2 text-[#DEBD63]"></i> Logout
+              </a>
+            </div>
+          </div>
         </div>
       </ng-template>
     </div>
@@ -63,46 +109,93 @@
 
   <!-- Mobile Menu -->
   <div *ngIf="menuOpen" class="md:hidden mt-4 space-y-3">
-    <ng-container *ngIf="!loggedIn; else userLinksMobile">
-      <a href="#" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
-      <a href="#" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Sign In</a>
-      <a href="#" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Sign Up</a>
+    <ng-container *ngIf="!isLoggedIn; else userLinksMobile">
+      <a routerLink="/home" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
+      <a routerLink="/sign-in" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Sign In</a>
+      <a routerLink="/sign-up" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Sign Up</a>
     </ng-container>
 
     <ng-template #userLinksMobile>
-      <a href="#" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
+      <a routerLink="/home" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
 
       <!-- Client Dropdown (Mobile) -->
       <div class="relative client-dropdown" (click)="$event.stopPropagation()">
-        <button (click)="toggleClientDropdown()"
-                class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300">
+        <button
+          (click)="toggleClientDropdown()"
+          class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300"
+        >
           <span>Client Projects</span>
-          <i class="fa fa-angle-down "></i>
+          <i class="fa fa-angle-down"></i>
         </button>
 
-        <div *ngIf="isClientDropdownOpen"
-             class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50">
-          <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-gray-800 transition-colors">
+        <div
+          *ngIf="isClientDropdownOpen"
+          class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50"
+        >
+          <a
+            routerLink="/client/projects"
+            class="flex items-center px-4 py-2 text-white hover:bg-gray-800 transition-colors"
+          >
             <i class="fa fa-folder-open mr-2 text-[#DEBD63]"></i> Client Projects
           </a>
-          <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-gray-800 transition-colors">
+          <a
+            routerLink="/client/approved"
+            class="flex items-center px-4 py-2 text-white hover:bg-gray-800 transition-colors"
+          >
             <i class="fa fa-check-circle mr-2 text-[#DEBD63]"></i> Approved Projects
           </a>
         </div>
       </div>
 
-      <a href="#" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Freelance Projects</a>
+      <a routerLink="/freelance/projects" class="block font-semibold hover:text-[#DEBD63] transition duration-300"
+        >Freelance Projects</a
+      >
 
       <!-- Icons -->
       <div class="flex items-center space-x-6 text-2xm">
-        <a href="#" class="text-white hover:text-[#DEBD63] transition duration-300"><i class="fa fa-dollar-sign"></i></a>
-        <a href="#" class="text-white hover:text-[#DEBD63] transition duration-300"><i class="fa fa-envelope"></i></a>
-        <a href="#" class="text-white hover:text-[#DEBD63] transition duration-300"><i class="fa fa-bell"></i></a>
-        <a href="#" class="text-white hover:text-[#DEBD63] transition duration-300">
-          <img src="https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg"
-               alt="User Profile"
-               class="rounded-full w-10 h-10 object-cover">
-        </a>
+        <a routerLink="/payments" class="text-white hover:text-[#DEBD63] transition duration-300"
+          ><i class="fa fa-dollar-sign"></i
+        ></a>
+        <a routerLink="/messages" class="text-white hover:text-[#DEBD63] transition duration-300"
+          ><i class="fa fa-envelope"></i
+        ></a>
+        <a routerLink="/notifications" class="text-white hover:text-[#DEBD63] transition duration-300"
+          ><i class="fa fa-bell"></i
+        ></a>
+
+        <!-- Profile Dropdown (Mobile) -->
+        <div class="relative profile-dropdown" (click)="$event.stopPropagation()">
+          <button
+            (click)="toggleProfileDropdown()"
+            class="text-white hover:text-[#DEBD63] transition duration-300 flex items-center"
+          >
+            <img
+              src="https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg"
+              alt="User Profile"
+              class="rounded-full w-10 h-10 object-cover"
+            />
+            <i class="fa fa-angle-down ml-2"></i>
+          </button>
+
+          <div
+            *ngIf="isProfileDropdownOpen"
+            class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50"
+          >
+            <a
+              routerLink="/profile"
+              class="flex items-center px-4 py-2 text-white hover:bg-gray-800 transition-colors"
+            >
+              <i class="fa fa-user mr-2 text-[#DEBD63]"></i> View Profile
+            </a>
+            <a
+              href="javascript:void(0)"
+              (click)="logout()"
+              class="flex items-center px-4 py-2 text-white hover:bg-gray-800 transition-colors"
+            >
+              <i class="fa fa-sign-out-alt mr-2 text-[#DEBD63]"></i> Logout
+            </a>
+          </div>
+        </div>
       </div>
     </ng-template>
   </div>
