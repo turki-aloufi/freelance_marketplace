@@ -1,0 +1,60 @@
+<div class="flex flex-col h-[calc(100vh-180px)]">
+    <!-- Chat header -->
+    <div class="p-3 border-b flex items-center sticky top-0 bg-white z-10">
+      <div class="w-10 h-10 bg-gray-300 rounded-full mr-3 flex-shrink-0">
+        <!-- User avatar placeholder -->
+        <div class="flex items-center justify-center h-full text-gray-600">
+          <i class="fa fa-user"></i>
+        </div>
+      </div>
+      <div>
+        <h3 class="font-semibold">{{ activeChat?.otherUserName || 'Unknown User' }}</h3>
+      </div>
+    </div>
+    
+    <!-- Chat messages - with fixed height and improved scrolling -->
+    <div #messagesContainer class="flex-grow overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+      <div *ngIf="loading" class="text-center text-gray-500 my-4">
+        <i class="fa fa-spinner fa-spin mr-2"></i> Loading messages...
+      </div>
+      
+      <div *ngIf="!loading && messages.length === 0" class="text-center text-gray-500 my-4">
+        No messages yet. Start the conversation!
+      </div>
+      
+      <div *ngFor="let message of messages" class="mb-4">
+        <div class="flex" [ngClass]="{'justify-end': message.isFromMe}">
+          <div class="max-w-[75%]" 
+               [ngClass]="{
+                 'bg-[#DEBD63] text-black': message.isFromMe,
+                 'bg-gray-200 text-gray-800': !message.isFromMe
+               }"
+               class="rounded-lg p-3 shadow-sm">
+            <div>{{ message.content }}</div>
+            <div class="text-xs mt-1 opacity-70 text-right">
+              {{ formatTime(message.sentAt) }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Message input - fixed at bottom -->
+    <div class="p-3 border-t sticky bottom-0 bg-white">
+      <div class="flex">
+        <input 
+          type="text" 
+          [(ngModel)]="newMessage" 
+          (keyup.enter)="sendMessage()"
+          placeholder="Type a message..." 
+          class="flex-grow border rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#DEBD63]"
+        />
+        <button 
+          (click)="sendMessage()" 
+          [disabled]="!newMessage.trim()"
+          class="bg-[#DEBD63] text-black px-4 py-2 rounded-r-lg hover:bg-[#c9a95a] disabled:opacity-50 disabled:cursor-not-allowed">
+          <i class="fa fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
