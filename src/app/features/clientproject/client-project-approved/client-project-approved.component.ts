@@ -15,6 +15,7 @@ export class ClientProjectApprovedComponent implements OnInit {
   userID: string = '';
   apiUrl: string = '';
   message = false;
+  initialLoading: boolean = false;
 
   searchTerm: string = '';
   selectedStatus: string = 'All';
@@ -36,15 +37,19 @@ export class ClientProjectApprovedComponent implements OnInit {
 
   // Fetch all client approved project
   loadApprovedProjects() {
+    this.initialLoading = true;
     this.approvedProjectService.getApprovedProjects(this.userID).subscribe({
       next: (data) => {
         this.allProjects = data;
+        this.initialLoading = false;
       },
       error: (err) => {
         console.error('Error fetching projects:', err);
+        this.initialLoading = false;
       }
     });
   }
+
 
   get filteredProjects() {
     let projects = this.allProjects;
