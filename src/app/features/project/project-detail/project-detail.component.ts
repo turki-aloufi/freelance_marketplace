@@ -74,7 +74,12 @@ export class ProjectDetailComponent implements OnInit {
         freelancerAvatar: p.freelancerAvatar || 'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg',
         status: p['status'] || 'Pending'
       }));
+      const accepted = this.proposals.find(p => p.status === 'Accepted');
+      if (accepted) {
+    this.acceptedProposalId = accepted.proposalId;
+  }
     });
+  
   }
 
   sendProposal(): void {
