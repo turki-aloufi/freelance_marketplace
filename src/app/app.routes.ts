@@ -4,6 +4,7 @@ import { HomeComponent } from './features/home/home.component';
 import { SignUpComponent } from './features/auth/sign-up/sign-up.component';
 import {ProjectDetailComponent} from './features/project/project-detail/project-detail.component';
 import { ClientProjectApprovedComponent } from './features/clientproject/client-project-approved/client-project-approved.component';
+import { PaymentComponent } from './features/payment/payment.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
@@ -12,6 +13,7 @@ export const routes: Routes = [
   { path: 'sign-up', component: SignUpComponent },
   { path: 'project-details/:id', component: ProjectDetailComponent },
   { path: 'clientProjects/approved', component: ClientProjectApprovedComponent },
+  { path: 'payment', component: PaymentComponent },
   { path: '**', redirectTo: '/home' },
  
 
