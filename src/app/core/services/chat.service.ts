@@ -1,11 +1,11 @@
 // src/app/core/services/chat.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, of } from 'rxjs';
+import { Observable, BehaviorSubject, of, throwError, from } from 'rxjs';
 import { ChatDto, MessageDto, SendMessageDto } from '../models/chat.model';
 import { SignalrService } from './signalr.service';
 import { AuthService } from './auth.service';
-import { tap, catchError, switchMap, filter, take } from 'rxjs/operators';
+import { tap, catchError, switchMap, filter, take, retry, delay } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +14,10 @@ export class ChatService {
   private apiUrl = 'http://localhost:5021/api';
   private activeChatSubject = new BehaviorSubject<ChatDto | null>(null);
   public activeChat$ = this.activeChatSubject.asObservable();
+  
+  // Track loading state
+  private loadingSubject = new BehaviorSubject<boolean>(false);
+  public loading$ = this.loadingSubject.asObservable();
 
   constructor(
     private http: HttpClient, 
@@ -72,12 +76,18 @@ export class ChatService {
 
   getUserChats(userId: string): Observable<ChatDto[]> {
     console.log(`Getting chats for user ${userId}`);
+    this.loadingSubject.next(true);
     
     return this.http.get<ChatDto[]>(`${this.apiUrl}/Chats/user/${userId}`)
       .pipe(
-        tap(chats => console.log(`Got ${chats.length} chats for user ${userId}`)),
+        retry(3), // Retry up to 3 times
+        tap(chats => {
+          console.log(`Got ${chats.length} chats for user ${userId}`);
+          this.loadingSubject.next(false);
+        }),
         catchError(error => {
           console.error('Error getting user chats:', error);
+          this.loadingSubject.next(false);
           return of([]);
         })
       );
@@ -85,14 +95,18 @@ export class ChatService {
 
   getChatMessages(chatId: number, userId: string): Observable<MessageDto[]> {
     console.log(`Getting messages for chat ${chatId}`);
+    this.loadingSubject.next(true);
     
     return this.http.get<MessageDto[]>(`${this.apiUrl}/Chats/${chatId}/messages?userId=${userId}`)
       .pipe(
+        retry(3), // Retry up to 3 times
         tap(messages => {
           console.log(`Got ${messages.length} messages for chat ${chatId}`);
+          this.loadingSubject.next(false);
         }),
         catchError(error => {
           console.error(`Error getting messages for chat ${chatId}:`, error);
+          this.loadingSubject.next(false);
           return of([]);
         })
       );
@@ -106,14 +120,47 @@ export class ChatService {
       content
     };
     
-    return this.http.post<MessageDto>(`${this.apiUrl}/Chats/${chatId}/messages`, message)
+    // Ensure SignalR connection is established before sending
+    return this.ensureSignalRConnection(chatId, senderId)
       .pipe(
-        tap(response => {
-          console.log('Message sent successfully:', response);
+        switchMap(() => {
+          // Now send the message
+          return this.http.post<MessageDto>(`${this.apiUrl}/Chats/${chatId}/messages`, message)
+            .pipe(
+              retry(2), // Retry up to 2 times with exponential backoff
+              tap(response => {
+                console.log('Message sent successfully:', response);
+              }),
+              catchError(error => {
+                console.error('Error sending message:', error);
+                return throwError(() => error);
+              })
+            );
+        })
+      );
+  }
+
+  // Helper method to ensure SignalR connection before sending message
+  private ensureSignalRConnection(chatId: number, userId: string): Observable<void> {
+    return this.signalrService.connectionEstablished$
+      .pipe(
+        take(1),
+        switchMap(isConnected => {
+          if (isConnected) {
+            // Already connected, just join the chat room
+            return from(this.signalrService.joinChatRoom(chatId));
+          } else {
+            // Need to connect first
+            console.log('SignalR not connected, connecting first...');
+            return from(this.signalrService.startConnection(userId))
+              .pipe(
+                switchMap(() => this.signalrService.joinChatRoom(chatId))
+              );
+          }
         }),
         catchError(error => {
-          console.error('Error sending message:', error);
-          throw error;
+          console.error('Error ensuring SignalR connection:', error);
+          return throwError(() => new Error('Could not establish SignalR connection'));
         })
       );
   }
@@ -125,10 +172,11 @@ export class ChatService {
       clientId, 
       freelancerId 
     }).pipe(
+      retry(3), // Retry up to 3 times
       tap(response => console.log('Chat created:', response)),
       catchError(error => {
         console.error('Error creating chat:', error);
-        throw error;
+        return throwError(() => error);
       })
     );
   }
@@ -138,10 +186,11 @@ export class ChatService {
     
     return this.http.get(`${this.apiUrl}/Chats/check?clientId=${clientId}&freelancerId=${freelancerId}`)
       .pipe(
+        retry(2), // Retry up to 2 times
         tap(response => console.log('Chat existence check result:', response)),
         catchError(error => {
           console.error('Error checking chat existence:', error);
-          throw error;
+          return throwError(() => error);
         })
       );
   }
