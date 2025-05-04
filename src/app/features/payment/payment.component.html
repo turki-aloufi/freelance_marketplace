@@ -1,0 +1,10 @@
+<div class="flex overflow-hidden rounded-xl shadow">
+  <input type="number" [(ngModel)]="amount" placeholder="Enter the amount" [disabled]="loading"
+    class="flex-1 px-4 py-2 text-black focus:outline-none placeholder-gray-500" />
+  <button (click)="pay()" [disabled]="loading"
+    class="bg-[#DEBD63] px-4 py-2 font-bold text-black hover:bg-yellow-500 transition">
+    {{ loading ? 'Transferring...' : '+' }}
+  </button>
+
+  <div *ngIf="message" class="text-red-600 alert">{{ message }}</div>
+</div>
