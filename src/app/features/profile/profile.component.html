@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto bg-white rounded-2xl shadow p-6" *ngIf="userProfile">
+<div class="max-w-4xl min-h-screen mx-auto bg-white rounded-2xl shadow p-6" *ngIf="userProfile">
   <div class="flex flex-col sm:flex-row items-center justify-between">
     <div class="flex items-center gap-4">
       <img [src]="userProfile.imageUrl || 'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'" class="w-24 h-24 rounded-full" alt="Profile">
@@ -15,12 +15,12 @@
   </div>
 
   <div class="mt-8">
-    <h3 class="text-lg font-semibold mb-2">About</h3>
+    <h3 class="text-lg font-semibold mb-2"><i class="fa-solid fa-face-smile mr-2 text-[#DEBD63]"></i>About</h3>
     <p class="text-gray-600 text-sm">{{ userProfile.aboutMe }}</p>
   </div>
 
   <div class="mt-8">
-    <h3 class="text-lg font-semibold mb-2">Skills</h3>
+    <h3 class="text-lg font-semibold mb-2"><i class="fa-solid fa-star mr-2 text-[#DEBD63]"></i>Skills</h3>
     <div class="flex flex-wrap gap-2">
       <span *ngFor="let skill of userProfile.skills" class="bg-gray-200 text-sm px-3 py-1 rounded">
         {{ skill.skill }}
@@ -29,7 +29,7 @@
   </div>
 
   <div class="mt-8">
-    <h3 class="text-lg font-semibold mb-2">Work Experience</h3>
+    <h3 class="text-lg font-semibold mb-2"><i class="fa-solid fa-award mr-2 text-[#DEBD63]"></i>Work Experience</h3>
     <div *ngFor="let project of userProfile.projects" class="bg-gray-100 p-4 rounded-xl mb-4">
       <div class="flex justify-between">
         <div>
