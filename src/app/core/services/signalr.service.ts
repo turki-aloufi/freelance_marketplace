@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
 import { MessageDto } from '../models/chat.model';
+import { NgZone } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +14,12 @@ export class SignalrService {
   
   public messageReceived = this.messageReceivedSubject.asObservable();
   private currentUserId: string | null = null;
+  
+  // Track connection status
+  private connectionEstablished = new BehaviorSubject<boolean>(false);
+  public connectionEstablished$ = this.connectionEstablished.asObservable();
 
-  constructor() { }
+  constructor(private ngZone: NgZone) { }
 
   public startConnection(userId: string): Promise<void> {
     this.currentUserId = userId;
@@ -30,28 +35,51 @@ export class SignalrService {
     // Create connection with detailed logging
     this.hubConnection = new HubConnectionBuilder()
       .withUrl('http://localhost:5021/chatHub')
-      .configureLogging(LogLevel.Information) // Enable detailed logging
-      .withAutomaticReconnect()
+      .configureLogging(LogLevel.Information)
+      .withAutomaticReconnect([0, 2000, 5000, 10000, 20000])
       .build();
 
-    // Set up message receiver with proper callback handling
+    // Set up connection event handlers
+    this.hubConnection.onreconnecting(error => {
+      console.warn('SignalR reconnecting due to error:', error);
+      this.connectionEstablished.next(false);
+    });
+    
+    this.hubConnection.onreconnected(connectionId => {
+      console.log('SignalR reconnected with ID:', connectionId);
+      this.connectionEstablished.next(true);
+      
+      // Re-join active chat rooms if needed
+      // Implementation depends on your specific needs
+    });
+    
+    this.hubConnection.onclose(error => {
+      console.error('SignalR connection closed with error:', error);
+      this.connectionEstablished.next(false);
+    });
+
+    // Set up message receiver with NgZone to ensure UI updates
     this.hubConnection.on('ReceiveMessage', (message: MessageDto) => {
       console.log('SignalR: Message received', message);
       
       // Set the isFromMe flag correctly based on current user
       message.isFromMe = message.senderId === this.currentUserId;
       
-      // Force the message out to subscribers
-      this.messageReceivedSubject.next({...message});
+      // Use NgZone to ensure Angular's change detection runs
+      this.ngZone.run(() => {
+        this.messageReceivedSubject.next({...message});
+      });
     });
 
-    // Start the connection with detailed error handling
+    // Start the connection
     return this.hubConnection.start()
       .then(() => {
         console.log('SignalR connected successfully!');
+        this.connectionEstablished.next(true);
       })
       .catch(err => {
         console.error('SignalR connection failed:', err);
+        this.connectionEstablished.next(false);
         throw err;
       });
   }
@@ -90,24 +118,6 @@ export class SignalrService {
       });
   }
 
-  // Send a test message to specific chat room (for debugging)
-  public sendTestMessage(chatId: number, content: string): Promise<void> {
-    if (!this.hubConnection || this.hubConnection.state !== HubConnectionState.Connected) {
-      console.error('Cannot send test message: Hub connection not established');
-      return Promise.reject('Hub connection not established');
-    }
-    
-    console.log(`Sending test message to chat room: ${chatId}`);
-    return this.hubConnection.invoke('SendTestMessage', chatId.toString(), content)
-      .then(() => {
-        console.log(`Test message sent to chat room: ${chatId}`);
-      })
-      .catch(err => {
-        console.error(`Failed to send test message to chat room ${chatId}:`, err);
-        throw err;
-      });
-  }
-
   public stopConnection(): Promise<void> {
     if (!this.hubConnection) {
       return Promise.resolve();
@@ -117,6 +127,7 @@ export class SignalrService {
     return this.hubConnection.stop()
       .then(() => {
         console.log('SignalR connection stopped');
+        this.connectionEstablished.next(false);
       })
       .catch(err => {
         console.error('Failed to stop SignalR connection:', err);

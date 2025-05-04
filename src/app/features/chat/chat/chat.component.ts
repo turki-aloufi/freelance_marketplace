@@ -1,5 +1,5 @@
 // src/app/features/messages/chat/chat.component.ts
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, AfterViewChecked, NgZone } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, AfterViewChecked, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatService } from '../../../core/services/chat.service';
@@ -23,6 +23,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   loading = false;
   activeChat: any = null;
   currentUserId: string | null = null;
+  signalRConnected = false;
   private shouldScrollToBottom = false;
   
   private destroy$ = new Subject<void>();
@@ -31,11 +32,21 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     private chatService: ChatService,
     private authService: AuthService,
     private signalrService: SignalrService,
-    private ngZone: NgZone // Add NgZone for change detection
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     console.log('Chat component initialized');
+    
+    // Monitor SignalR connection status
+    this.signalrService.connectionEstablished$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(established => {
+        console.log('SignalR connection status:', established);
+        this.signalRConnected = established;
+        this.cdr.detectChanges(); // Force change detection
+      });
     
     // Get current user
     this.authService.user$
@@ -61,41 +72,31 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         }
       });
 
-    // IMPORTANT: The key fix - listen for new messages from SignalR
-    this.setupSignalRListener();
-  }
-  
-  // Extract SignalR message handling to a separate method for clarity
-  private setupSignalRListener(): void {
-    console.log('Setting up SignalR message listener');
-    
+    // Listen for new messages from SignalR
     this.signalrService.messageReceived
       .pipe(takeUntil(this.destroy$))
       .subscribe(message => {
-        // Skip null messages
         if (!message) {
           return;
         }
         
-        console.log('Message received from SignalR:', message);
+        console.log('Message received in chat component:', message);
         
         // Only process messages for the active chat
         if (this.activeChat && message.chatId === this.activeChat.chatId) {
-          console.log('Message is for active chat, processing...');
+          // Check if message already exists to avoid duplicates
+          const existingIndex = this.messages.findIndex(m => m.messageId === message.messageId);
           
-          // Run inside NgZone to ensure change detection happens
-          this.ngZone.run(() => {
-            // Check if message already exists to avoid duplicates
-            const existingMessageIndex = this.messages.findIndex(m => m.messageId === message.messageId);
-            
-            if (existingMessageIndex === -1) {
-              console.log('Adding new message to chat view');
-              this.messages.push(message);
+          if (existingIndex === -1) {
+            console.log('Adding new message to chat view');
+            this.ngZone.run(() => {
+              this.messages = [...this.messages, message]; // Create new array to trigger change detection
               this.shouldScrollToBottom = true;
-            } else {
-              console.log('Message already exists, not adding duplicate');
-            }
-          });
+              this.cdr.detectChanges(); // Force change detection
+            });
+          } else {
+            console.log('Message already exists, not adding duplicate');
+          }
         } else {
           console.log('Message is not for active chat, ignoring');
         }
@@ -128,10 +129,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
           this.messages = messages;
           this.loading = false;
           this.shouldScrollToBottom = true;
+          this.cdr.detectChanges(); // Force change detection
         },
         error: (err) => {
           console.error('Error loading messages:', err);
           this.loading = false;
+          this.cdr.detectChanges(); // Force change detection
         }
       });
   }
@@ -141,23 +144,36 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       return;
     }
     
+    if (!this.signalRConnected) {
+      console.warn('SignalR not connected, attempting to reconnect...');
+      this.signalrService.startConnection(this.currentUserId)
+        .then(() => this.doSendMessage())
+        .catch(err => console.error('Failed to reconnect SignalR:', err));
+      return;
+    }
+    
+    this.doSendMessage();
+  }
+  
+  private doSendMessage(): void {
     const messageContent = this.newMessage.trim();
     console.log(`Sending message to chat ${this.activeChat.chatId}`);
     
-    // Clear input immediately for better UX
+    // Store message text and clear input immediately for better UX
     const pendingMessage = this.newMessage;
     this.newMessage = '';
     
-    this.chatService.sendMessage(this.activeChat.chatId, this.currentUserId, messageContent)
+    this.chatService.sendMessage(this.activeChat.chatId, this.currentUserId!, messageContent)
       .subscribe({
         next: (sentMessage) => {
           console.log('Message sent successfully:', sentMessage);
-          // No need to add message manually, SignalR will deliver it
+          // No need to add manually, SignalR will deliver it
         },
         error: (err) => {
           console.error('Error sending message:', err);
           // Restore the message text if sending failed
           this.newMessage = pendingMessage;
+          this.cdr.detectChanges(); // Force change detection
         }
       });
   }
