@@ -1,6 +1,6 @@
 // src/app/core/services/signalr.service.ts
 import { Injectable } from '@angular/core';
-import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
 import { MessageDto } from '../models/chat.model';
 
@@ -27,33 +27,33 @@ export class SignalrService {
     
     console.log('Starting SignalR connection...');
     
+    // Create connection with detailed logging
     this.hubConnection = new HubConnectionBuilder()
       .withUrl('http://localhost:5021/chatHub')
+      .configureLogging(LogLevel.Information) // Enable detailed logging
       .withAutomaticReconnect()
       .build();
 
-    // Handle reconnection events
-    this.hubConnection.onreconnecting(() => {
-      console.log('SignalR reconnecting...');
-    });
-    
-    this.hubConnection.onreconnected(() => {
-      console.log('SignalR reconnected!');
-    });
-
-    // Set up message receiver
+    // Set up message receiver with proper callback handling
     this.hubConnection.on('ReceiveMessage', (message: MessageDto) => {
       console.log('SignalR: Message received', message);
       
       // Set the isFromMe flag correctly based on current user
       message.isFromMe = message.senderId === this.currentUserId;
       
-      // Publish the message to subscribers
-      this.messageReceivedSubject.next(message);
+      // Force the message out to subscribers
+      this.messageReceivedSubject.next({...message});
     });
 
-    // Start the connection
-    return this.hubConnection.start();
+    // Start the connection with detailed error handling
+    return this.hubConnection.start()
+      .then(() => {
+        console.log('SignalR connected successfully!');
+      })
+      .catch(err => {
+        console.error('SignalR connection failed:', err);
+        throw err;
+      });
   }
 
   public joinChatRoom(chatId: number): Promise<void> {
@@ -63,7 +63,14 @@ export class SignalrService {
     }
     
     console.log(`Joining chat room: ${chatId}`);
-    return this.hubConnection.invoke('JoinChat', chatId.toString());
+    return this.hubConnection.invoke('JoinChat', chatId.toString())
+      .then(() => {
+        console.log(`Successfully joined chat room: ${chatId}`);
+      })
+      .catch(err => {
+        console.error(`Failed to join chat room ${chatId}:`, err);
+        throw err;
+      });
   }
 
   public leaveChatRoom(chatId: number): Promise<void> {
@@ -73,7 +80,32 @@ export class SignalrService {
     }
     
     console.log(`Leaving chat room: ${chatId}`);
-    return this.hubConnection.invoke('LeaveChat', chatId.toString());
+    return this.hubConnection.invoke('LeaveChat', chatId.toString())
+      .then(() => {
+        console.log(`Successfully left chat room: ${chatId}`);
+      })
+      .catch(err => {
+        console.error(`Failed to leave chat room ${chatId}:`, err);
+        throw err;
+      });
+  }
+
+  // Send a test message to specific chat room (for debugging)
+  public sendTestMessage(chatId: number, content: string): Promise<void> {
+    if (!this.hubConnection || this.hubConnection.state !== HubConnectionState.Connected) {
+      console.error('Cannot send test message: Hub connection not established');
+      return Promise.reject('Hub connection not established');
+    }
+    
+    console.log(`Sending test message to chat room: ${chatId}`);
+    return this.hubConnection.invoke('SendTestMessage', chatId.toString(), content)
+      .then(() => {
+        console.log(`Test message sent to chat room: ${chatId}`);
+      })
+      .catch(err => {
+        console.error(`Failed to send test message to chat room ${chatId}:`, err);
+        throw err;
+      });
   }
 
   public stopConnection(): Promise<void> {
@@ -82,6 +114,13 @@ export class SignalrService {
     }
     
     console.log('Stopping SignalR connection...');
-    return this.hubConnection.stop();
+    return this.hubConnection.stop()
+      .then(() => {
+        console.log('SignalR connection stopped');
+      })
+      .catch(err => {
+        console.error('Failed to stop SignalR connection:', err);
+        throw err;
+      });
   }
 }
