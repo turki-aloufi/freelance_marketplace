@@ -20,7 +20,7 @@ export const routes: Routes = [
 
   { path: 'project-details/:id', component: ProjectDetailComponent },
   { path: 'clientProjects/approved', component: ClientProjectApprovedComponent },
-  { path: 'payment', component: PaymentComponent },
+
   { path: '**', redirectTo: '/home' },
  
 
