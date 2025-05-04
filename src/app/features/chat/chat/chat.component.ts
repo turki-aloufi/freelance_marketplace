@@ -40,6 +40,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       .subscribe(user => {
         if (user) {
           this.currentUserId = user.uid;
+          console.log('Chat component: User set', this.currentUserId);
         }
       });
 
@@ -48,8 +49,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       .pipe(takeUntil(this.destroy$))
       .subscribe(chat => {
         if (chat) {
+          console.log('Chat component: Active chat updated', chat);
           this.activeChat = chat;
-          this.loadMessages(chat.chatId, this.currentUserId!);
+          
+          if (this.currentUserId) {
+            this.loadMessages(chat.chatId, this.currentUserId);
+          }
         }
       });
 
@@ -58,8 +63,17 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       .pipe(takeUntil(this.destroy$))
       .subscribe(message => {
         if (message && this.activeChat && message.chatId === this.activeChat.chatId) {
-          this.messages.push(message);
-          this.shouldScrollToBottom = true;
+          console.log('Chat component: Received message for active chat', message);
+          
+          // Avoid duplicating messages
+          const existingMessage = this.messages.find(m => m.messageId === message.messageId);
+          if (!existingMessage) {
+            this.messages.push(message);
+            this.shouldScrollToBottom = true;
+            console.log('Chat component: Added new message to display');
+          } else {
+            console.log('Chat component: Skipped duplicate message');
+          }
         }
       });
   }
@@ -80,32 +94,47 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.loading = true;
     this.messages = [];
     
+    console.log(`Chat component: Loading messages for chat ${chatId}`);
+    
     this.chatService.getChatMessages(chatId, userId)
       .subscribe({
         next: (messages) => {
+          console.log(`Chat component: Loaded ${messages.length} messages`);
           this.messages = messages;
           this.loading = false;
           this.shouldScrollToBottom = true;
         },
         error: (err) => {
-          console.error('Error loading messages:', err);
+          console.error('Chat component: Error loading messages:', err);
           this.loading = false;
         }
       });
   }
 
   sendMessage(): void {
-    if (!this.newMessage.trim() || !this.activeChat || !this.currentUserId) return;
+    if (!this.newMessage.trim() || !this.activeChat || !this.currentUserId) {
+      console.log('Chat component: Cannot send empty message');
+      return;
+    }
     
-    this.chatService.sendMessage(this.activeChat.chatId, this.currentUserId, this.newMessage)
+    const messageContent = this.newMessage.trim();
+    console.log(`Chat component: Sending message to chat ${this.activeChat.chatId}`);
+    
+    // Store current message and clear input field immediately for better UX
+    const pendingMessage = this.newMessage;
+    this.newMessage = '';
+    
+    this.chatService.sendMessage(this.activeChat.chatId, this.currentUserId, pendingMessage)
       .subscribe({
-        next: () => {
-          // Message will be added by SignalR
-          this.newMessage = '';
-          this.shouldScrollToBottom = true;
+        next: (sentMessage) => {
+          console.log('Chat component: Message sent successfully', sentMessage);
+          // The new message will be added via the SignalR callback
         },
         error: (err) => {
-          console.error('Error sending message:', err);
+          console.error('Chat component: Error sending message:', err);
+          // Restore the message if sending failed
+          this.newMessage = pendingMessage;
+          alert('Failed to send message. Please try again.');
         }
       });
   }
