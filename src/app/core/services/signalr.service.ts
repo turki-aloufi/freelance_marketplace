@@ -4,7 +4,7 @@ import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } fro
 import { BehaviorSubject, Observable, from, Subject } from 'rxjs';
 import { MessageDto } from '../models/chat.model';
 import { NgZone } from '@angular/core';
-import { catchError, tap, retry } from 'rxjs/operators';
+import { catchError, tap, retry, delay } from 'rxjs/operators';
 
 // Define proper types for the pending operations
 interface PendingOperation {
@@ -18,7 +18,7 @@ interface PendingOperation {
 })
 export class SignalrService {
   private hubConnection: HubConnection | undefined;
-  private messageReceivedSubject = new BehaviorSubject<MessageDto | null>(null);
+  private messageReceivedSubject = new Subject<MessageDto>(); // Changed to Subject for better multicast
   
   public messageReceived = this.messageReceivedSubject.asObservable();
   private currentUserId: string | null = null;
@@ -32,10 +32,17 @@ export class SignalrService {
   
   // Track active chat rooms
   private activeRooms: Set<number> = new Set<number>();
+  private reconnectTimer: any = null;
 
   constructor(private ngZone: NgZone) { }
 
   public startConnection(userId: string): Promise<void> {
+    // Clear any existing reconnect timer
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+
     this.currentUserId = userId;
     
     // If connection exists and is already connected, just return
@@ -45,15 +52,64 @@ export class SignalrService {
       return Promise.resolve();
     }
     
+    // If we already have a connection but it's not connected, stop it first
+    if (this.hubConnection) {
+      return this.stopConnection().then(() => this.initiateConnection(userId));
+    }
+    
+    return this.initiateConnection(userId);
+  }
+
+  private initiateConnection(userId: string): Promise<void> {
     console.log('Starting SignalR connection...');
     
-    // Create connection with detailed logging
+    // Properly dispose of any existing connection
+    if (this.hubConnection) {
+      this.hubConnection.stop().catch(err => console.error('Error stopping existing connection:', err));
+    }
+    
+    // Create a new connection with detailed logging
     this.hubConnection = new HubConnectionBuilder()
       .withUrl('http://localhost:5021/chatHub')
       .configureLogging(LogLevel.Debug)
-      .withAutomaticReconnect([0, 1000, 2000, 5000, 10000, 15000, 30000]) // More aggressive reconnection
+      .withAutomaticReconnect([0, 1000, 2000, 5000, 10000, 15000, 30000])
       .build();
 
+    // Set up event handlers before starting connection
+    this.setupConnectionEventHandlers();
+
+    // Store hubConnection in a const to ensure TypeScript knows it's defined in the chain
+    const connection = this.hubConnection;
+
+    // Start the connection
+    return connection.start()
+      .then(() => {
+        console.log('SignalR connected successfully! Connection ID:', connection.connectionId);
+        this.connectionEstablished.next(true);
+        
+        // Register user with chat hub to map userId to connectionId
+        return connection.invoke('RegisterUser', userId);
+      })
+      .then(() => {
+        console.log('User registered with ChatHub');
+        
+        // Process any pending room joins
+        this.processPendingRoomJoins();
+      })
+      .catch(err => {
+        console.error('SignalR connection failed:', err);
+        this.connectionEstablished.next(false);
+        
+        // Schedule a reconnection attempt
+        this.scheduleReconnect(userId);
+        
+        throw err;
+      });
+  }
+
+  private setupConnectionEventHandlers(): void {
+    if (!this.hubConnection) return;
+    
     // Set up connection event handlers
     this.hubConnection.onreconnecting(error => {
       console.warn('SignalR reconnecting due to error:', error);
@@ -64,8 +120,16 @@ export class SignalrService {
       console.log('SignalR reconnected with ID:', connectionId);
       this.connectionEstablished.next(true);
       
-      // Rejoin all active rooms after reconnection
-      this.rejoinActiveRooms();
+      // Re-register user after reconnection
+      if (this.currentUserId && this.hubConnection) {
+        this.hubConnection.invoke('RegisterUser', this.currentUserId)
+          .then(() => {
+            console.log('User re-registered after reconnection');
+            // Rejoin all active rooms after reconnection
+            this.rejoinActiveRooms();
+          })
+          .catch(err => console.error('Failed to re-register user after reconnection:', err));
+      }
     });
     
     this.hubConnection.onclose(error => {
@@ -74,10 +138,7 @@ export class SignalrService {
       
       // Try to restart connection if closed unexpectedly
       if (this.currentUserId) {
-        console.log('Attempting to restart connection...');
-        setTimeout(() => {
-          this.startConnection(this.currentUserId!);
-        }, 5000);
+        this.scheduleReconnect(this.currentUserId);
       }
     });
 
@@ -90,6 +151,7 @@ export class SignalrService {
       
       // Use NgZone to ensure Angular's change detection runs
       this.ngZone.run(() => {
+        // Use next() to push the message to all subscribers
         this.messageReceivedSubject.next({...message});
       });
     });
@@ -105,6 +167,10 @@ export class SignalrService {
       this.activeRooms.delete(parseInt(chatId));
     });
 
+    this.hubConnection.on('UserRegistered', (userId: string) => {
+      console.log(`User ${userId} registered with ChatHub`);
+    });
+
     // Add error handlers
     this.hubConnection.on('JoinChatError', (error: string) => {
       console.error(`Error joining chat room: ${error}`);
@@ -113,33 +179,30 @@ export class SignalrService {
         this.rejoinActiveRooms();
       }, 3000);
     });
+  }
 
-    // Start the connection
-    return this.hubConnection.start()
-      .then(() => {
-        console.log('SignalR connected successfully!');
-        this.connectionEstablished.next(true);
-        
-        // Process any pending room joins
-        this.processPendingRoomJoins();
-      })
-      .catch(err => {
-        console.error('SignalR connection failed:', err);
-        this.connectionEstablished.next(false);
-        
-        // Retry connection after a delay
-        console.log('Retrying connection in 5 seconds...');
-        setTimeout(() => {
-          if (this.currentUserId) {
-            this.startConnection(this.currentUserId);
-          }
-        }, 5000);
-        
-        throw err;
-      });
+  private scheduleReconnect(userId: string): void {
+    console.log('Scheduling reconnection attempt in 5 seconds...');
+    
+    // Clear any existing timer
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+    }
+    
+    // Set up new timer
+    this.reconnectTimer = setTimeout(() => {
+      console.log('Attempting reconnection...');
+      this.startConnection(userId)
+        .catch(err => console.error('Reconnection attempt failed:', err));
+    }, 5000);
   }
 
   private rejoinActiveRooms(): void {
+    if (!this.hubConnection || this.hubConnection.state !== HubConnectionState.Connected) {
+      console.log('Cannot rejoin rooms - no active connection');
+      return;
+    }
+    
     console.log(`Rejoining ${this.activeRooms.size} active rooms after reconnection`);
     
     // Convert Set to Array to avoid issues during iteration
@@ -177,7 +240,7 @@ export class SignalrService {
         this.pendingRoomJoins.push({chatId, resolve, reject});
         
         // Start connection if it doesn't exist
-        if (!this.hubConnection && this.currentUserId) {
+        if ((!this.hubConnection || this.hubConnection.state === HubConnectionState.Disconnected) && this.currentUserId) {
           this.startConnection(this.currentUserId)
             .catch(err => {
               // If connection fails, reject all pending joins
@@ -252,16 +315,23 @@ export class SignalrService {
       .catch(err => {
         console.error('Failed to stop SignalR connection:', err);
         return Promise.resolve();
+      })
+      .finally(() => {
+        // Ensure we clean up the connection
+        this.hubConnection = undefined;
       });
   }
   
-  // New method to check if a message is being received by this client
+  // Method to check if a message is being received by this client
   public checkConnection(): Promise<boolean> {
     if (!this.hubConnection || this.hubConnection.state !== HubConnectionState.Connected) {
       return Promise.resolve(false);
     }
     
-    return this.hubConnection.invoke<string>('Ping')
+    // Store hubConnection in a const to ensure TypeScript knows it's defined in the chain
+    const connection = this.hubConnection;
+    
+    return connection.invoke<string>('Ping')
       .then(response => {
         console.log('Ping response:', response);
         return response === 'Pong';

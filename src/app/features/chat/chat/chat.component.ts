@@ -40,8 +40,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   ngOnInit(): void {
     console.log('Chat component initialized');
     
-    // Setup connection checker - every 30 seconds check if SignalR is connected
-    interval(30000)
+    // Setup connection checker - check every 15 seconds if SignalR is connected
+    interval(15000)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         if (this.activeChat && this.currentUserId) {
@@ -53,7 +53,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.signalrService.connectionEstablished$
       .pipe(takeUntil(this.destroy$))
       .subscribe(established => {
-        console.log('SignalR connection status:', established);
+        console.log('SignalR connection status changed:', established);
         
         // If connection state changes, update UI
         if (this.signalRConnected !== established) {
@@ -76,6 +76,11 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         if (user) {
           this.currentUserId = user.uid;
           console.log('Current user set:', this.currentUserId);
+          
+          // Start SignalR connection when user is available
+          this.signalrService.startConnection(user.uid)
+            .then(() => console.log('SignalR connection started for user:', user.uid))
+            .catch(err => console.error('Failed to start SignalR connection:', err));
         }
       });
 
@@ -102,18 +107,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         }
       });
 
-    // Listen for new messages from SignalR
+    // Listen for new messages from SignalR - THIS IS CRITICAL FOR REAL-TIME UPDATES
     this.signalrService.messageReceived
       .pipe(
-        takeUntil(this.destroy$),
-        filter(message => !!message) // Filter out null messages
+        takeUntil(this.destroy$)
       )
       .subscribe(message => {
-        if (!message) {
-          return;
-        }
-        
-        console.log('Message received in chat component:', message);
+        console.log('Message received in chat component from SignalR:', message);
         
         // Only process messages for the active chat
         if (this.activeChat && message.chatId === this.activeChat.chatId) {
@@ -173,9 +173,16 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
           this.cdr.detectChanges(); // Force change detection
           
           // Ensure we're joined to this chat room
-          if (this.signalRConnected) {
-            this.signalrService.joinChatRoom(chatId)
-              .catch(err => console.error('Failed to join chat room after loading messages:', err));
+          if (this.currentUserId) {
+            // Make sure SignalR is connected first
+            if (!this.signalRConnected) {
+              this.signalrService.startConnection(this.currentUserId)
+                .then(() => this.signalrService.joinChatRoom(chatId))
+                .catch(err => console.error('Failed to start SignalR connection:', err));
+            } else {
+              this.signalrService.joinChatRoom(chatId)
+                .catch(err => console.error('Failed to join chat room after loading messages:', err));
+            }
           }
         },
         error: (err) => {
