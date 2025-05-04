@@ -5,7 +5,7 @@ import { Observable, BehaviorSubject, of } from 'rxjs';
 import { ChatDto, MessageDto, SendMessageDto } from '../models/chat.model';
 import { SignalrService } from './signalr.service';
 import { AuthService } from './auth.service';
-import { tap, catchError, switchMap } from 'rxjs/operators';
+import { tap, catchError, switchMap, filter, take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -14,31 +14,22 @@ export class ChatService {
   private apiUrl = 'http://localhost:5021/api';
   private activeChatSubject = new BehaviorSubject<ChatDto | null>(null);
   public activeChat$ = this.activeChatSubject.asObservable();
-  
-  // Add cache for messages
-  private messagesCache = new Map<number, MessageDto[]>();
 
   constructor(
     private http: HttpClient, 
     private signalrService: SignalrService,
     private authService: AuthService
   ) {
-    // Monitor SignalR messages to update cache
-    this.signalrService.messageReceived.subscribe(message => {
-      if (!message) return;
-      
-      // Update cache for the relevant chat
-      if (this.messagesCache.has(message.chatId)) {
-        const existingMessages = this.messagesCache.get(message.chatId) || [];
-        
-        // Avoid duplicate messages
-        if (!existingMessages.some(m => m.messageId === message.messageId)) {
-          this.messagesCache.set(
-            message.chatId, 
-            [...existingMessages, message]
-          );
-          console.log('Updated message cache for chat', message.chatId);
-        }
+    // Initialize SignalR when service is created
+    this.authService.user$.pipe(
+      filter(user => !!user), // Only proceed if user exists
+      take(1) // Take only the first valid user
+    ).subscribe(user => {
+      if (user) {
+        console.log('Chat service: Initializing SignalR for user', user.uid);
+        this.signalrService.startConnection(user.uid)
+          .then(() => console.log('Chat service: SignalR connection initialized'))
+          .catch(err => console.error('Chat service: Error initializing SignalR:', err));
       }
     });
   }
@@ -61,11 +52,20 @@ export class ChatService {
       if (chat) {
         console.log(`Joining new chat room: ${chat.chatId}`);
         
-        this.signalrService.joinChatRoom(chat.chatId)
-          .catch(err => console.error(`Error joining chat ${chat.chatId}:`, err));
+        // Wait for SignalR connection before attempting to join
+        this.signalrService.connectionEstablished$
+          .pipe(
+            filter(established => established), // Only proceed when connection is established
+            take(1) // Take only the first true value
+          )
+          .subscribe(() => {
+            console.log('Connection established, joining chat room');
+            this.signalrService.joinChatRoom(chat.chatId)
+              .catch(err => console.error(`Error joining chat ${chat.chatId}:`, err));
+          });
       }
       
-      // Update active chat
+      // Update active chat immediately
       this.activeChatSubject.next(chat);
     }
   }
@@ -86,20 +86,10 @@ export class ChatService {
   getChatMessages(chatId: number, userId: string): Observable<MessageDto[]> {
     console.log(`Getting messages for chat ${chatId}`);
     
-    // Try cached messages first if available
-    const cachedMessages = this.messagesCache.get(chatId);
-    if (cachedMessages) {
-      console.log(`Using ${cachedMessages.length} cached messages for chat ${chatId}`);
-      return of(cachedMessages);
-    }
-    
-    // Otherwise fetch from server
     return this.http.get<MessageDto[]>(`${this.apiUrl}/Chats/${chatId}/messages?userId=${userId}`)
       .pipe(
         tap(messages => {
           console.log(`Got ${messages.length} messages for chat ${chatId}`);
-          // Update cache
-          this.messagesCache.set(chatId, messages);
         }),
         catchError(error => {
           console.error(`Error getting messages for chat ${chatId}:`, error);
