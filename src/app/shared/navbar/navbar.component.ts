@@ -18,9 +18,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
   isClientDropdownOpen = false;
   isProfileDropdownOpen = false;
+  isFreelanceDropdownOpen=false;
+  isBalanceDropdownOpen = false;
   userBalance: number = 0;
   userId: string | null = null;
-  isBalanceDropdownOpen = false;
+ 
   private destroy$ = new Subject<void>();
 
   constructor(private authService: AuthService,private userService: UserService) {}
@@ -55,22 +57,33 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
 
 
-
+  toggleFreelanceDropdown(){
+    this.isFreelanceDropdownOpen = !this.isFreelanceDropdownOpen;
+    // close other dropdowns
+    this.isClientDropdownOpen = false;
+    this.isProfileDropdownOpen = false;
+    this.isBalanceDropdownOpen=false;
+  }
 
   toggleBalanceDropdown() {
     this.isBalanceDropdownOpen = !this.isBalanceDropdownOpen;
     // close other dropdowns
     this.isClientDropdownOpen = false;
     this.isProfileDropdownOpen = false;
+    this.isFreelanceDropdownOpen =false;
   }
   toggleClientDropdown() {
     this.isClientDropdownOpen = !this.isClientDropdownOpen;
     this.isProfileDropdownOpen = false;
+    this.isBalanceDropdownOpen=false;
+    this.isFreelanceDropdownOpen =false;
   }
 
   toggleProfileDropdown() {
     this.isProfileDropdownOpen = !this.isProfileDropdownOpen;
     this.isClientDropdownOpen = false;
+    this.isBalanceDropdownOpen=false;
+    this.isFreelanceDropdownOpen =false;
   }
 
   @HostListener('document:click', ['$event'])
