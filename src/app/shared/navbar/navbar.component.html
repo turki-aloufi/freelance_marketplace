@@ -59,9 +59,30 @@
 
         <!-- Icons -->
         <div class="flex items-center space-x-6 text-2xm">
-          <a routerLink="/payments" class="text-white hover:text-[#DEBD63] transition duration-300"
-            ><i class="fa fa-dollar-sign"></i
-          ></a>
+        
+        <!-- Balance Dropdown Trigger -->
+        <div class="relative" (click)="$event.stopPropagation()">
+          <button
+            (click)="toggleBalanceDropdown()"
+            class="text-white hover:text-[#DEBD63] transition duration-300"
+          >
+            <i class="fa fa-dollar-sign"></i>
+          </button>
+
+          <!-- Dropdown -->
+          <div
+            *ngIf="isBalanceDropdownOpen"
+            class="absolute right-0 mt-3 w-72 bg-[#0f1116] text-white rounded-xl shadow-lg z-50 p-4"
+          >
+            <div class="text-lg font-semibold text-[#DEBD63] mb-2">
+              My balance: <span class="text-white font-bold">{{ userBalance }} $</span>
+            </div>        
+            <!-- form payment -->
+            <app-payment-modal></app-payment-modal>
+            
+          </div>
+        </div>
+
           <a routerLink="/messages" class="text-white hover:text-[#DEBD63] transition duration-300"
             ><i class="fa fa-envelope"></i
           ></a>
@@ -88,11 +109,11 @@
               class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50"
             >
               <a
-                routerLink="/profile"
-                class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
-              >
-                <i class="fa fa-user mr-2 text-[#DEBD63]"></i> View Profile
-              </a>
+              [routerLink]="['/profile', userId]"
+              class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
+            >
+              <i class="fa fa-user mr-2 text-[#DEBD63]"></i> View Profile
+            </a>
               <a
                 href="javascript:void(0)"
                 (click)="logout()"
@@ -102,6 +123,8 @@
               </a>
             </div>
           </div>
+          
+
         </div>
       </ng-template>
     </div>
@@ -153,9 +176,28 @@
 
       <!-- Icons -->
       <div class="flex items-center space-x-6 text-2xm">
-        <a routerLink="/payments" class="text-white hover:text-[#DEBD63] transition duration-300"
-          ><i class="fa fa-dollar-sign"></i
-        ></a>
+        <!-- Balance Dropdown Trigger -->
+        <div class="relative" (click)="$event.stopPropagation()">
+          <button
+            (click)="toggleBalanceDropdown()"
+            class="text-white hover:text-[#DEBD63] transition duration-300"
+          >
+            <i class="fa fa-dollar-sign"></i>
+          </button>
+
+          <!-- Dropdown -->
+          <div
+            *ngIf="isBalanceDropdownOpen"
+            class="absolute right-0 mt-3 w-72 bg-[#0f1116] text-white rounded-xl shadow-lg z-50 p-4"
+          >
+            <div class="text-lg font-semibold text-[#DEBD63] mb-2">
+              My balance: <span class="text-white font-bold">{{ userBalance }} $</span>
+            </div>        
+            <!-- form payment -->
+            <app-payment-modal></app-payment-modal>
+            
+          </div>
+        </div>
         <a routerLink="/messages" class="text-white hover:text-[#DEBD63] transition duration-300"
           ><i class="fa fa-envelope"></i
         ></a>
