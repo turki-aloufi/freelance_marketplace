@@ -4,12 +4,12 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { Subject, takeUntil } from 'rxjs';
 import { UserService } from '../../core/services/user/user.service';
-import { PaymentModalComponent } from '../payment-modal/payment-modal.component';
+import { PaymentComponent } from '../../features/payment/payment.component';
 import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule,PaymentModalComponent,FormsModule],
+  imports: [CommonModule, RouterModule,PaymentComponent,FormsModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
 })
