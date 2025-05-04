@@ -3,7 +3,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FooterComponent } from "../../shared/footer/footer.component";
-import { HomeProjectService, HomeProject } from "../../services/home-project.service";
+import { HomeProjectService, HomeProject } from "../../core/services/home/home-project.service";
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 
