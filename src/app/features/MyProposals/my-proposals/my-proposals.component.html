@@ -1,0 +1,43 @@
+<div class="proposals-container">
+    <div *ngIf="proposals.length === 0" class="no-proposals">
+      <p>No proposals found.</p>
+    </div>
+  
+    <div *ngIf="proposals.length > 0" class="proposals-list">
+      <div *ngFor="let proposal of proposals" class="proposal-card">
+        <div class="card-inner">
+          <!-- Main Row -->
+          <div class="card-main-row">
+            <!-- Left -->
+            <div class="card-left">
+              <a href="#">
+                <img [src]="proposal.profilePictureUrl || 'https://via.placeholder.com/40'" alt="Profile" class="avatar">
+              </a>
+              <div>
+                <h5 class="freelancer-name">{{ proposal.projectTitle }}</h5>
+                <p class="cover-letter">{{ proposal.coverLetter }}</p>
+                <p class="cover-letter">{{ proposal.status }}</p>
+              </div>
+            </div>
+  
+            <!-- Right -->
+            <div class="card-right">
+              <div class="card-info">
+                <span>Deadline: {{ proposal.deadline }}</span>
+              </div>
+              <div class="card-info price">
+                <span>Amount: {{ proposal.proposedAmount | currency }}</span>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Button -->
+          <div class="card-footer">
+            <button (click)="deleteProposal(proposal.proposalId)">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
