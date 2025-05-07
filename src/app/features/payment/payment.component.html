@@ -1,0 +1,16 @@
+<div class="flex overflow-hidden relative rounded-xl shadow">
+  <input type="number" [(ngModel)]="amount" placeholder="Enter the amount" [disabled]="loading"
+    class="flex-1 px-4 py-2 text-black focus:outline-none placeholder-gray-500" />
+    <button
+    (click)="pay()"
+    [disabled]="loading"
+    class="bg-[#DEBD63] px-4 py-2 font-bold text-black rounded-r-md hover:bg-yellow-500 transition flex items-center justify-center"
+  >
+    <ng-container *ngIf="loading; else plusIcon">
+      <i class="fas fa-spinner fa-spin"></i>
+    </ng-container>
+    <ng-template #plusIcon>+</ng-template>
+  </button>
+
+  <div *ngIf="message" class="text-red-600 alert">{{ message }}</div>
+</div>

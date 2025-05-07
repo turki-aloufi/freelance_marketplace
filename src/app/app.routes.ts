@@ -6,6 +6,13 @@ import { ClientProjectsComponent } from './features/client-projects/client-proje
 import { ClientApprovedProjectsComponent } from './features/client-approved-projects/client-approved-projects.component';
 import { AddProjectComponent } from './features/add-project/add-project.component';
 
+import { ProfileComponent } from './features/profile/profile.component';
+
+import {ProjectDetailComponent} from './features/project/project-detail/project-detail.component';
+import { ClientProjectApprovedComponent } from './features/clientproject/client-project-approved/client-project-approved.component';
+import { PaymentComponent } from './features/payment/payment.component';
+
+
 export const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'home', component: HomeComponent },
@@ -14,5 +21,14 @@ export const routes: Routes = [
   { path: 'client/projects', component: ClientProjectsComponent },
   { path: 'client/projects/add', component: AddProjectComponent },
   { path: 'client/projects/approved', component: ClientApprovedProjectsComponent },
+
+  { path: 'profile/:id',component: ProfileComponent },
+
+  { path: 'project-details/:id', component: ProjectDetailComponent },
+  { path: 'clientProjects/approved', component: ClientProjectApprovedComponent },
+
   { path: '**', redirectTo: '/home' },
+ 
+
+
 ];

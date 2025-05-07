@@ -1,13 +1,15 @@
 import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service'; // Adjust path as needed
+import { AuthService } from '../../core/services/auth.service';
 import { Subject, takeUntil } from 'rxjs';
-
+import { UserService } from '../../core/services/user/user.service';
+import { PaymentComponent } from '../../features/payment/payment.component';
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule,PaymentComponent,FormsModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
 })
@@ -16,32 +18,72 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
   isClientDropdownOpen = false;
   isProfileDropdownOpen = false;
+  isFreelanceDropdownOpen=false;
+  isBalanceDropdownOpen = false;
+  userBalance: number = 0;
+  userId: string | null = null;
+ 
   private destroy$ = new Subject<void>();
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService,private userService: UserService) {}
 
   ngOnInit() {
     this.authService.user$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         this.isLoggedIn = !!user;
+        this.userId = user?.uid ?? null; // get uid
         console.log('User authentication state:', this.isLoggedIn);
+  
+        if (this.userId) {
+          this.userService.getUserProfile(this.userId).subscribe({
+            next: (userData) => {
+              this.userBalance = userData.balance; //get user balance
+            },
+            error: (err) => {
+              console.error('Error fetching user profile:', err);
+            }
+          });
+        }
       });
   }
+  
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
+  
 
+
+
+  toggleFreelanceDropdown(){
+    this.isFreelanceDropdownOpen = !this.isFreelanceDropdownOpen;
+    // close other dropdowns
+    this.isClientDropdownOpen = false;
+    this.isProfileDropdownOpen = false;
+    this.isBalanceDropdownOpen=false;
+  }
+
+  toggleBalanceDropdown() {
+    this.isBalanceDropdownOpen = !this.isBalanceDropdownOpen;
+    // close other dropdowns
+    this.isClientDropdownOpen = false;
+    this.isProfileDropdownOpen = false;
+    this.isFreelanceDropdownOpen =false;
+  }
   toggleClientDropdown() {
     this.isClientDropdownOpen = !this.isClientDropdownOpen;
     this.isProfileDropdownOpen = false;
+    this.isBalanceDropdownOpen=false;
+    this.isFreelanceDropdownOpen =false;
   }
 
   toggleProfileDropdown() {
     this.isProfileDropdownOpen = !this.isProfileDropdownOpen;
     this.isClientDropdownOpen = false;
+    this.isBalanceDropdownOpen=false;
+    this.isFreelanceDropdownOpen =false;
   }
 
   @HostListener('document:click', ['$event'])
@@ -50,6 +92,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     if (!target.closest('.client-dropdown') && !target.closest('.profile-dropdown')) {
       this.isClientDropdownOpen = false;
       this.isProfileDropdownOpen = false;
+      this.isBalanceDropdownOpen = false;
     }
   }
 

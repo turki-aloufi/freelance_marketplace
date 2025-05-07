@@ -2,10 +2,12 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 import { FooterComponent } from './shared/footer/footer.component';
+
 import { SignInComponent } from "./features/auth/sign-in/sign-in.component";
+import { ProfileComponent } from './features/profile/profile.component';
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, SignInComponent],
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, SignInComponent,ProfileComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
