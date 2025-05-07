@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -48,5 +48,17 @@ export class ClientsProjectsService {
       Authorization: `Bearer ${token}`
     };
     return this.http.delete(`${this.apiUrl}/${id}`, { headers, responseType: 'text' });
+  }
+
+  createProject(payload: { title: string; projectOverview: string; requiredTasks: string; additionalNotes: string; budget: number; deadline: string; skills: Skill[] }): Observable<{ projectId: number }> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Authentication token not found.');
+    }
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+    return this.http.post<{ projectId: number }>(`${this.apiUrl}/create`, payload, { headers });
   }
 }
