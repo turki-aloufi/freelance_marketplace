@@ -2,42 +2,66 @@
   <div class="flex flex-col sm:flex-row justify-between items-end mb-4 sm:mb-6">
     <div>
       <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold">Client Projects</h1>
-      <p class="text-base sm:text-lg text-gray-500 mt-1">Browse your proposal projects</p>
+      <p class="text-base sm:text-lg text-gray-500 mt-1">Browse your proposal Projects</p>
     </div>
-    <button class="mt-3 sm:mt-0 bg-black text-white px-4 py-2 sm:px-6 sm:py-3 text-base sm:text-lg rounded-md w-full sm:w-auto">New Project</button>
+    <button
+      class="mt-3 sm:mt-0 bg-black text-white px-4 py-2 sm:px-6 sm:py-3 text-base sm:text-lg rounded-md w-full sm:w-auto">
+      New Project
+    </button>
   </div>
 
-  <!-- Project Card -->
-  <div class="bg-white shadow-md rounded-lg px-4 sm:px-6 py-4 sm:py-5 mt-4 sm:mt-6 w-full relative">
-    <!-- Header row -->
-    <div class="relative">
-      <h1 class="text-xl sm:text-2xl font-semibold pr-8 sm:pr-10">Project Build a frontend by .Net for e-commerce website</h1>
-      <button class="absolute top-0 right-0 text-gray-400 hover:text-black text-xl sm:text-2xl font-bold leading-none">×</button>
-      <p class="text-gray-500 text-sm sm:text-base mt-1">I need a Web developer build a backend for my website</p>
-    </div>
-
-    <!-- Delivery and Price Section -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 sm:mt-4 space-y-3 sm:space-y-0">
-      <div class="flex items-center bg-[#FFF7E8] border border-[#DEBD63] h-10 sm:h-12 px-4 sm:px-8 md:px-12 rounded-md text-sm sm:text-lg w-full sm:w-auto">
-        <h2 class="font-semibold text-[#D3A72F] pr-2">Delivery on</h2>
-        <h2 class="font-semibold">2025-11-11</h2>
-      </div>
-
-      <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
-        <span class="text-base sm:text-xl font-semibold text-[#DEBD63]">
-          Avg <span class="text-black">~ 500 </span>$
-        </span>
-        <button class="w-full sm:w-auto bg-[#DEBD63] hover:bg-[#cbaa50] text-white font-semibold py-2 sm:py-2.5 px-8 sm:px-12 md:px-16 rounded-md text-base sm:text-lg">
-          View
+  <ng-container *ngIf="openProjects.length > 0; else noopenProjects">
+    <div *ngFor="let project of openProjects"
+      class="bg-white shadow-md rounded-lg px-4 sm:px-6 py-4 sm:py-5 mt-4 sm:mt-6 w-full relative">
+      <div class="relative">
+        <h1 class="text-xl sm:text-2xl font-semibold pr-8 sm:pr-10">{{ project.title }}</h1>
+        <button
+          class="absolute top-0 right-0 text-gray-400 hover:text-black text-xl sm:text-2xl font-bold leading-none"
+          (click)="confirmDelete(project.projectId)"
+          [disabled]="deletingProjectId === project.projectId">
+          <ng-container *ngIf="deletingProjectId === project.projectId; else normalDelete">
+            <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+              viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+          </ng-container>
+          <ng-template #normalDelete>
+            ×
+          </ng-template>
         </button>
+        <p class="text-gray-600 text-sm sm:text-base mt-1">{{ project.overview }}</p>
+      </div>
+
+      <div
+        class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-3 sm:mt-4 space-y-3 sm:space-y-0">
+        <div
+          class="flex items-center bg-[#FFF7E8] border border-[#DEBD63] h-10 sm:h-12 px-4 sm:px-8 md:px-12 rounded-md text-sm sm:text-lg w-full sm:w-auto">
+          <h2 class="font-semibold text-[#D3A72F] pr-2">Delivery on</h2>
+          <h2 class="font-semibold">{{ project.deadline }}</h2>
+        </div>
+        <div
+          class="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
+          <span class="text-base sm:text-xl font-semibold text-[#DEBD63]">
+            Budget <span class="text-black">~ {{ project.budget }} </span>$
+          </span>
+          <button
+            class="w-full sm:w-auto bg-[#DEBD63] hover:bg-[#cbaa50] text-white font-semibold py-2 sm:py-2.5 px-8 sm:px-12 md:px-16 rounded-md text-base sm:text-lg">
+            View
+          </button>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2 sm:gap-3 mt-3 sm:mt-4">
+        <div *ngFor="let skill of project.skills"
+          class="bg-[#F3F3F3] px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-base">
+          {{ skill.skill }}
+        </div>
       </div>
     </div>
+  </ng-container>
 
-    <!-- Tags -->
-    <div class="flex flex-wrap gap-2 sm:gap-3 mt-3 sm:mt-4">
-      <div class="bg-[#F3F3F3] px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-base">Web Development</div>
-      <div class="bg-[#F3F3F3] px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-base">Angular</div>
-      <div class="bg-[#F3F3F3] px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-base">CSS</div>
-    </div>
-  </div>
+  <ng-template #noopenProjects>
+    <p class="text-gray-500 mt-6 text-center text-lg">No open projects available.</p>
+  </ng-template>
 </main>
