@@ -3,59 +3,29 @@
   <div class="flex items-center justify-between">
     <!-- Logo -->
     <div class="text-xl font-bold">
-      <span class="text-white">Free</span
-      ><span class="italic text-[#DEBD63]">lancer</span>
+      <span class="text-white">Free</span><span class="italic text-[#DEBD63]">lancer</span>
     </div>
 
     <!-- Mobile Menu Button -->
     <button class="md:hidden" (click)="toggleMenu()">
-      <svg
-        class="w-6 h-6"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 6h16M4 12h16M4 18h16"
-        />
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     </button>
 
     <!-- Links (Desktop) -->
     <div class="hidden md:flex items-center space-x-9">
       <ng-container *ngIf="!isLoggedIn; else userLinks">
-        <a
-          routerLink="/home"
-          class="font-semibold hover:text-[#DEBD63] transition duration-300"
-          >Home</a
-        >
-        <a
-          routerLink="/sign-in"
-          class="font-semibold hover:text-[#DEBD63] transition duration-300"
-          >Sign In</a
-        >
-        <a
-          routerLink="/sign-up"
-          class="font-semibold hover:text-[#DEBD63] transition duration-300"
-          >Sign Up</a
-        >
+        <a routerLink="/home" class="font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
+        <a routerLink="/sign-in" class="font-semibold hover:text-[#DEBD63] transition duration-300">Sign In</a>
+        <a routerLink="/sign-up" class="font-semibold hover:text-[#DEBD63] transition duration-300">Sign Up</a>
       </ng-container>
 
       <ng-template #userLinks>
-        <a
-          routerLink="/home"
-          class="font-semibold hover:text-[#DEBD63] transition duration-300"
-          >Home</a
-        >
+        <a routerLink="/home" class="font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
 
         <!-- Client Dropdown -->
-        <div
-          class="relative client-dropdown"
-          (click)="$event.stopPropagation()"
-        >
+        <div class="relative client-dropdown" (click)="$event.stopPropagation()">
           <button
             (click)="toggleClientDropdown()"
             class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300"
@@ -72,23 +42,18 @@
               routerLink="/client/projects"
               class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
             >
-              <i class="fa fa-folder-open mr-2 text-[#DEBD63]"></i> Client
-              Projects
+              <i class="fa fa-folder-open mr-2 text-[#DEBD63]"></i> Client Projects
             </a>
             <a
               routerLink="clientProjects/approved"
               class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
             >
-              <i class="fa fa-check-circle mr-2 text-[#DEBD63]"></i> Approved
-              Projects
+              <i class="fa fa-check-circle mr-2 text-[#DEBD63]"></i> Approved Projects
             </a>
           </div>
         </div>
         <!-- Freelance Dropdown -->
-        <div
-          class="relative freelance-dropdown"
-          (click)="$event.stopPropagation()"
-        >
+        <div class="relative freelance-dropdown" (click)="$event.stopPropagation()">
           <button
             (click)="toggleFreelanceDropdown()"
             class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300"
@@ -105,60 +70,53 @@
               routerLink="/freelance/projects"
               class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
             >
-              <i class="fa-solid fa-bars-progress mr-2 text-[#DEBD63]"></i>
-              Freelance Projects
-            </a>
+            <i class="fa-solid fa-bars-progress mr-2 text-[#DEBD63]"></i> Freelance Projects
+          </a>
             <a
               routerLink="freelancerProposals/"
               class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
             >
-              <i class="fa-solid fa-file-lines mr-2 text-[#DEBD63]"></i> My
-              Proposals
-            </a>
+            <i class="fa-solid fa-file-lines mr-2 text-[#DEBD63]"></i> My Proposals
+          </a>
           </div>
         </div>
 
+
         <!-- Icons -->
         <div class="flex items-center space-x-6 text-2xm">
-          <!-- Balance Dropdown Trigger -->
-          <div class="relative" (click)="$event.stopPropagation()">
-            <button
-              (click)="toggleBalanceDropdown()"
-              class="text-white hover:text-[#DEBD63] transition duration-300"
-            >
-              <i class="fa fa-dollar-sign"></i>
-            </button>
-
-            <!-- Dropdown -->
-            <div
-              *ngIf="isBalanceDropdownOpen"
-              class="absolute right-0 mt-3 bg-gray-900 w-72 bg-[#0f1116] text-white rounded-xl shadow-lg z-50 p-4"
-            >
-              <div class="text-lg font-semibold text-[#DEBD63] mb-2">
-                My balance:
-                <span class="text-white font-bold">{{ userBalance }} $</span>
-              </div>
-              <!-- form payment -->
-              <app-payment></app-payment>
-            </div>
-          </div>
-
-          <a
-            routerLink="/messages"
+        
+        <!-- Balance Dropdown Trigger -->
+        <div class="relative " (click)="$event.stopPropagation()">
+          <button
+            (click)="toggleBalanceDropdown()"
             class="text-white hover:text-[#DEBD63] transition duration-300"
+          >
+            <i class="fa fa-dollar-sign"></i>
+          </button>
+
+          <!-- Dropdown -->
+          <div
+            *ngIf="isBalanceDropdownOpen"
+            class="absolute right-0 mt-3 bg-gray-900 w-72 bg-[#0f1116] text-white rounded-xl shadow-lg z-50 p-4"
+          >
+            <div class="text-lg font-semibold text-[#DEBD63] mb-2">
+              My balance: <span class="text-white font-bold">{{ userBalance }} $</span>
+            </div>        
+            <!-- form payment -->
+            <app-payment></app-payment>
+            
+          </div>
+        </div>
+
+          <a routerLink="/messages" class="text-white hover:text-[#DEBD63] transition duration-300"
             ><i class="fa fa-envelope"></i
           ></a>
-          <a
-            routerLink="/notifications"
-            class="text-white hover:text-[#DEBD63] transition duration-300"
+          <a routerLink="/notifications" class="text-white hover:text-[#DEBD63] transition duration-300"
             ><i class="fa fa-bell"></i
           ></a>
 
           <!-- Profile Dropdown -->
-          <div
-            class="relative profile-dropdown"
-            (click)="$event.stopPropagation()"
-          >
+          <div class="relative profile-dropdown" (click)="$event.stopPropagation()">
             <button
               (click)="toggleProfileDropdown()"
               class="text-white hover:text-[#DEBD63] transition duration-300 flex items-center"
@@ -176,11 +134,11 @@
               class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50"
             >
               <a
-                [routerLink]="['/profile', userId]"
-                class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
-              >
-                <i class="fa fa-user mr-2 text-[#DEBD63]"></i> View Profile
-              </a>
+              [routerLink]="['/profile', userId]"
+              class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
+            >
+              <i class="fa fa-user mr-2 text-[#DEBD63]"></i> View Profile
+            </a>
               <a
                 href="javascript:void(0)"
                 (click)="logout()"
@@ -190,6 +148,8 @@
               </a>
             </div>
           </div>
+          
+
         </div>
       </ng-template>
     </div>
@@ -198,100 +158,68 @@
   <!-- Mobile Menu -->
   <div *ngIf="menuOpen" class="md:hidden mt-4 space-y-3">
     <ng-container *ngIf="!isLoggedIn; else userLinksMobile">
-      <a
-        routerLink="/home"
-        class="block font-semibold hover:text-[#DEBD63] transition duration-300"
-        >Home</a
-      >
-      <a
-        routerLink="/sign-in"
-        class="block font-semibold hover:text-[#DEBD63] transition duration-300"
-        >Sign In</a
-      >
-      <a
-        routerLink="/sign-up"
-        class="block font-semibold hover:text-[#DEBD63] transition duration-300"
-        >Sign Up</a
-      >
+      <a routerLink="/home" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
+      <a routerLink="/sign-in" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Sign In</a>
+      <a routerLink="/sign-up" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Sign Up</a>
     </ng-container>
 
-    <ng-template #userLinksMobile>
-      <a
-        routerLink="/home"
-        class="block font-semibold hover:text-[#DEBD63] transition duration-300"
-        >Home</a
-      >
 
-      <!-- ✅ Client Dropdown (Mobile) -->
-      <div class="client-dropdown" (click)="$event.stopPropagation()">
-        <button
-          (click)="toggleClientDropdown()"
-          class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300"
-        >
-          <span>Client Projects</span>
-          <i class="fa fa-angle-down"></i>
-        </button>
-
-        <div
-          *ngIf="isClientDropdownOpen"
-          class="bg-gray-900 rounded-md shadow-md mt-2 w-full"
-        >
-          <a
-            routerLink="/client/projects"
-            class="block px-4 py-2 text-white hover:bg-gray-800 transition-colors"
+      <ng-template #userLinksMobile>
+        <a routerLink="/home" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
+    
+        <!-- ✅ Client Dropdown (Mobile) -->
+        <div class="client-dropdown" (click)="$event.stopPropagation()">
+          <button
+            (click)="toggleClientDropdown()"
+            class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300"
           >
-            <i class="fa fa-folder-open mr-2 text-[#DEBD63]"></i> Client
-            Projects
-          </a>
-          <a
-            routerLink="/client/approved"
-            class="block px-4 py-2 text-white hover:bg-gray-800 transition-colors"
-          >
-            <i class="fa fa-check-circle mr-2 text-[#DEBD63]"></i> Approved
-            Projects
-          </a>
+            <span>Client Projects</span>
+            <i class="fa fa-angle-down"></i>
+          </button>
+    
+          <div *ngIf="isClientDropdownOpen" class="bg-gray-900 rounded-md shadow-md mt-2 w-full">
+            <a routerLink="/client/projects"
+               class="block px-4 py-2 text-white hover:bg-gray-800 transition-colors">
+              <i class="fa fa-folder-open mr-2 text-[#DEBD63]"></i> Client Projects
+            </a>
+            <a routerLink="/client/approved"
+               class="block px-4 py-2 text-white hover:bg-gray-800 transition-colors">
+              <i class="fa fa-check-circle mr-2 text-[#DEBD63]"></i> Approved Projects
+            </a>
+          </div>
         </div>
-      </div>
+    
 
-      <!-- ✅ Freelance Projects Dropdown (Mobile) -->
-      <div class="freelance-dropdown" (click)="$event.stopPropagation()">
-        <button
-          (click)="toggleFreelanceDropdown()"
-          class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300"
-        >
-          <span>Freelance Projects</span>
-          <i class="fa fa-angle-down"></i>
-        </button>
-
-        <div
-          *ngIf="isFreelanceDropdownOpen"
-          class="bg-gray-900 rounded-md shadow-md mt-2 w-full"
-        >
-          <a
-            routerLink="/freelancer/projects"
-            class="block px-4 py-2 text-white hover:bg-gray-800 transition-colors"
+        <!-- ✅ Freelance Projects Dropdown (Mobile) -->
+        <div class="freelance-dropdown" (click)="$event.stopPropagation()">
+          <button
+            (click)="toggleFreelanceDropdown()"
+            class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300"
           >
-            <i class="fa-solid fa-bars-progress mr-2 text-[#DEBD63]"></i>
-            Freelance Projects
-          </a>
-          <a
-            routerLink="/freelancerProposals"
-            class="block px-4 py-2 text-white hover:bg-gray-800 transition-colors"
-          >
-            <i class="fa-solid fa-file-lines mr-2 text-[#DEBD63]"></i> My
-            Proposals
-          </a>
+            <span>Freelance Projects</span>
+            <i class="fa fa-angle-down"></i>
+          </button>
+    
+          <div *ngIf="isFreelanceDropdownOpen" class="bg-gray-900 rounded-md shadow-md mt-2 w-full">
+            <a routerLink="/freelancer/projects"
+               class="block px-4 py-2 text-white hover:bg-gray-800 transition-colors">
+              <i class="fa-solid fa-bars-progress mr-2 text-[#DEBD63]"></i> Freelance Projects
+            </a>
+            <a routerLink="/freelancerProposals"
+               class="block px-4 py-2 text-white hover:bg-gray-800 transition-colors">
+              <i class="fa-solid fa-file-lines mr-2 text-[#DEBD63]"></i> My Proposals
+            </a>
+          </div>
         </div>
-      </div>
 
+        
+
+     
       <div class="flex items-center space-x-5 relative mt-2">
         <!-- ✅ Balance -->
-        <div
-          class="balance-dropdown relative"
-          (click)="$event.stopPropagation()"
-        >
+        <div  class="balance-dropdown relative " (click)="$event.stopPropagation()">
           <button
-            (click)="toggleBalanceDropdown()"
+          (click)="toggleBalanceDropdown()"
             class="text-white hover:text-[#DEBD63] transition duration-300"
           >
             <i class="fa fa-dollar-sign"></i>
@@ -301,36 +229,26 @@
             class="absolute left-0 mt-2 bg-gray-900 w-72 bg-[#0f1116] text-white rounded-xl shadow-md p-4 z-50"
           >
             <div class="text-lg font-semibold text-[#DEBD63] mb-2">
-              My balance:
-              <span class="text-white font-bold">{{ userBalance }} $</span>
+              My balance: <span class="text-white font-bold">{{ userBalance }} $</span>
             </div>
             <app-payment></app-payment>
           </div>
         </div>
-
+      
         <!-- 📩 Messages -->
-        <a
-          routerLink="/messages"
-          class="text-white hover:text-[#DEBD63] transition duration-300"
-        >
+        <a routerLink="/messages" class="text-white hover:text-[#DEBD63] transition duration-300">
           <i class="fa fa-envelope"></i>
         </a>
-
+      
         <!-- 🔔 Notifications -->
-        <a
-          routerLink="/notifications"
-          class="text-white hover:text-[#DEBD63] transition duration-300"
-        >
+        <a routerLink="/notifications" class="text-white hover:text-[#DEBD63] transition duration-300">
           <i class="fa fa-bell"></i>
         </a>
-
+      
         <!-- 👤 Profile -->
-        <div
-          class="relative profile-dropdown"
-          (click)="$event.stopPropagation()"
-        >
+        <div class="relative profile-dropdown" (click)="$event.stopPropagation()">
           <button
-            (click)="toggleProfileDropdown()"
+          (click)="toggleProfileDropdown()"
             class="text-white hover:text-[#DEBD63] transition duration-300 flex items-center"
           >
             <img
@@ -344,22 +262,17 @@
             *ngIf="isProfileDropdownOpen"
             class="absolute left-0 mt-2 bg-gray-900 rounded-md shadow-md w-64 z-50"
           >
-            <a
-              routerLink="/profile"
-              class="block px-4 py-2 text-white hover:bg-gray-800 transition-colors"
-            >
+            <a routerLink="/profile" class="block px-4 py-2 text-white hover:bg-gray-800 transition-colors">
               <i class="fa fa-user mr-2 text-[#DEBD63]"></i> View Profile
             </a>
-            <a
-              href="javascript:void(0)"
-              (click)="logout()"
-              class="block px-4 py-2 text-white hover:bg-gray-800 transition-colors"
-            >
+            <a href="javascript:void(0)" (click)="logout()" class="block px-4 py-2 text-white hover:bg-gray-800 transition-colors">
               <i class="fa fa-sign-out-alt mr-2 text-[#DEBD63]"></i> Logout
             </a>
           </div>
         </div>
       </div>
-    </ng-template>
+      
+      </ng-template>
+    
   </div>
 </nav>

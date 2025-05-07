@@ -45,31 +45,25 @@ export class NewChatComponent {
         return;
       }
       
-      
       console.log('Current user ID:', currentUser.uid);
       console.log('Receiver ID:', this.receiverEmail);
       
-     
       if (currentUser.uid === this.receiverEmail) {
         this.loading = false;
         this.error = 'You cannot chat with yourself';
         return;
       }
       
-      
       const clientId = currentUser.uid;
       const freelancerId = this.receiverEmail;
-      
       
       console.log('Sending to API:', { clientId, freelancerId });
       
       this.chatService.createChat(clientId, freelancerId)
         .pipe(
-          
           switchMap((createdChat: ChatDto) => {
             return this.chatService.getUserChats(currentUser.uid).pipe(
               take(1),
-              
               map((chats: ChatDto[]) => {
                 const fullChat = chats.find(c => c.chatId === createdChat.chatId);
                 return fullChat || createdChat;

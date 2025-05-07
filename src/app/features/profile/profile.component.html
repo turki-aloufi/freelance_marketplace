@@ -1,36 +1,72 @@
-<div class="max-w-4xl min-h-screen mx-auto bg-white rounded-2xl shadow p-6" *ngIf="userProfile">
+<div
+  class="max-w-4xl min-h-screen mx-auto bg-white rounded-2xl shadow p-6"
+  *ngIf="userProfile"
+>
   <div class="flex flex-col sm:flex-row items-center justify-between">
     <div class="flex items-center gap-4">
-      <img [src]="userProfile.imageUrl || 'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'" class="w-24 h-24 rounded-full" alt="Profile">
+      <img
+        [src]="
+          userProfile.imageUrl ||
+          'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'
+        "
+        class="w-24 h-24 rounded-full"
+        alt="Profile"
+      />
       <div>
         <h2 class="text-xl font-semibold">{{ userProfile.name }}</h2>
       </div>
     </div>
     <div class="mt-4 sm:mt-0 text-right">
       <p class="text-md font-semibold">Contact Information</p>
-      <a [href]="'mailto:' + userProfile.email" class="text-sm text-gray-400 hover:underline">{{ userProfile.email }}</a><br>
-      <a [href]="'callto:' + userProfile.phone" class="text-sm text-gray-400 hover:underline">{{ userProfile.phone }}</a><br>
-      <button class="mt-2 bg-black text-white px-4 py-1 rounded">Contact</button>
+      <a
+        [href]="'mailto:' + userProfile.email"
+        class="text-sm text-gray-400 hover:underline"
+        >{{ userProfile.email }}</a
+      ><br />
+      <a
+        [href]="'callto:' + userProfile.phone"
+        class="text-sm text-gray-400 hover:underline"
+        >{{ userProfile.phone }}</a
+      ><br />
+      <button
+        class="mt-2 bg-black text-white px-4 py-1 rounded"
+        [routerLink]="['/messages']"
+        [queryParams]="{ userId: userId }"
+      >
+        Contact
+      </button>
     </div>
   </div>
 
   <div class="mt-8">
-    <h3 class="text-lg font-semibold mb-2"><i class="fa-solid fa-face-smile mr-2 text-[#DEBD63]"></i>About</h3>
+    <h3 class="text-lg font-semibold mb-2">
+      <i class="fa-solid fa-face-smile mr-2 text-[#DEBD63]"></i>About
+    </h3>
     <p class="text-gray-600 text-sm">{{ userProfile.aboutMe }}</p>
   </div>
 
   <div class="mt-8">
-    <h3 class="text-lg font-semibold mb-2"><i class="fa-solid fa-star mr-2 text-[#DEBD63]"></i>Skills</h3>
+    <h3 class="text-lg font-semibold mb-2">
+      <i class="fa-solid fa-star mr-2 text-[#DEBD63]"></i>Skills
+    </h3>
     <div class="flex flex-wrap gap-2">
-      <span *ngFor="let skill of userProfile.skills" class="bg-gray-200 text-sm px-3 py-1 rounded">
+      <span
+        *ngFor="let skill of userProfile.skills"
+        class="bg-gray-200 text-sm px-3 py-1 rounded"
+      >
         {{ skill.skill }}
       </span>
     </div>
   </div>
 
   <div class="mt-8">
-    <h3 class="text-lg font-semibold mb-2"><i class="fa-solid fa-award mr-2 text-[#DEBD63]"></i>Work Experience</h3>
-    <div *ngFor="let project of userProfile.projects" class="bg-gray-100 p-4 rounded-xl mb-4">
+    <h3 class="text-lg font-semibold mb-2">
+      <i class="fa-solid fa-award mr-2 text-[#DEBD63]"></i>Work Experience
+    </h3>
+    <div
+      *ngFor="let project of userProfile.projects"
+      class="bg-gray-100 p-4 rounded-xl mb-4"
+    >
       <div class="flex justify-between">
         <div>
           <p class="font-medium text-sm">Project: {{ project.title }}</p>
@@ -38,13 +74,17 @@
         </div>
         <div>
           <span class="text-green-600 p-1 font-semibold">Finished at:</span>
-          <span class="text-gray-600"> {{ project.deadline }}</span><br>
+          <span class="text-gray-600"> {{ project.deadline }}</span
+          ><br />
           <span class="text-yellow-600 p-1 font-semibold">Cost</span>
           <span class="font-bold"> {{ project.budget }} $</span>
         </div>
       </div>
       <div class="flex flex-wrap gap-1 mt-2">
-        <span *ngFor="let skill of project.skills" class="bg-gray-300 text-xs px-2 py-0.5 rounded">
+        <span
+          *ngFor="let skill of project.skills"
+          class="bg-gray-300 text-xs px-2 py-0.5 rounded"
+        >
           {{ skill.skill }}
         </span>
       </div>

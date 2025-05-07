@@ -20,13 +20,11 @@ export class SignalrService {
       .withAutomaticReconnect()
       .build();
 
-    // Set up message receiver
     this.hubConnection.on('ReceiveMessage', (message: MessageDto) => {
       message.isFromMe = message.senderId === userId;
       this.messageReceivedSubject.next(message);
     });
 
-    // Start the connection
     return this.hubConnection.start();
   }
 
