@@ -6,6 +6,7 @@ import { AuthService, SkillDto } from '../../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { debounceTime, Subject, switchMap, takeUntil, retry } from 'rxjs';
+import { SkillSelectorComponent } from '../../../shared/skill-selector/skill-selector.component';
 
 interface Skill {
   SkillId: number;
@@ -16,7 +17,7 @@ interface Skill {
 @Component({
   selector: 'app-sign-up',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, SkillSelectorComponent],
   templateUrl: './sign-up.component.html',
   styleUrls: ['./sign-up.component.css'],
 })

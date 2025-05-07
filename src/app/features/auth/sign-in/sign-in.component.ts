@@ -17,7 +17,7 @@ export class SignInComponent {
   error: string = '';
   isLoading: boolean = false; // New loading state
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   async loginWithEmail() {
     try {
@@ -26,7 +26,8 @@ export class SignInComponent {
         return;
       }
       this.isLoading = true; // Start loading
-      await this.authService.loginWithEmail(this.email, this.password);
+      let userCredincials = await this.authService.loginWithEmail(this.email, this.password);
+      console.log(userCredincials);
     } catch (error: any) {
       this.error = error.message;
     } finally {
