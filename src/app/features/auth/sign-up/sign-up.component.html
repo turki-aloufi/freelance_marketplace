@@ -4,25 +4,15 @@
     <h2 class="text-3xl font-bold mb-6">SIGN UP</h2>
 
     <!-- Google Sign Up -->
-    <button
-      (click)="loginWithGoogle()"
+    <button (click)="loginWithGoogle()"
       class="flex items-center space-x-2 border border-gray-300 rounded-full p-2 hover:shadow-md mb-4"
-      [disabled]="isLoading"
-    >
+      [disabled]="isLoading">
       <img src="assets/images/download.png" alt="Google Logo" class="w-6 h-6" />
       <span *ngIf="isLoading" class="ml-2">
-        <svg
-          class="animate-spin h-5 w-5 text-gray-500"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
+        <svg class="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-          ></path>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>
       </span>
     </button>
@@ -39,73 +29,43 @@
       <div class="flex space-x-4">
         <div class="flex-1">
           <label class="block text-sm font-medium text-gray-700">*First Name</label>
-          <input
-            type="text"
-            [(ngModel)]="firstName"
-            name="firstName"
-            placeholder="First Name"
+          <input type="text" [(ngModel)]="firstName" name="firstName" placeholder="First Name"
             class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-            [disabled]="isLoading"
-          />
+            required [disabled]="isLoading" />
         </div>
         <div class="flex-1">
           <label class="block text-sm font-medium text-gray-700">*Last Name</label>
-          <input
-            type="text"
-            [(ngModel)]="lastName"
-            name="lastName"
-            placeholder="Last Name"
+          <input type="text" [(ngModel)]="lastName" name="lastName" placeholder="Last Name"
             class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
-            [disabled]="isLoading"
-          />
+            required [disabled]="isLoading" />
         </div>
       </div>
 
       <!-- Email -->
       <div>
         <label class="block text-sm font-medium text-gray-700">*Email</label>
-        <input
-          type="email"
-          [(ngModel)]="email"
-          name="email"
-          placeholder="Email"
-          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-          required
-          [disabled]="isLoading"
-        />
+        <input type="email" [(ngModel)]="email" name="email" placeholder="Email"
+          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required
+          [disabled]="isLoading" />
       </div>
 
       <!-- Contact Number -->
       <div>
         <label class="block text-sm font-medium text-gray-700">*Contact Number</label>
-        <input
-          type="tel"
-          [(ngModel)]="contactNumber"
-          name="contactNumber"
-          placeholder="Contact Number"
-          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-          required
-          [disabled]="isLoading"
-        />
+        <input type="tel" [(ngModel)]="contactNumber" name="contactNumber" placeholder="Contact Number"
+          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required
+          [disabled]="isLoading" />
       </div>
 
       <!-- Password -->
       <div>
         <label class="block text-sm font-medium text-gray-700">*Password</label>
-        <input
-          type="password"
-          [(ngModel)]="password"
-          name="password"
-          placeholder="Password"
-          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-          required
-          [disabled]="isLoading"
-        />
+        <input type="password" [(ngModel)]="password" name="password" placeholder="Password"
+          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required
+          [disabled]="isLoading" />
       </div>
 
-      <!-- Required Skills -->
+      <!-- Required Skills
       <div>
         <label class="block text-sm font-medium text-gray-700">Required Skills</label>
         <div class="relative">
@@ -159,45 +119,29 @@
             <button (click)="removeSkill(skill)" class="ml-1 text-red-500" [disabled]="isLoading">×</button>
           </span>
         </div>
-      </div>
-
+      </div> -->
+      <app-skill-selector [(selectedSkills)]="skills"></app-skill-selector>
       <!-- About Experience -->
       <div>
         <label class="block text-sm font-medium text-gray-700">About Your Experience</label>
-        <textarea
-          [(ngModel)]="about"
-          name="about"
-          placeholder="Write your experience"
-          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-          rows="4"
-          [disabled]="isLoading"
-        ></textarea>
+        <textarea [(ngModel)]="about" name="about" placeholder="Write your experience"
+          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" rows="4"
+          [disabled]="isLoading"></textarea>
       </div>
 
       <!-- Error Message -->
       <p *ngIf="error" class="text-red-500 text-sm">{{ error }}</p>
 
       <!-- Sign Up Button -->
-      <button
-        type="submit"
-        (click)="signUp()"
+      <button type="submit" (click)="signUp()"
         class="w-full bg-black text-white py-2 rounded hover:bg-gray-800 font-semibold flex items-center justify-center"
-        [disabled]="isLoading"
-      >
+        [disabled]="isLoading">
         <span *ngIf="!isLoading">SIGN UP</span>
         <span *ngIf="isLoading" class="flex items-center">
-          <svg
-            class="animate-spin h-5 w-5 text-white mr-2"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
+          <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            ></path>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
           </svg>
           Loading...
         </span>

@@ -5,6 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ClientsProjectsService, Project } from '../../core/services/clients-projects.service';
 import { ConfirmDeleteDialogComponent } from '../../core/custom_components/confirm-delete-dialog/confirm-delete-dialog.component';
+import { AddProjectComponent } from '../add-project/add-project.component';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-client-projects',
@@ -14,7 +16,7 @@ import { ConfirmDeleteDialogComponent } from '../../core/custom_components/confi
     MatDialogModule,
     MatButtonModule,
     MatSnackBarModule,
-  ],
+    RouterModule],
   templateUrl: './client-projects.component.html',
   styleUrls: ['./client-projects.component.css']
 })
@@ -29,7 +31,7 @@ export class ClientProjectsComponent implements OnInit {
     public clientProjects: ClientsProjectsService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.clientProjects.getClientProjects().subscribe((data) => {

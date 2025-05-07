@@ -1,0 +1,98 @@
+<div class="container mx-auto p-4">
+  <h1 class="text-2xl sm:text-3xl font-bold mb-2">Add New Project</h1>
+  <p class="text-gray-500 mb-4">Create a new project here.</p>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="text-green-500 mb-4">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="text-red-500 mb-4">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="projectForm" (ngSubmit)="submitProject()" class="space-y-4">
+    <!-- Project Name -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Project Name</label>
+      <input formControlName="projectName"
+        class="border p-2 w-full rounded-md border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500" />
+      <div *ngIf="projectForm.get('projectName')?.touched && projectForm.get('projectName')?.invalid"
+        class="text-red-500 text-sm mt-1">
+        <div *ngIf="projectForm.get('projectName')?.errors?.['required']">Project Name is required.</div>
+        <div *ngIf="projectForm.get('projectName')?.errors?.['minlength']">Project Name must be at least 3 characters
+          long.</div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Description</label>
+      <textarea formControlName="description" rows="4"
+        class="border p-2 w-full rounded-md border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"></textarea>
+      <div *ngIf="projectForm.get('description')?.touched && projectForm.get('description')?.invalid"
+        class="text-red-500 text-sm mt-1">
+        <div *ngIf="projectForm.get('description')?.errors?.['required']">Description is required.</div>
+        <div *ngIf="projectForm.get('description')?.errors?.['minlength']">Description must be at least 10 characters
+          long.</div>
+      </div>
+    </div>
+
+    <!-- Required Tasks -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Required Tasks</label>
+      <input formControlName="requiredTasks"
+        class="border p-2 w-full rounded-md border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500" />
+      <div *ngIf="projectForm.get('requiredTasks')?.touched && projectForm.get('requiredTasks')?.invalid"
+        class="text-red-500 text-sm mt-1">
+        <div *ngIf="projectForm.get('requiredTasks')?.errors?.['required']">Required Tasks are required.</div>
+      </div>
+    </div>
+
+    <!-- Additional Notes -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Additional Notes</label>
+      <textarea formControlName="additionalNotes" rows="2"
+        class="border p-2 w-full rounded-md border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"></textarea>
+    </div>
+
+    <!-- Skills -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Skills</label>
+      <app-skill-selector [(selectedSkills)]="skills"></app-skill-selector>
+    </div>
+
+    <div class="flex gap-4">
+      <!-- Budget -->
+      <div class="flex-1">
+        <label class="block text-sm font-medium text-gray-700">Budget ($)</label>
+        <input type="number" formControlName="budget"
+          class="border p-2 w-full rounded-md border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500" />
+        <div *ngIf="projectForm.get('budget')?.touched && projectForm.get('budget')?.invalid"
+          class="text-red-500 text-sm mt-1">
+          <div *ngIf="projectForm.get('budget')?.errors?.['required']">Budget is required.</div>
+          <div *ngIf="projectForm.get('budget')?.errors?.['min']">Budget must be at least 1.</div>
+        </div>
+      </div>
+    
+      <!-- Deadline -->
+      <div class="flex-1">
+        <label class="block text-sm font-medium text-gray-700">Deadline (YYYY-MM-DD)</label>
+        <input type="date" formControlName="deadline"
+          class="border p-2 w-full rounded-md border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500" />
+        <div *ngIf="projectForm.get('deadline')?.touched && projectForm.get('deadline')?.invalid"
+          class="text-red-500 text-sm mt-1">
+          <div *ngIf="projectForm.get('deadline')?.errors?.['required']">Deadline is required.</div>
+          <div *ngIf="projectForm.get('deadline')?.errors?.['pattern']">Deadline must be in YYYY-MM-DD format.</div>
+        </div>
+      </div>
+    </div>
+    
+
+
+    <!-- Submit Button -->
+    <button type="submit" [disabled]="projectForm.invalid"
+      class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+      Submit
+    </button>
+  </form>
+</div>
