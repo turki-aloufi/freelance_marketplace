@@ -1,37 +1,45 @@
 <div class="overflow-y-auto max-h-[calc(100vh-280px)]">
-    <div *ngIf="loading" class="p-4 text-center text-gray-500">
-      <i class="fa fa-spinner fa-spin mr-2"></i> Loading conversations...
-    </div>
-    
-    <div *ngIf="!loading && chats.length === 0" class="p-4 text-center text-gray-500">
-      No conversations found
-    </div>
-    
-    <div *ngFor="let chat of chats" 
-         (click)="selectChat(chat)"
-         class="p-3 border-b hover:bg-gray-100 cursor-pointer transition-colors"
-         [class.bg-gray-200]="activeChat?.chatId === chat.chatId">
-      <div class="flex items-center">
-        <div class="w-12 h-12 bg-gray-300 rounded-full mr-3 flex-shrink-0">
-          <!-- User avatar placeholder -->
-          <div class="flex items-center justify-center h-full text-gray-600">
-            <i class="fa fa-user"></i>
-          </div>
+  <div *ngIf="loading" class="p-4 text-center text-gray-500">
+    <i class="fa fa-spinner fa-spin mr-2"></i> Loading conversations...
+  </div>
+
+  <div
+    *ngIf="!loading && chats.length === 0"
+    class="p-4 text-center text-gray-500"
+  >
+    No conversations found
+  </div>
+
+  <div
+    *ngFor="let chat of chats"
+    (click)="selectChat(chat)"
+    class="p-3 border-b hover:bg-gray-100 cursor-pointer transition-colors"
+    [class.bg-gray-200]="activeChat?.chatId === chat.chatId"
+  >
+    <div class="flex items-center">
+      <div class="w-12 h-12 bg-gray-300 rounded-full mr-3 flex-shrink-0">
+        <!-- User avatar placeholder -->
+        <div class="flex items-center justify-center h-full text-gray-600">
+          <i class="fa fa-user"></i>
         </div>
-        <div class="flex-grow min-w-0">
-          <div class="flex justify-between items-baseline">
-            <h3 class="font-semibold truncate">{{ chat.otherUserName || 'Unknown User' }}</h3>
-            <span *ngIf="chat.lastMessageTime" class="text-xs text-gray-500">
-              {{ formatTime(chat.lastMessageTime) }}
-            </span>
-          </div>
-          <p class="text-sm text-gray-600 truncate" *ngIf="chat.lastMessage">
-            <span *ngIf="chat.isLastMessageFromMe">You: </span>{{ chat.lastMessage }}
-          </p>
-          <p *ngIf="!chat.lastMessage" class="text-sm text-gray-400 italic">
-            No messages yet
-          </p>
+      </div>
+      <div class="flex-grow min-w-0">
+        <div class="flex justify-between items-baseline">
+          <h3 class="font-semibold truncate">
+            {{ chat.otherUserName || "Unknown User" }}
+          </h3>
+          <span *ngIf="chat.lastMessageTime" class="text-xs text-gray-500">
+            {{ formatTime(chat.lastMessageTime) }}
+          </span>
         </div>
+        <p class="text-sm text-gray-600 truncate" *ngIf="chat.lastMessage">
+          <span *ngIf="chat.isLastMessageFromMe">You: </span
+          >{{ chat.lastMessage }}
+        </p>
+        <p *ngIf="!chat.lastMessage" class="text-sm text-gray-400 italic">
+          No messages yet
+        </p>
       </div>
     </div>
   </div>
+</div>

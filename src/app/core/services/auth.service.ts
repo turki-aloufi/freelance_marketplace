@@ -27,7 +27,7 @@ export interface SkillDto {
 })
 export class AuthService {
   user$ = new BehaviorSubject<any>(null);
-  private apiUrl = 'http://localhost:5021/api/users/create';
+  private apiUrl = 'https://localhost:7192/api/users/create';
 
   constructor(
     private auth: Auth,

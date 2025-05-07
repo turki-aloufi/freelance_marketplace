@@ -1,4 +1,3 @@
-// src/app/features/messages/chat-list/chat-list.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';

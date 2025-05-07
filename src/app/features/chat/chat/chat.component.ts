@@ -1,12 +1,11 @@
-// src/app/features/messages/chat/chat.component.ts
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, AfterViewChecked, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatService } from '../../../core/services/chat.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { SignalrService } from '../../../core/services/signalr.service';
 import { MessageDto } from '../../../core/models/chat.model';
-import { Subject, takeUntil, debounceTime, filter, interval } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-chat',
@@ -23,64 +22,34 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   loading = false;
   activeChat: any = null;
   currentUserId: string | null = null;
-  signalRConnected = false;
   private shouldScrollToBottom = false;
-  private messageIds = new Set<number>(); // Track received message IDs to prevent duplicates
+  userHasScrolled = false;
   
+  // Auto-refresh properties
+  private refreshTimerId: any = null;
+  private refreshInterval = 1000; // 1 second refresh interval (adjust as needed)
+  
+  // For message deduplication
+  private pendingMessage: {
+    tempId: number;
+    content: string;
+  } | null = null;
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private chatService: ChatService,
     private authService: AuthService,
-    private signalrService: SignalrService,
-    private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private signalrService: SignalrService
   ) {}
 
   ngOnInit(): void {
-    console.log('Chat component initialized');
-    
-    // Setup connection checker - check every 15 seconds if SignalR is connected
-    interval(15000)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        if (this.activeChat && this.currentUserId) {
-          this.checkSignalRConnection();
-        }
-      });
-    
-    // Monitor SignalR connection status
-    this.signalrService.connectionEstablished$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(established => {
-        console.log('SignalR connection status changed:', established);
-        
-        // If connection state changes, update UI
-        if (this.signalRConnected !== established) {
-          this.signalRConnected = established;
-          this.cdr.detectChanges(); // Force change detection
-          
-          // If connection is established and we have an active chat, make sure we're joined
-          if (established && this.activeChat && this.currentUserId) {
-            console.log('Connection established, ensuring we are joined to the active chat');
-            this.signalrService.joinChatRoom(this.activeChat.chatId)
-              .catch(err => console.error('Failed to join chat room after connection established:', err));
-          }
-        }
-      });
-    
     // Get current user
     this.authService.user$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         if (user) {
           this.currentUserId = user.uid;
-          console.log('Current user set:', this.currentUserId);
-          
-          // Start SignalR connection when user is available
-          this.signalrService.startConnection(user.uid)
-            .then(() => console.log('SignalR connection started for user:', user.uid))
-            .catch(err => console.error('Failed to start SignalR connection:', err));
         }
       });
 
@@ -89,184 +58,193 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       .pipe(takeUntil(this.destroy$))
       .subscribe(chat => {
         if (chat) {
-          console.log('Active chat updated:', chat);
+          this.activeChat = chat;
+          this.loadMessages(chat.chatId, this.currentUserId!);
           
-          // Only reload messages if chat has changed
-          if (!this.activeChat || this.activeChat.chatId !== chat.chatId) {
-            this.activeChat = chat;
-            this.messageIds.clear(); // Clear tracked message IDs
-            
-            if (this.currentUserId) {
-              this.loadMessages(chat.chatId, this.currentUserId);
-            }
-          }
+          // Start auto-refresh when a chat becomes active
+          this.startAutoRefresh();
         } else {
-          this.activeChat = null;
-          this.messages = [];
-          this.messageIds.clear();
+          // Stop auto-refresh if no active chat
+          this.stopAutoRefresh();
         }
       });
 
-    // Listen for new messages from SignalR - THIS IS CRITICAL FOR REAL-TIME UPDATES
+    // Listen for new messages from SignalR
     this.signalrService.messageReceived
-      .pipe(
-        takeUntil(this.destroy$)
-      )
+      .pipe(takeUntil(this.destroy$))
       .subscribe(message => {
-        console.log('Message received in chat component from SignalR:', message);
-        
-        // Only process messages for the active chat
-        if (this.activeChat && message.chatId === this.activeChat.chatId) {
-          this.ngZone.run(() => {
-            // Check if this message already exists in our messages array
-            if (!this.messageIds.has(message.messageId)) {
-              console.log('Adding new message to chat view:', message);
-              
-              // Add message ID to our tracking set
-              this.messageIds.add(message.messageId);
-              
-              // Add the message to our array
-              this.messages = [...this.messages, message];
-              this.shouldScrollToBottom = true;
-              this.cdr.detectChanges(); // Force change detection
-            } else {
-              console.log('Message already exists, not adding duplicate');
-            }
-          });
-        } else {
-          console.log('Message is not for active chat, ignoring');
+        if (message && this.activeChat && message.chatId === this.activeChat.chatId) {
+          // Check if this is our pending message
+          if (this.pendingMessage && 
+              message.content === this.pendingMessage.content && 
+              message.senderId === this.currentUserId) {
+            // Replace temp message with real one
+            this.replaceTempMessage(message);
+            this.pendingMessage = null;
+          } 
+          // Otherwise check if it's a new message
+          else if (!this.isDuplicateMessage(message)) {
+            this.messages.push(message);
+            this.shouldScrollToBottom = !this.userHasScrolled;
+          }
         }
       });
   }
 
+  isDuplicateMessage(message: MessageDto): boolean {
+    return this.messages.some(m => 
+      // Check if exact message ID match
+      m.messageId === message.messageId ||
+      // Or check content + sender match for pending message
+      (m.content === message.content && 
+       m.senderId === message.senderId &&
+       Math.abs(new Date(m.sentAt).getTime() - new Date(message.sentAt).getTime()) < 5000)
+    );
+  }
+
+  onScroll(): void {
+    const el = this.messagesContainer.nativeElement;
+    const threshold = 100; // px
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+  
+    this.userHasScrolled = !atBottom;
+  }
+  
   ngAfterViewChecked() {
-    if (this.shouldScrollToBottom) {
+    if (this.shouldScrollToBottom && !this.userHasScrolled) {
       this.scrollToBottom();
       this.shouldScrollToBottom = false;
     }
   }
-
+  
   ngOnDestroy(): void {
-    console.log('Chat component destroyed');
+    // Stop auto-refresh when component is destroyed
+    this.stopAutoRefresh();
+    
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   loadMessages(chatId: number, userId: string): void {
-    this.loading = true;
-    this.messages = [];
-    this.messageIds.clear();
+    if (!chatId || !userId) return;
     
-    console.log(`Loading messages for chat ${chatId}`);
+    // Don't load if already loading
+    if (this.loading) return;
+    
+    // Save current scroll position before loading
+    let scrollTop = 0;
+    let scrollHeight = 0;
+    
+    if (this.messagesContainer) {
+      const element = this.messagesContainer.nativeElement;
+      scrollTop = element.scrollTop;
+      scrollHeight = element.scrollHeight;
+    }
+    
+    // Only show loading indicator on initial load
+    const isInitialLoad = this.messages.length === 0;
+    if (isInitialLoad) {
+      this.loading = true;
+    }
     
     this.chatService.getChatMessages(chatId, userId)
       .subscribe({
         next: (messages) => {
-          console.log(`Loaded ${messages.length} messages`);
-          
-          // Track all message IDs
-          messages.forEach(msg => this.messageIds.add(msg.messageId));
-          
-          this.messages = messages;
-          this.loading = false;
-          this.shouldScrollToBottom = true;
-          this.cdr.detectChanges(); // Force change detection
-          
-          // Ensure we're joined to this chat room
-          if (this.currentUserId) {
-            // Make sure SignalR is connected first
-            if (!this.signalRConnected) {
-              this.signalrService.startConnection(this.currentUserId)
-                .then(() => this.signalrService.joinChatRoom(chatId))
-                .catch(err => console.error('Failed to start SignalR connection:', err));
+          // Check if there are actually new messages
+          if (messages.length > this.messages.length || this.messages.length === 0) {
+            // Check if we have a pending message that needs to be added
+            if (this.pendingMessage) {
+              const pendingExists = messages.some(m => 
+                m.content === this.pendingMessage?.content && 
+                m.senderId === this.currentUserId
+              );
+              
+              if (!pendingExists) {
+                // Add our pending message to the display
+                const tempMessage = this.createTempMessage(this.pendingMessage.content);
+                messages.push(tempMessage);
+              } else {
+                // Server has our message, clear pending state
+                this.pendingMessage = null;
+              }
+            }
+            
+            // Update messages while maintaining scroll position
+            const wasAtBottom = !this.userHasScrolled;
+            this.messages = messages;
+            
+            // Only scroll to bottom if we were already at the bottom or this is the first load
+            if (wasAtBottom || isInitialLoad) {
+              this.shouldScrollToBottom = true;
             } else {
-              this.signalrService.joinChatRoom(chatId)
-                .catch(err => console.error('Failed to join chat room after loading messages:', err));
+              // Otherwise restore scroll position after view updates
+              setTimeout(() => {
+                if (this.messagesContainer) {
+                  const element = this.messagesContainer.nativeElement;
+                  const newScrollHeight = element.scrollHeight;
+                  const heightDifference = newScrollHeight - scrollHeight;
+                  element.scrollTop = scrollTop + heightDifference;
+                }
+              }, 0);
             }
           }
+          
+          this.loading = false;
         },
         error: (err) => {
           console.error('Error loading messages:', err);
           this.loading = false;
-          this.cdr.detectChanges(); // Force change detection
         }
       });
   }
-
-  sendMessage(): void {
-    if (!this.newMessage.trim() || !this.activeChat || !this.currentUserId) {
-      return;
-    }
-    
-    // Check connection before sending
-    if (!this.signalRConnected) {
-      console.warn('SignalR not connected, attempting to reconnect...');
-      this.signalrService.startConnection(this.currentUserId)
-        .then(() => {
-          // Join the room after reconnection
-          return this.signalrService.joinChatRoom(this.activeChat.chatId);
-        })
-        .then(() => this.doSendMessage())
-        .catch(err => console.error('Failed to reconnect SignalR:', err));
-      return;
-    }
-    
-    this.doSendMessage();
+  
+  scrollToBottomManually(): void {
+    this.scrollToBottom();
+    this.userHasScrolled = false;
   }
   
-  private doSendMessage(): void {
+  sendMessage(): void {
+    if (!this.newMessage.trim() || !this.activeChat || !this.currentUserId) return;
+    
     const messageContent = this.newMessage.trim();
-    console.log(`Sending message to chat ${this.activeChat.chatId}`);
     
-    // Store message text and clear input immediately for better UX
-    const pendingMessage = this.newMessage;
-    this.newMessage = '';
+    // Create a temporary ID for the pending message
+    const tempId = -Date.now();
     
-    // Add a temporary message with a local ID to the UI immediately
-    // This gives immediate feedback to the user
-    const tempMessage: MessageDto = {
-      messageId: -Date.now(), // Temporary negative ID so it doesn't conflict with server IDs
-      chatId: this.activeChat.chatId,
-      senderId: this.currentUserId!,
-      content: messageContent,
-      sentAt: new Date().toISOString(), // Convert to ISO string format
-      isFromMe: true
+    // Save pending message details
+    this.pendingMessage = {
+      tempId: tempId,
+      content: messageContent
     };
     
-    // Add to messages array
-    this.messages = [...this.messages, tempMessage];
+    // Create a temporary message to display immediately
+    const tempMessage = this.createTempMessage(messageContent);
+    this.messages.push(tempMessage);
     this.shouldScrollToBottom = true;
-    this.cdr.detectChanges();
     
-    this.chatService.sendMessage(this.activeChat.chatId, this.currentUserId!, messageContent)
+    // Clear input
+    this.newMessage = '';
+    
+    this.chatService.sendMessage(this.activeChat.chatId, this.currentUserId, messageContent)
       .subscribe({
         next: (sentMessage) => {
-          console.log('Message sent successfully:', sentMessage);
-          
-          // Replace temp message with actual message from server
-          const messageIndex = this.messages.findIndex(m => 
-            m.messageId === tempMessage.messageId || 
-            (m.messageId === sentMessage.messageId));
-          
-          if (messageIndex >= 0) {
-            // Add message ID to tracking set
-            this.messageIds.add(sentMessage.messageId);
-            
-            // Replace the message
-            this.messages[messageIndex] = sentMessage;
-            this.messages = [...this.messages]; // Create new array to trigger change detection
-            this.cdr.detectChanges();
+          // Replace temp message with confirmed message
+          if (sentMessage) {
+            this.replaceTempMessage(sentMessage);
           }
+          this.pendingMessage = null;
         },
         error: (err) => {
           console.error('Error sending message:', err);
           
-          // Remove the temporary message
-          this.messages = this.messages.filter(m => m.messageId !== tempMessage.messageId);
+          // Remove temp message on error
+          this.messages = this.messages.filter(m => m.messageId !== tempId);
           
-          // Restore the message text if sending failed
-          this.newMessage = pendingMessage;
-          this.cdr.detectChanges();
+          // Restore message to input
+          this.newMessage = messageContent;
+          
+          // Clear pending state
+          this.pendingMessage = null;
         }
       });
   }
@@ -284,21 +262,53 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
   
-  private checkSignalRConnection(): void {
-    this.signalrService.checkConnection()
-      .then(connected => {
-        if (!connected && this.currentUserId) {
-          console.log('Connection check failed, restarting SignalR...');
-          return this.signalrService.startConnection(this.currentUserId);
-        }
-        return Promise.resolve();
-      })
-      .then(() => {
-        if (this.activeChat) {
-          return this.signalrService.joinChatRoom(this.activeChat.chatId);
-        }
-        return Promise.resolve();
-      })
-      .catch(err => console.error('Error in connection check:', err));
+  // Helper method to create a temporary message
+  private createTempMessage(content: string): MessageDto {
+    return {
+      messageId: -Date.now(), // Use negative ID to avoid conflicts with server IDs
+      chatId: this.activeChat.chatId,
+      senderId: this.currentUserId!,
+      content: content,
+      sentAt: new Date().toISOString(),
+      isFromMe: true
+    };
+  }
+  
+  // Helper method to replace a temporary message with the confirmed one
+  private replaceTempMessage(serverMessage: MessageDto): void {
+    // Find the temporary message
+    const index = this.messages.findIndex(m => 
+      (m.messageId < 0 && m.content === serverMessage.content) || 
+      m.messageId === serverMessage.messageId
+    );
+    
+    if (index >= 0) {
+      // Replace it with the server message
+      this.messages[index] = serverMessage;
+    }
+  }
+  
+  // Start auto-refresh timer
+  private startAutoRefresh(): void {
+    // Stop any existing timer first
+    this.stopAutoRefresh();
+    
+    // Start a new timer
+    this.refreshTimerId = setInterval(() => {
+      if (this.activeChat && this.currentUserId && !this.loading) {
+        this.loadMessages(this.activeChat.chatId, this.currentUserId);
+      }
+    }, this.refreshInterval);
+    
+    console.log('Auto-refresh started');
+  }
+  
+  // Stop auto-refresh timer
+  private stopAutoRefresh(): void {
+    if (this.refreshTimerId) {
+      clearInterval(this.refreshTimerId);
+      this.refreshTimerId = null;
+      console.log('Auto-refresh stopped');
+    }
   }
 }
