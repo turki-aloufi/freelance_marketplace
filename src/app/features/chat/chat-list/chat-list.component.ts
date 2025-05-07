@@ -68,18 +68,18 @@ export class ChatListComponent implements OnInit, OnDestroy {
     const date = new Date(timestamp);
     const now = new Date();
     
-    // Same day - show time
+   
     if (date.toDateString() === now.toDateString()) {
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
     
-    // Within last week - show day name
+  
     const daysAgo = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
     if (daysAgo < 7) {
       return date.toLocaleDateString([], { weekday: 'short' });
     }
     
-    // Otherwise show date
+    
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
   }
 }
