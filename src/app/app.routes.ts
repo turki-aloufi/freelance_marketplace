@@ -11,6 +11,7 @@ import { ProfileComponent } from './features/profile/profile.component';
 import {ProjectDetailComponent} from './features/project/project-detail/project-detail.component';
 import { ClientProjectApprovedComponent } from './features/clientproject/client-project-approved/client-project-approved.component';
 import { PaymentComponent } from './features/payment/payment.component';
+import { ProposalsComponent } from './features/MyProposals/my-proposals/my-proposals.component';
 
 
 export const routes: Routes = [
@@ -26,6 +27,7 @@ export const routes: Routes = [
 
   { path: 'project-details/:id', component: ProjectDetailComponent },
   { path: 'clientProjects/approved', component: ClientProjectApprovedComponent },
+  { path: 'my-proposals', component: ProposalsComponent },
 
   { path: '**', redirectTo: '/home' },
  
