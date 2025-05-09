@@ -1,0 +1,10 @@
+<div class="p-6">
+  <h2 mat-dialog-title class="text-xl font-semibold">Confirm Deletion</h2>
+  <mat-dialog-content>
+    <p class="text-gray-600">Are you sure you want to delete this project? This action cannot be undone.</p>
+  </mat-dialog-content>
+  <mat-dialog-actions class="flex justify-end gap-2 mt-4">
+    <button mat-button class="px-4 py-2 text-gray-600" (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="warn" class="px-4 py-2" (click)="onConfirm()">Delete</button>
+  </mat-dialog-actions>
+</div>
