@@ -11,9 +11,9 @@ import { ActivatedRoute } from '@angular/router';
   styleUrl: './profile.component.css'
 })
 export class ProfileComponent {
-  userId = '4rRsQ3t1gob0w3uIeTW4FCW62LG2'; // Replace with dynamic value later
+  userId = ''; // Replace it later
   userProfile: any;
-
+  currentUserId:any;
   constructor(
     private userService: UserService,
     private route: ActivatedRoute
@@ -21,11 +21,16 @@ export class ProfileComponent {
 
   ngOnInit(): void {
     const userId = this.route.snapshot.paramMap.get('id'); // get user id from url
+    this.currentUserId =  this.userService.getCurrentUserId();
     if (userId) {
+      this.userId = userId;
       this.userService.getUserProfile(userId).subscribe({
         next: (data) => this.userProfile = data,
         error: (err) => console.error('Error fetching profile:', err)
       });
     }
+  }
+  isOwnProfile(): boolean {
+    return this.userId === this.currentUserId;
   }
 }

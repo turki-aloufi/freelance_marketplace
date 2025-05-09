@@ -10,7 +10,7 @@
       <p class="text-md font-semibold">Contact Information</p>
       <a [href]="'mailto:' + userProfile.email" class="text-sm text-gray-400 hover:underline">{{ userProfile.email }}</a><br>
       <a [href]="'callto:' + userProfile.phone" class="text-sm text-gray-400 hover:underline">{{ userProfile.phone }}</a><br>
-      <button class="mt-2 bg-black text-white px-4 py-1 rounded">Contact</button>
+      <button *ngIf="!isOwnProfile()" class="mt-2 bg-black text-white px-4 py-1 rounded">Contact</button>
     </div>
   </div>
 
