@@ -75,16 +75,31 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   applyFilters() {
+    const hasSearchTerm = this.searchTerm.trim() !== '';
+    const hasCategory = this.selectedCategory !== '';
+  
+    if (!hasSearchTerm && !hasCategory) {
+      // no filters
+      this.filteredProjects = this.projects;
+      return;
+    }
+  
     this.filteredProjects = this.projects.filter(project => {
-      const matchTitle = this.searchTerm
+      const matchTitle = hasSearchTerm
         ? project.title.toLowerCase().includes(this.searchTerm.toLowerCase())
         : true;
-
-      const matchCategory = this.selectedCategory
+  
+      const matchCategory = hasCategory
         ? project.skills.some(skill => skill.category === this.selectedCategory)
         : true;
-
+  
       return matchTitle && matchCategory;
     });
   }
+  clearFilters() {
+    this.searchTerm = '';
+    this.selectedCategory = '';
+    this.filteredProjects = this.projects;
+  }
+  
 }

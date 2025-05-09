@@ -42,5 +42,10 @@ export class UserService {
       )
     );
   }
+
+  getCurrentUserId(): string | null {
+    return this.auth.currentUser?.uid || null;
+  }
+  
  
 }
