@@ -19,6 +19,138 @@
         <a routerLink="/sign-in" class="font-semibold hover:text-[#DEBD63] transition duration-300">Sign In</a>
         <a routerLink="/sign-up" class="font-semibold hover:text-[#DEBD63] transition duration-300">Sign Up</a>
       </ng-container>
+
+      <ng-template #userLinks>
+        <a routerLink="/home" class="font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
+
+        <!-- Client Dropdown -->
+        <div class="relative client-dropdown" (click)="$event.stopPropagation()">
+          <button
+            (click)="toggleClientDropdown()"
+            class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300"
+          >
+            <span>Client Projects</span>
+            <i class="fa fa-angle-down pt-1"></i>
+          </button>
+
+          <div
+            *ngIf="isClientDropdownOpen"
+            class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50"
+          >
+            <a
+              routerLink="/client/projects"
+              class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
+            >
+              <i class="fa fa-folder-open mr-2 text-[#DEBD63]"></i> Client Projects
+            </a>
+            <a
+              routerLink="clientProjects/approved"
+              class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
+            >
+              <i class="fa fa-check-circle mr-2 text-[#DEBD63]"></i> Approved Projects
+            </a>
+          </div>
+        </div>
+        <!-- Freelance Dropdown -->
+        <div class="relative freelance-dropdown" (click)="$event.stopPropagation()">
+          <button
+            (click)="toggleFreelanceDropdown()"
+            class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300"
+          >
+            <span>Freelance Projects</span>
+            <i class="fa fa-angle-down pt-1"></i>
+          </button>
+
+          <div
+            *ngIf="isFreelanceDropdownOpen"
+            class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50"
+          >
+            <a
+              routerLink="workingin/"
+              class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
+            >
+            <i class="fa-solid fa-bars-progress mr-2 text-[#DEBD63]"></i> Freelance Projects
+          </a>
+            <a
+              routerLink="freelancerProposals/"
+              class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
+            >
+            <i class="fa-solid fa-file-lines mr-2 text-[#DEBD63]"></i> My Proposals
+          </a>
+          </div>
+        </div>
+
+
+        <!-- Icons -->
+        <div class="flex items-center space-x-6 text-2xm">
+        
+        <!-- Balance Dropdown Trigger -->
+        <div class="relative " (click)="$event.stopPropagation()">
+          <button
+            (click)="toggleBalanceDropdown()"
+            class="text-white hover:text-[#DEBD63] transition duration-300"
+          >
+            <i class="fa fa-dollar-sign"></i>
+          </button>
+
+          <!-- Dropdown -->
+          <div
+            *ngIf="isBalanceDropdownOpen"
+            class="absolute right-0 mt-3 bg-gray-900 w-72 bg-[#0f1116] text-white rounded-xl shadow-lg z-50 p-4"
+          >
+            <div class="text-lg font-semibold text-[#DEBD63] mb-2">
+              My balance: <span class="text-white font-bold">{{ userBalance }} $</span>
+            </div>        
+            <!-- form payment -->
+            <app-payment></app-payment>
+            
+          </div>
+        </div>
+
+          <a routerLink="/messages" class="text-white hover:text-[#DEBD63] transition duration-300"
+            ><i class="fa fa-envelope"></i
+          ></a>
+          <a routerLink="/notifications" class="text-white hover:text-[#DEBD63] transition duration-300"
+            ><i class="fa fa-bell"></i
+          ></a>
+
+          <!-- Profile Dropdown -->
+          <div class="relative profile-dropdown" (click)="$event.stopPropagation()">
+            <button
+              (click)="toggleProfileDropdown()"
+              class="text-white hover:text-[#DEBD63] transition duration-300 flex items-center"
+            >
+              <img
+                src="https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg"
+                alt="User Profile"
+                class="rounded-full w-10 h-10 object-cover"
+              />
+              <i class="fa fa-angle-down ml-2"></i>
+            </button>
+
+            <div
+              *ngIf="isProfileDropdownOpen"
+              class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50"
+            >
+              <a
+              [routerLink]="['/profile', userId]"
+              class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
+            >
+              <i class="fa fa-user mr-2 text-[#DEBD63]"></i> View Profile
+            </a>
+              <a
+                href="javascript:void(0)"
+                (click)="logout()"
+                class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300"
+              >
+                <i class="fa fa-sign-out-alt mr-2 text-[#DEBD63]"></i> Logout
+              </a>
+            </div>
+          </div>
+          
+
+        </div>
+      </ng-template>
     </div>
   </div>
 
