@@ -95,9 +95,48 @@
 
         <a routerLink="/messages" class="text-white hover:text-[#DEBD63] transition duration-300"><i
             class="fa fa-envelope"></i></a>
-        <a routerLink="/notifications" class="text-white hover:text-[#DEBD63] transition duration-300"><i
-            class="fa fa-bell"></i></a>
+        <!-- <a routerLink="/notifications" class="text-white hover:text-[#DEBD63] transition duration-300"><i
+            class="fa fa-bell"></i></a> -->
+            <!-- Notifications Icon (Modified for similar functionality) -->
+ 
+    <!-- <div class="relative" (click)="$event.stopPropagation()">
+      <button (click)="toggleNotifications()" class="text-white hover:text-[#DEBD63] transition duration-300">
+        <i class="fa fa-bell"></i>
+        <span *ngIf="unreadCount > 0" class="badge">{{ unreadCount }}</span>
+      </button>
+    
+      <div *ngIf="showNotifications" class="absolute right-0 mt-3 bg-gray-900 w-72 bg-[#0f1116] text-white rounded-xl shadow-lg z-50 p-4">
+        <div *ngFor="let notification of notifications">
+          <p [class.read]="notification.read">{{ notification.message }}</p>
+          <small>{{ notification.timestamp | date:'shortTime' }}</small>
+        </div>
+        <button (click)="markAllAsRead()">Mark all as read</button>
+      </div>
+    </div>
+    -->
 
+
+  <div class="relative" (click)="$event.stopPropagation()">
+  <button (click)="toggleNotifications()" class="text-white hover:text-[#DEBD63] transition duration-300">
+    <i class="fa fa-bell"></i>
+    <span *ngIf="unreadCount > 0" class="badge">{{ unreadCount }}</span>
+  </button>
+
+  <div *ngIf="showNotifications" class="absolute right-0 mt-3 bg-gray-900 w-72 bg-[#0f1116] text-white rounded-xl shadow-lg z-50 p-4">
+    <div *ngFor="let notification of notifications">
+      <p [class.read]="notification.read">
+     
+        <span *ngIf="!notification.read" (click)="markAsRead(notification.id)" class="cursor-pointer text-green-500">✔</span>
+        {{ notification.message }}
+      </p>
+      <small>{{ notification.timestamp | date:'shortTime' }}</small>
+    </div>
+  </div>
+</div>
+
+
+
+    
         <!-- Profile Dropdown -->
         <div class="relative profile-dropdown" (click)="$event.stopPropagation()">
           <button (click)="toggleProfileDropdown()"
