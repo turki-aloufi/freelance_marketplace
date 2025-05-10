@@ -23,8 +23,16 @@
           <div class="flex gap-2 flex-wrap">
             <span *ngFor="let skill of project.skills" class="px-3 py-1 bg-gray-200 rounded-full text-sm">{{ skill }}</span>
           </div>
+              <!-- Add Owner's Name -->
+         <div class="flex items-center gap-2 text-gray-600">
+          <i class="fa-solid fa-user text-yellow-500"></i>
+          <h2 class="font-bold">Owner: <span>{{ project.clientName }}</span></h2>
+         
         </div>
+        </div>
+     
 
+        
         <!-- Vertical Line -->
         <div class="w-px bg-gray-300 self-stretch"></div>
 
@@ -67,22 +75,22 @@
       <ng-container *ngIf="isProjectOwner">
         <app-proposal-card [proposal]="proposal">
           <!-- Button inside the card (will be rendered inside app-proposal-card using ng-content) -->
-          <ng-container *ngIf="proposal.status !== 'Accepted'">
-           
-          <button
-        [disabled]="acceptedProposalId !== null && acceptedProposalId !== proposal.proposalId"
-        [ngClass]="{
-          'bg-gray-400 cursor-not-allowed': acceptedProposalId !== null && acceptedProposalId !== proposal.proposalId,
-          'bg-yellow-500 hover:bg-yellow-600': acceptedProposalId === null || acceptedProposalId === proposal.proposalId
-        }"
-        class="text-white font-bold py-2 px-6 rounded-lg m-5 transition"
-        (click)="acceptProposal(proposal)"
-      >
-        {{ proposal.status === 'Accepted' ? 'Accepted' : 'Accept' }}
-      </button>
+
+            <button
+      [disabled]="proposal.status === 'Accepted' || acceptedProposalId !== null"
+      [ngClass]="{
+        'bg-gray-400 cursor-not-allowed': proposal.status === 'Accepted' || acceptedProposalId !== null,
+        'bg-yellow-500 hover:bg-yellow-600': proposal.status !== 'Accepted' && acceptedProposalId === null
+      }"
+      class="text-white font-bold py-2 px-6 rounded-lg m-5 transition"
+      (click)="acceptProposal(proposal)"
+    >
+  {{ proposal.status === 'Accepted' ? 'Accepted' : 'Accept' }}
+</button>
+
+            </app-proposal-card>
           </ng-container>
-        </app-proposal-card>
-      </ng-container>
+          
     </div>
   </div>
   <div class="border-b"></div>
@@ -93,7 +101,7 @@
 
 
   <!-- Share Proposal Form (Only shows if user is not the project owner) -->
-  <section class="space-y-6" *ngIf="!isProjectOwner">
+  <section class="space-y-6" *ngIf="isLoggedInNotOwner">
     <h3 class="text-2xl font-bold">Share <span class="text-yellow-500 font-normal">your Proposal</span></h3>
 
     <!-- Proposal Form -->

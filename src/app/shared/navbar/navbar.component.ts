@@ -6,6 +6,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { UserService } from '../../core/services/user/user.service';
 import { PaymentComponent } from '../../features/payment/payment.component';
 import { FormsModule } from '@angular/forms';
+import { NotificationService, Notification } from '../../core/services/Notification/notification.service';
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -22,10 +23,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isBalanceDropdownOpen = false;
   userBalance: number = 0;
   userId: string | null = null;
- 
+  notifications: Notification[] = [];
+  unreadCount = 0;
+  showNotifications = false;
+  
   private destroy$ = new Subject<void>();
 
-  constructor(private authService: AuthService,private userService: UserService) {}
+  constructor(private authService: AuthService,private userService: UserService,private notificationService: NotificationService) {}
 
   ngOnInit() {
     this.authService.user$
@@ -46,8 +50,25 @@ export class NavbarComponent implements OnInit, OnDestroy {
           });
         }
       });
-  }
-  
+      // this.notificationService.notifications$.subscribe(notifications => {
+      //   this.notifications = notifications;
+      // });
+ 
+         // Subscribe to notifications and filter based on userId
+         this.notificationService.notifications$
+         .pipe(takeUntil(this.destroy$))
+         .subscribe((notifications) => {
+           if (this.userId) {  // Ensure userId is not null before processing notifications
+             const userNotifications = notifications.get(this.userId) || [];
+             this.notifications = userNotifications;
+             // Update unread count
+             this.unreadCount = this.notificationService.getUnreadCount(this.userId);
+           }
+         });
+     }
+ 
+   
+
 
   ngOnDestroy() {
     this.destroy$.next();
@@ -99,6 +120,47 @@ export class NavbarComponent implements OnInit, OnDestroy {
   toggleMenu() {
     this.menuOpen = !this.menuOpen;
   }
+  // toggleNotifications() {
+  //   this.showNotifications = !this.showNotifications;
+  //   if (this.showNotifications) {
+  //     this.markAllAsRead();
+  //   }
+  // }
+  
+  // markAllAsRead() {
+  //   this.notificationService.markAllAsRead();
+  // }
+  // toggleNotifications() {
+  //   this.showNotifications = !this.showNotifications;
+  //   if (this.showNotifications) {
+  //     this.markAllAsRead();
+  //   }
+  // }
+
+  // markAllAsRead() {
+  //   if (this.userId) {
+  //     this.notificationService.markAllAsRead(this.userId);
+  //   }
+  // }
+
+
+
+  toggleNotifications() {
+  this.showNotifications = !this.showNotifications;
+  if (this.showNotifications) {
+    // هنا يمكن أن تضع شرطًا إذا أردت تعيين إشعار معين كـ "مقروء"
+    // على سبيل المثال، يمكن أن تختار أول إشعار لمعرفه
+    if (this.notifications.length > 0) {
+      this.markAsRead(this.notifications[0].id);  // يمكن اختيار أول إشعار أو إشعار معين
+    }
+  }
+}
+
+markAsRead(notificationId: number) {
+  if (this.userId) {
+    this.notificationService.markNotificationAsRead(this.userId, notificationId);
+  }
+}
 
   logout() {
     this.authService.logout().then(() => {
@@ -107,4 +169,5 @@ export class NavbarComponent implements OnInit, OnDestroy {
       console.error('Logout error:', error);
     });
   }
+  
 }
