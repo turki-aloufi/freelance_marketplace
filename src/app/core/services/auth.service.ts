@@ -55,17 +55,6 @@ export class AuthService {
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
       const user = userCredential.user;
 
-      // Store additional user data in Firestore
-      // await setDoc(doc(this.firestore, 'users', user.uid), {
-      //   firstName,
-      //   lastName,
-      //   email,
-      //   contactNumber,
-      //   skills: skills.map(skill => ({ skillId: skill.skillId, skill: skill.skill, category: skill.category })),
-      //   about,
-      //   createdAt: new Date().toISOString()
-      // });
-
       // Prepare data for backend API
       const createUserDto: CreateUserDto = {
         userId: user.uid,
@@ -91,19 +80,12 @@ export class AuthService {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(this.auth, provider);
       const user = userCredential.user;
-
-      // Check if user exists in Firestore, if not, create a profile
-      // await setDoc(doc(this.firestore, 'users', user.uid), {
-      //   firstName: user.displayName?.split(' ')[0] || '',
-      //   lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
-      //   email: user.email,
-      //   contactNumber: '',
-      //   skills: [],
-      //   about: '',
-      //   createdAt: new Date().toISOString()
-      // }, { merge: true });
-
-      // Prepare data for backend API (minimal data for Google sign-up)
+  
+      // Get Firebase token
+      const token = await user.getIdToken();
+      // Store the token in localStorage (or sessionStorage)
+      localStorage.setItem('token', token);
+  
       const createUserDto: CreateUserDto = {
         userId: user.uid,
         name: user.displayName || '',
@@ -112,21 +94,24 @@ export class AuthService {
         aboutMe: '',
         skills: []
       };
-
+  
       console.log(createUserDto);
-      // Call backend API to save user data
+  
       await this.http.post(this.apiUrl, createUserDto).toPromise();
-
+  
+      console.log("from auth service", userCredential);
       this.ngZone.run(() => this.router.navigate(['/home']));
       return user;
     } catch (error: any) {
       throw new Error(error.message);
     }
   }
+  
 
   async loginWithEmail(email: string, password: string) {
     try {
       const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
+      console.log("from auth service" + userCredential)
       this.ngZone.run(() => this.router.navigate(['/dashboard']));
       return userCredential.user;
     } catch (error: any) {

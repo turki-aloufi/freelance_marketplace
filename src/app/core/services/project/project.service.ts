@@ -15,6 +15,7 @@ export interface Project {
   additionalNotes: string;
   proposals: Proposal[];
   clientId: string;
+  clientName:string,
   Status:string;
 }
 
@@ -26,6 +27,7 @@ export interface Proposal {
   freelancerAvatar: string;
   status: string;
   freelancerId: string;
+  freelancerPhoneNumber: string;
   proposalId: number;
 }
 
@@ -49,22 +51,48 @@ export class ProjectService {
     this.user$ = user(this.auth);
   }
 
-  private getAuthToken(): Observable<string> {
-    return this.user$.pipe(
-      take(1),
-      switchMap(user => {
-        if (!user) throw new Error('No authenticated user');
+  // private getAuthToken(): Observable<string> {
+  //   return this.user$.pipe(
+  //     take(1),
+  //     switchMap(user => {
+  //       if (!user) throw new Error('No authenticated user');
         
-        return user.getIdToken(); // Get Firebase JWT token
-      })
-    );
-  }
+  //       return user.getIdToken(); // Get Firebase JWT token
+  //     })
+  //   );
+  // }
+private getAuthToken(): Observable<string | null> {
+  return this.user$.pipe(
+    take(1),
+    switchMap(user => {
+      if (!user) {
+        // Return null if no user is authenticated
+        return new Observable<string | null>(observer => observer.next(null));
+      }
+      return user.getIdToken(); 
+    })
+  );
+}
 
-  getProjectById(id: number): Observable<Project> {
+
+
+  // getProjectById(id: number): Observable<Project> {
+  //   return this.getAuthToken().pipe(
+  //     switchMap(token => {
+        
+  //       const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+  //       return this.http.get<Project>(`${this.baseUrl}/FreelancerProposal/${id}`, { headers });
+  //     })
+  //   );
+  // }
+ getProjectById(id: number): Observable<Project> {
     return this.getAuthToken().pipe(
       switchMap(token => {
-        
-        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+        let headers = new HttpHeaders();
+
+        if (token) {
+          headers = headers.set('Authorization', `Bearer ${token}`);
+        }
         return this.http.get<Project>(`${this.baseUrl}/FreelancerProposal/${id}`, { headers });
       })
     );

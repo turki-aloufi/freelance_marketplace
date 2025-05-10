@@ -5,7 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ProposalCardComponent } from '../../../shared/components/proposal-card/proposal-card.component';
 import { ProjectService, Project, Proposal,AssignProjectDto } from '../../../core/services/project/project.service';
-import { AuthService } from '../../../core/services/auth.service'; // 
+import { AuthService } from '../../../core/services/auth.service'; 
+import { NotificationService } from '../../../core/services/Notification/notification.service'; 
+
 @Component({
   selector: 'app-project-detail',
   standalone: true,
@@ -28,10 +30,14 @@ export class ProjectDetailComponent implements OnInit {
   requiredTasksArray: string[] = [];
   isProjectOwner: boolean = false;
   acceptedProposalId: number | null = null;
+   // Add the isLoggedInNotOwner property
+  isLoggedInNotOwner: boolean = false;
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
-    private authService: AuthService
+    private authService: AuthService,
+    private notificationService: NotificationService,
+  
   ) {}
 
   ngOnInit(): void {
@@ -42,12 +48,11 @@ export class ProjectDetailComponent implements OnInit {
       console.log('Project Data:', project);
       const currentUser = this.authService.user$.value;
       const token = currentUser?.getIdToken();
-
       console.log('token:', token);  
-    
-      
       console.log('Current User:', currentUser);
       console.log('PostedBy:', project.clientId);
+
+
       
         if (currentUser && project.clientId && project.clientId === currentUser.uid) {
           this.isProjectOwner = true;
@@ -56,6 +61,12 @@ export class ProjectDetailComponent implements OnInit {
         }
     
       console.log('isProjectOwner:', this.isProjectOwner);
+      
+    //Check if the user is logged in and is not the project owner
+    this.isLoggedInNotOwner = currentUser && !this.isProjectOwner;
+    console.log('isLoggedInNotOwner:', this.isLoggedInNotOwner);
+
+
       if (project.requiredTasks && typeof project.requiredTasks === 'string') {
         this.requiredTasksArray = project.requiredTasks.split(',').map(task => task.trim());
       } else if (Array.isArray(project.requiredTasks)) {
@@ -72,7 +83,8 @@ export class ProjectDetailComponent implements OnInit {
         proposedAmount: p.proposedAmount,
         freelancerName: p.freelancerName || 'Unknown',
         freelancerAvatar: p.freelancerAvatar || 'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg',
-        status: p['status'] || 'Pending'
+        status: p['status'] || 'Pending',
+        freelancerPhoneNumber:p.freelancerPhoneNumber
       }));
       const accepted = this.proposals.find(p => p.status === 'Accepted');
       if (accepted) {
@@ -125,16 +137,21 @@ export class ProjectDetailComponent implements OnInit {
 
     this.projectService.assignProject(this.projectId, model).subscribe(
       () => {
-        // Project.status= 'In Progress';
+        
         proposal.status = 'Accepted';
         this.acceptedProposalId = proposal.proposalId; 
         console.log('Proposal accepted and project assigned successfully.');
         alert('Proposal accepted successfully.');
+      
+        this.notificationService.addNotification(
+          `Congratulations! Your proposal has been accepted for Project No.${this.projectId}`,  
+          proposal.freelancerId // <== This identifies the recipient.
+        );
+    
+        
       },
       (error) => {
         console.error('Error assigning project:', error);
-       
-  console.log('Validation details:', error.error?.errors);
         alert('Failed to assign the project.');
       }
     );

@@ -1,0 +1,36 @@
+<div class="proposals-container px-4 sm:px-6 lg:px-12 py-6">
+  <div *ngIf="proposals.length === 0" class="text-center text-gray-600">
+    <p>No proposals found.</p>
+  </div>
+
+  <div *ngIf="proposals.length > 0" class="space-y-4">
+    <div *ngFor="let proposal of proposals" class="proposal-card bg-white shadow-md rounded-2xl px-6 py-4 border border-gray-100 transition hover:shadow-xl flex flex-col md:flex-row md:items-center md:justify-between">
+      
+      <!-- Left Side: Profile + Info -->
+      <div class="flex items-start gap-4 flex-1">
+
+        <div>
+          <h2 class="text-lg font-bold text-gray-900">{{ proposal.projectTitle }}</h2>
+          <p class="text-sm text-gray-900  font-bold line-clamp-2">{{ proposal.coverLetter }}</p>
+
+          <span class="status-badge mt-2 inline-block" [ngClass]="{
+            'status-completed': proposal.status === 'Accepted',
+            'status-inprogress': proposal.status === 'Pending',
+            'status-pending': proposal.status === 'Rejected'
+          }">{{ proposal.status }}</span>
+        </div>
+      </div>
+
+      <!-- Right Side: Meta + Button -->
+      <div class="flex flex-col items-end mt-4 md:mt-0 md:ml-6 text-right space-y-2">
+        <p class="text-sm text-gray-600"><span class="font-medium text-gray-800">Deadline:</span> {{ proposal.deadline }}</p>
+        <p class="text-sm text-gray-600"><span class="font-medium text-gray-800">Amount:</span> {{ proposal.proposedAmount | currency }}</p>
+        
+        <button (click)="deleteProposal(proposal.proposalId)"
+                class="mt-2 px-4 py-2 text-sm font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

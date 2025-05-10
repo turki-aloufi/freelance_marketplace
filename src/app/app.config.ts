@@ -4,10 +4,11 @@ import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
-import { provideHttpClient, withFetch } from '@angular/common/http';
-
+import { NotificationService } from './core/services/Notification/notification.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,7 +18,8 @@ export const appConfig: ApplicationConfig = {
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
-    provideHttpClient(),
-    provideHttpClient(withFetch()), // Enable fetch APIs
+    provideHttpClient(withFetch()),
+    provideAnimations(),
+    NotificationService,
   ]
 };

@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+.mat-dialog-title {
+  margin-bottom: 1rem;
+}
+
+.mat-dialog-actions {
+  padding-top: 1rem;
+}
