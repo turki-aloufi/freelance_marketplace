@@ -34,6 +34,7 @@ export class ClientsProjectsService {
 
   getClientProjects(): Observable<Project[]> {
     const token = localStorage.getItem('token');
+    
     console.log('Token:', token);
     const headers = {
       Authorization: `Bearer ${token}`

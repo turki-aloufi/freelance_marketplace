@@ -4,9 +4,7 @@
       <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold">Client Projects</h1>
       <p class="text-base sm:text-lg text-gray-500 mt-1">Browse your proposal Projects</p>
     </div>
-    <button
-    type="button"
-      routerLink="/client/projects/add"
+    <button type="button" routerLink="/client/projects/add"
       class="mt-3 sm:mt-0 bg-black text-white px-4 py-2 sm:px-6 sm:py-3 text-base sm:text-lg rounded-md w-full sm:w-auto">
       New Project
     </button>
@@ -17,10 +15,8 @@
       class="bg-white shadow-md rounded-lg px-4 sm:px-6 py-4 sm:py-5 mt-4 sm:mt-6 w-full relative">
       <div class="relative">
         <h1 class="text-xl sm:text-2xl font-semibold pr-8 sm:pr-10">{{ project.title }}</h1>
-        <button
-          class="absolute top-0 right-0 text-gray-400 hover:text-black text-xl sm:text-2xl font-bold leading-none"
-          (click)="confirmDelete(project.projectId)"
-          [disabled]="deletingProjectId === project.projectId">
+        <button class="absolute top-0 right-0 text-gray-400 hover:text-black text-xl sm:text-2xl font-bold leading-none"
+          (click)="confirmDelete(project.projectId)" [disabled]="deletingProjectId === project.projectId">
           <ng-container *ngIf="deletingProjectId === project.projectId; else normalDelete">
             <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
               viewBox="0 0 24 24">
@@ -47,7 +43,7 @@
           <span class="text-base sm:text-xl font-semibold text-[#DEBD63]">
             Budget <span class="text-black">~ {{ project.budget }} </span>$
           </span>
-          <button
+          <button [routerLink]="['/project-details', project.projectId]"
             class="w-full sm:w-auto bg-[#DEBD63] hover:bg-[#cbaa50] text-white font-semibold py-2 sm:py-2.5 px-8 sm:px-12 md:px-16 rounded-md text-base sm:text-lg">
             View
           </button>
