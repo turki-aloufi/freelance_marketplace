@@ -5,7 +5,7 @@ import { environment } from '../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class StripeService {
-  private stripePromise = loadStripe(environment.Stripe.PublishableKey);
+  private stripePromise = loadStripe(environment.stripe.publishableKey);
 
   async getStripe(): Promise<Stripe> {
     return (await this.stripePromise)!;
