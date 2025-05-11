@@ -250,7 +250,13 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   formatTime(timestamp: string): string {
-    return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const date = new Date(timestamp);
+    
+    return date.toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
   }
 
   private scrollToBottom(): void {
