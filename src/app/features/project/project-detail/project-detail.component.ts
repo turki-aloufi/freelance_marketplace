@@ -132,9 +132,10 @@ export class ProjectDetailComponent implements OnInit {
     const model: AssignProjectDto = {
      
       freelancerId:proposal.freelancerId,
-      proposalId: proposal.proposalId
+      proposalId: proposal.proposalId,
+      freelancerPhoneNumber:proposal.freelancerPhoneNumber, 
     };
-
+    console.log("the body: ", model)
     this.projectService.assignProject(this.projectId, model).subscribe(
       () => {
         

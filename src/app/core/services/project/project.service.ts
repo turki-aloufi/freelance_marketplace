@@ -35,6 +35,7 @@ export interface AssignProjectDto {
  
   freelancerId: string;
   proposalId: number;
+  freelancerPhoneNumber: string;
 }
 
 @Injectable({
