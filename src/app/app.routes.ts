@@ -13,6 +13,7 @@ import { ClientProjectApprovedComponent } from './features/clientproject/client-
 import { PaymentComponent } from './features/payment/payment.component';
 import { MessagesComponent } from './features/chat/messages/messages.component';
 import { MyWorkingProjectsComponent } from './features/MyWorkingProjects/my-working-projects/my-working-projects.component';
+import { PaymentResultComponent } from './features/payment/payment-result/payment-result.component';
 
 import { ProposalsComponent } from './features/MyProposals/my-proposals/my-proposals.component';
 
@@ -26,6 +27,7 @@ export const routes: Routes = [
   { path: 'client/projects', component: ClientProjectsComponent },
   { path: 'client/projects/add', component: AddProjectComponent },
   { path: 'client/projects/approved', component: ClientApprovedProjectsComponent },
+  { path: 'payment', component: PaymentResultComponent },
 
   { path: 'profile/:id',component: ProfileComponent },
 
