@@ -31,6 +31,7 @@ export interface Proposal {
   proposalId: number;
 }
 
+
 export interface AssignProjectDto {
  
   freelancerId: string;
