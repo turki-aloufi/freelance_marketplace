@@ -5,8 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ProposalCardComponent } from '../../../shared/components/proposal-card/proposal-card.component';
 import { ProjectService, Project, Proposal,AssignProjectDto } from '../../../core/services/project/project.service';
-import { AuthService } from '../../../core/services/auth.service'; 
-import { NotificationService } from '../../../core/services/Notification/notification.service'; 
+import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/Notification/notification.service';
+import Bugsnag from '@bugsnag/js';
 
 @Component({
   selector: 'app-project-detail',
@@ -30,14 +31,14 @@ export class ProjectDetailComponent implements OnInit {
   requiredTasksArray: string[] = [];
   isProjectOwner: boolean = false;
   acceptedProposalId: number | null = null;
-   // Add the isLoggedInNotOwner property
+  // Add the isLoggedInNotOwner property
   isLoggedInNotOwner: boolean = false;
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
     private authService: AuthService,
     private notificationService: NotificationService,
-  
+
   ) {}
 
   ngOnInit(): void {
@@ -48,23 +49,23 @@ export class ProjectDetailComponent implements OnInit {
       console.log('Project Data:', project);
       const currentUser = this.authService.user$.value;
       const token = currentUser?.getIdToken();
-      console.log('token:', token);  
+      console.log('token:', token);
       console.log('Current User:', currentUser);
       console.log('PostedBy:', project.clientId);
 
 
-      
-        if (currentUser && project.clientId && project.clientId === currentUser.uid) {
-          this.isProjectOwner = true;
-        } else {
-          this.isProjectOwner = false;
-        }
-    
+
+      if (currentUser && project.clientId && project.clientId === currentUser.uid) {
+        this.isProjectOwner = true;
+      } else {
+        this.isProjectOwner = false;
+      }
+
       console.log('isProjectOwner:', this.isProjectOwner);
-      
-    //Check if the user is logged in and is not the project owner
-    this.isLoggedInNotOwner = currentUser && !this.isProjectOwner;
-    console.log('isLoggedInNotOwner:', this.isLoggedInNotOwner);
+
+      //Check if the user is logged in and is not the project owner
+      this.isLoggedInNotOwner = currentUser && !this.isProjectOwner;
+      console.log('isLoggedInNotOwner:', this.isLoggedInNotOwner);
 
 
       if (project.requiredTasks && typeof project.requiredTasks === 'string') {
@@ -88,10 +89,10 @@ export class ProjectDetailComponent implements OnInit {
       }));
       const accepted = this.proposals.find(p => p.status === 'Accepted');
       if (accepted) {
-    this.acceptedProposalId = accepted.proposalId;
-  }
+        this.acceptedProposalId = accepted.proposalId;
+      }
     });
-  
+
   }
 
   sendProposal(): void {
@@ -126,11 +127,11 @@ export class ProjectDetailComponent implements OnInit {
       alert("Please fill in all fields");
     }
   }
-//assign project
+  //assign project
   acceptProposal(proposal: Proposal): void {
-  
+
     const model: AssignProjectDto = {
-     
+
       freelancerId:proposal.freelancerId,
       proposalId: proposal.proposalId,
       freelancerPhoneNumber:proposal.freelancerPhoneNumber, 
@@ -138,21 +139,32 @@ export class ProjectDetailComponent implements OnInit {
     console.log("the body: ", model)
     this.projectService.assignProject(this.projectId, model).subscribe(
       () => {
-        
+
         proposal.status = 'Accepted';
-        this.acceptedProposalId = proposal.proposalId; 
+        this.acceptedProposalId = proposal.proposalId;
         console.log('Proposal accepted and project assigned successfully.');
         alert('Proposal accepted successfully.');
-      
+
         this.notificationService.addNotification(
-          `Congratulations! Your proposal has been accepted for Project No.${this.projectId}`,  
+          `Congratulations! Your proposal has been accepted for Project No.${this.projectId}`,
           proposal.freelancerId // <== This identifies the recipient.
         );
-    
-        
+
+
       },
       (error) => {
-        console.error('Error assigning project:', error);
+        const errorMessage = error.error?.message || 'Failed to assign the project.';
+        Bugsnag.notify(error, event => {
+          event.setUser(proposal.freelancerId, undefined, '');
+          event.addMetadata('AssignProjectError', {
+            projectId: this.projectId,
+            proposalId: proposal.proposalId,
+            freelancerId: proposal.freelancerId,
+            responseMessage: errorMessage,
+            statusCode: error.status,
+            statusText: error.statusText,
+          });
+        });
         alert('Failed to assign the project.');
       }
     );
