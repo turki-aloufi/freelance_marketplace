@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { RouterModule } from '@angular/router';
+import { RouterModule,Router } from '@angular/router';
 import { ApprovedProjectService } from '../../../core/services/clientProjects/approved-project.service';
 @Component({
   selector: 'app-client-project-approved',
@@ -23,7 +23,8 @@ export class ClientProjectApprovedComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private approvedProjectService: ApprovedProjectService
+    private approvedProjectService: ApprovedProjectService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -83,6 +84,15 @@ export class ClientProjectApprovedComponent implements OnInit {
         console.error('Failed to mark the project as complete', err);
         alert('Error: Could not mark project as completed.');
       }
+    });
+  }
+  contactFreelancer(freelancerId: string) {
+    if (!freelancerId) {
+      console.error('No freelancer ID provided');
+      return;
+    }
+    this.router.navigate(['/messages'], { 
+      queryParams: { userId: freelancerId }
     });
   }
 }
