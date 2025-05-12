@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { ApprovedProjectService } from '../../../core/services/clientProjects/approved-project.service';
 @Component({
   selector: 'app-client-project-approved',
@@ -23,7 +23,8 @@ export class ClientProjectApprovedComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private approvedProjectService: ApprovedProjectService
+    private approvedProjectService: ApprovedProjectService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -85,5 +86,11 @@ export class ClientProjectApprovedComponent implements OnInit {
       }
     });
   }
+
+navigateToUserProfile(freelancerId: string) {
+  if (freelancerId) {
+    this.router.navigate(['/profile', freelancerId]);
+  }
+}
 }
 
