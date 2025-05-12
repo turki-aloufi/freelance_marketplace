@@ -29,7 +29,7 @@
             {{ chat.otherUserName || "Unknown User" }}
           </h3>
           <span *ngIf="chat.lastMessageTime" class="text-xs text-gray-500">
-            {{ formatTime(chat.lastMessageTime) }}
+            {{ chat.lastMessageTime | date:'shortTime':'UTC+6' }}
           </span>
         </div>
         <p class="text-sm text-gray-600 truncate" *ngIf="chat.lastMessage">

@@ -30,19 +30,27 @@ export class ChatService {
   }
 
   setActiveChat(chat: ChatDto | null): void {
-    if (this.activeChatSubject.value?.chatId !== chat?.chatId) {
-      // Leave previous chat room if exists
-      if (this.activeChatSubject.value) {
-        this.signalrService.leaveChatRoom(this.activeChatSubject.value.chatId);
-      }
-      
+    console.log('Setting active chat:', chat);
+    
+    // Clear current chat first
+    if (this.activeChatSubject.value) {
+      console.log('Leaving chat room:', this.activeChatSubject.value.chatId);
+      this.signalrService.leaveChatRoom(this.activeChatSubject.value.chatId)
+        .catch(err => console.error('Error leaving previous chat room:', err));
+    }
+    
+    // Short pause before setting new chat
+    setTimeout(() => {
       // Join new chat room if provided
       if (chat) {
-        this.signalrService.joinChatRoom(chat.chatId);
+        console.log('Joining new chat room:', chat.chatId);
+        this.signalrService.joinChatRoom(chat.chatId)
+          .catch(err => console.error('Error joining new chat room:', err));
       }
       
+      // Update the active chat
       this.activeChatSubject.next(chat);
-    }
+    }, 100);
   }
 
   getUserChats(userId: string): Observable<ChatDto[]> {

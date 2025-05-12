@@ -44,7 +44,7 @@
         >
           <div>{{ message.content }}</div>
           <div class="text-xs mt-1 opacity-70 text-right">
-            {{ formatTime(message.sentAt) }}
+            {{ message.sentAt | date:'shortTime':'UTC+6' }}
           </div>
         </div>
       </div>

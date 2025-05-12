@@ -21,6 +21,7 @@ export class SignalrService {
       .build();
 
     this.hubConnection.on('ReceiveMessage', (message: MessageDto) => {
+      console.log('SignalR received message:', message);
       message.isFromMe = message.senderId === userId;
       this.messageReceivedSubject.next(message);
     });
@@ -32,6 +33,7 @@ export class SignalrService {
     if (!this.hubConnection) {
       return Promise.reject('Hub connection not established');
     }
+    console.log(`Joining chat room: ${chatId}`);
     return this.hubConnection.invoke('JoinChat', chatId.toString());
   }
 
@@ -39,6 +41,7 @@ export class SignalrService {
     if (!this.hubConnection) {
       return Promise.reject('Hub connection not established');
     }
+    console.log(`Leaving chat room: ${chatId}`);
     return this.hubConnection.invoke('LeaveChat', chatId.toString());
   }
 

@@ -25,10 +25,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   private shouldScrollToBottom = false;
   userHasScrolled = false;
   
-  
   private refreshTimerId: any = null;
-  private refreshInterval = 1000; 
-  
+  private refreshInterval = 5000; // Changed from 1000ms to 5000ms
   
   private pendingMessage: {
     tempId: number;
@@ -44,58 +42,78 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   ) {}
 
   ngOnInit(): void {
-    
+    // Get current user ID
     this.authService.user$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
         if (user) {
           this.currentUserId = user.uid;
+          console.log('Current user ID set:', this.currentUserId);
         }
       });
 
-    
+    // Listen for active chat changes
     this.chatService.activeChat$
       .pipe(takeUntil(this.destroy$))
       .subscribe(chat => {
+        console.log('Active chat changed:', chat);
+        
+        // Clear previous chat state
+        this.stopAutoRefresh();
+        this.messages = [];
+        
         if (chat) {
           this.activeChat = chat;
-          this.loadMessages(chat.chatId, this.currentUserId!);
+          this.loading = true; // Show loading indicator
           
+          console.log(`Loading messages for chat ${chat.chatId} with user ${this.currentUserId}`);
           
-          this.startAutoRefresh();
-        } else {
-          
-          this.stopAutoRefresh();
+          // Load messages for the new chat
+          if (this.currentUserId) {
+            this.loadMessages(chat.chatId, this.currentUserId);
+            this.startAutoRefresh();
+          } else {
+            console.error('Cannot load messages: currentUserId is null');
+            this.loading = false;
+          }
         }
       });
 
-    
+    // Listen for real-time messages
     this.signalrService.messageReceived
       .pipe(takeUntil(this.destroy$))
       .subscribe(message => {
         if (message && this.activeChat && message.chatId === this.activeChat.chatId) {
+          console.log('Received message via SignalR:', message);
           
           if (this.pendingMessage && 
               message.content === this.pendingMessage.content && 
               message.senderId === this.currentUserId) {
-            
+            // Replace temp message with the real one from server
             this.replaceTempMessage(message);
             this.pendingMessage = null;
-          } 
-          
-          else if (!this.isDuplicateMessage(message)) {
+          } else if (!this.isDuplicateMessage(message)) {
+            // Add new message from other user
             this.messages.push(message);
+            this.sortMessages();
             this.shouldScrollToBottom = !this.userHasScrolled;
           }
         }
       });
   }
 
+  // Sort messages by time and ID
+  sortMessages(): void {
+    this.messages.sort((a, b) => {
+      const timeA = new Date(a.sentAt).getTime();
+      const timeB = new Date(b.sentAt).getTime();
+      return timeA !== timeB ? timeA - timeB : a.messageId - b.messageId;
+    });
+  }
+
   isDuplicateMessage(message: MessageDto): boolean {
     return this.messages.some(m => 
-      
       m.messageId === message.messageId ||
-      
       (m.content === message.content && 
        m.senderId === message.senderId &&
        Math.abs(new Date(m.sentAt).getTime() - new Date(message.sentAt).getTime()) < 5000)
@@ -106,7 +124,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     const el = this.messagesContainer.nativeElement;
     const threshold = 100; // px
     const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
-  
     this.userHasScrolled = !atBottom;
   }
   
@@ -118,82 +135,65 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
   
   ngOnDestroy(): void {
-    
     this.stopAutoRefresh();
-    
     this.destroy$.next();
     this.destroy$.complete();
   }
 
+  // FIXED loadMessages function
   loadMessages(chatId: number, userId: string): void {
-    if (!chatId || !userId) return;
-    
-    
-    if (this.loading) return;
-    
-    
-    let scrollTop = 0;
-    let scrollHeight = 0;
-    
-    if (this.messagesContainer) {
-      const element = this.messagesContainer.nativeElement;
-      scrollTop = element.scrollTop;
-      scrollHeight = element.scrollHeight;
+    // Validate parameters
+    if (!chatId || !userId) {
+      console.error('Invalid chatId or userId', { chatId, userId });
+      this.loading = false;
+      return;
     }
     
+    console.log(`Loading messages for chat ${chatId} and user ${userId}`);
     
-    const isInitialLoad = this.messages.length === 0;
-    if (isInitialLoad) {
-      this.loading = true;
-    }
+    // Set loading state
+    this.loading = true;
     
+    // Call API to get messages
     this.chatService.getChatMessages(chatId, userId)
       .subscribe({
         next: (messages) => {
-         
-          if (messages.length > this.messages.length || this.messages.length === 0) {
-            
-            if (this.pendingMessage) {
-              const pendingExists = messages.some(m => 
-                m.content === this.pendingMessage?.content && 
-                m.senderId === this.currentUserId
-              );
+          console.log(`Successfully loaded ${messages.length} messages for chat ${chatId}`);
+          
+          // Check if we got any messages back
+          if (messages && Array.isArray(messages)) {
+            // Sort messages by sent time
+            messages.sort((a, b) => {
+              // Convert timestamps to milliseconds for comparison
+              const timeA = new Date(a.sentAt).getTime();
+              const timeB = new Date(b.sentAt).getTime();
               
-              if (!pendingExists) {
-                
-                const tempMessage = this.createTempMessage(this.pendingMessage.content);
-                messages.push(tempMessage);
-              } else {
-                
-                this.pendingMessage = null;
+              // First compare by time
+              if (timeA !== timeB) {
+                return timeA - timeB;
               }
-            }
+              
+              // If same time, use message ID as tiebreaker
+              return a.messageId - b.messageId;
+            });
             
-            
-            const wasAtBottom = !this.userHasScrolled;
+            // Set the messages to component state
             this.messages = messages;
             
-            
-            if (wasAtBottom || isInitialLoad) {
-              this.shouldScrollToBottom = true;
-            } else {
-             
-              setTimeout(() => {
-                if (this.messagesContainer) {
-                  const element = this.messagesContainer.nativeElement;
-                  const newScrollHeight = element.scrollHeight;
-                  const heightDifference = newScrollHeight - scrollHeight;
-                  element.scrollTop = scrollTop + heightDifference;
-                }
-              }, 0);
-            }
+            // Always scroll to bottom when loading messages
+            this.shouldScrollToBottom = true;
+          } else {
+            console.error('Received invalid messages data:', messages);
+            this.messages = [];
           }
           
+          // Clear loading state
           this.loading = false;
         },
         error: (err) => {
           console.error('Error loading messages:', err);
           this.loading = false;
+          this.messages = []; // Clear messages on error
         }
       });
   }
@@ -207,52 +207,57 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (!this.newMessage.trim() || !this.activeChat || !this.currentUserId) return;
     
     const messageContent = this.newMessage.trim();
-    
-    
     const tempId = -Date.now();
     
-    
+    // Create a temporary message ID
     this.pendingMessage = {
       tempId: tempId,
       content: messageContent
     };
     
-    
+    // Add temp message to the list
     const tempMessage = this.createTempMessage(messageContent);
     this.messages.push(tempMessage);
+    this.sortMessages();
     this.shouldScrollToBottom = true;
     
-    
+    // Clear input field
     this.newMessage = '';
     
+    // Send message to server
     this.chatService.sendMessage(this.activeChat.chatId, this.currentUserId, messageContent)
       .subscribe({
         next: (sentMessage) => {
-          
+          console.log('Message sent successfully:', sentMessage);
           if (sentMessage) {
             this.replaceTempMessage(sentMessage);
+            this.sortMessages();
           }
           this.pendingMessage = null;
         },
         error: (err) => {
           console.error('Error sending message:', err);
           
-          
+          // Remove the temporary message
           this.messages = this.messages.filter(m => m.messageId !== tempId);
           
-          
+          // Restore the message to the input field
           this.newMessage = messageContent;
-          
-          
           this.pendingMessage = null;
         }
       });
   }
 
   formatTime(timestamp: string): string {
-    const date = new Date(timestamp);
+    if (!timestamp) {
+      return '';
+    }
     
-    return date.toLocaleTimeString([], { 
+    // Create a Date object from the UTC timestamp
+    const utcDate = new Date(timestamp);
+    
+    // Format with locale settings and 12-hour format
+    return utcDate.toLocaleTimeString([], { 
       hour: '2-digit', 
       minute: '2-digit',
       hour12: true 
@@ -267,7 +272,6 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       console.error('Error scrolling to bottom:', err);
     }
   }
-  
 
   private createTempMessage(content: string): MessageDto {
     return {
@@ -279,26 +283,20 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       isFromMe: true
     };
   }
-  
 
   private replaceTempMessage(serverMessage: MessageDto): void {
-
     const index = this.messages.findIndex(m => 
       (m.messageId < 0 && m.content === serverMessage.content) || 
       m.messageId === serverMessage.messageId
     );
     
     if (index >= 0) {
-      
       this.messages[index] = serverMessage;
     }
   }
-  
  
   private startAutoRefresh(): void {
- 
     this.stopAutoRefresh();
-    
 
     this.refreshTimerId = setInterval(() => {
       if (this.activeChat && this.currentUserId && !this.loading) {
@@ -306,9 +304,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       }
     }, this.refreshInterval);
     
-    console.log('Auto-refresh started');
+    console.log('Auto-refresh started with interval', this.refreshInterval);
   }
-  
 
   private stopAutoRefresh(): void {
     if (this.refreshTimerId) {
