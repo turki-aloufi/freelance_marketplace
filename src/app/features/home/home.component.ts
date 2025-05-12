@@ -38,14 +38,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.projects = data;
       this.filteredProjects = data;
 
-      // call update balance API when redicrect from strip 
-      this.route.queryParams.subscribe(async params => {
-        if (params['success'] === 'true' && params['amount']) {
-          const cents = +params['amount'];
-          await this.userSrv.updateBalance(cents / 100);
-          window.location.href = '/home';
-        }
-      });
+
     });
 
     // 
