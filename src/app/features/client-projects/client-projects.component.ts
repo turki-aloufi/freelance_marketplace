@@ -26,6 +26,7 @@ export class ClientProjectsComponent implements OnInit {
   freelancingProjects: Project[] = [];
   loading: boolean = false;
   deletingProjectId: number | null = null;
+  initialLoading: boolean = true;
 
   constructor(
     public clientProjects: ClientsProjectsService,
@@ -38,6 +39,7 @@ export class ClientProjectsComponent implements OnInit {
       this.projects = data;
       this.openProjects = data.filter(p => p.status === 'Open');
       this.freelancingProjects = data.filter(p => p.status !== 'Open');
+      this.initialLoading = false;
     });
   }
 

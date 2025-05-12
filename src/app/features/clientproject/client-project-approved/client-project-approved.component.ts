@@ -15,7 +15,7 @@ export class ClientProjectApprovedComponent implements OnInit {
   userID: string = '';
   apiUrl: string = '';
   message = false;
-  initialLoading: boolean = false;
+  initialLoading: boolean = true;
 
   searchTerm: string = '';
   selectedStatus: string = 'All';
