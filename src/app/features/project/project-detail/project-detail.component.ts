@@ -126,7 +126,7 @@ export class ProjectDetailComponent implements OnInit {
       alert("Please fill in all fields");
     }
   }
-
+//assign project
   acceptProposal(proposal: Proposal): void {
   
     const model: AssignProjectDto = {
