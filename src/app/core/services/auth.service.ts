@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
-
+import { UserService } from './user/user.service';
 // Interface for the backend DTO
 export interface CreateUserDto {
   userId: string;
@@ -35,6 +35,7 @@ export class AuthService {
     private router: Router,
     private http: HttpClient,
     private ngZone: NgZone,
+    private userService: UserService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     onAuthStateChanged(this.auth, (user) => {
@@ -64,8 +65,27 @@ export class AuthService {
         skills
       };
 
-      console.log(createUserDto);
-      await this.http.post(this.apiUrl, createUserDto).toPromise();
+      // Call backend API to save user data with token
+      try {
+        await this.http.post(this.apiUrl, createUserDto, {
+          headers: new HttpHeaders({ Authorization: `Bearer ${token}` })
+        }).toPromise();
+
+        this.userService.clearCachedProfile(); 
+        await this.userService.refreshUserProfile();
+        
+      } catch (error: any) {
+        if (error.status === 401) {
+          // Token might be expired, try refreshing and retrying
+          const newToken = await this.refreshToken();
+          if (!newToken) throw new Error('Session expired. Please log in again.');
+          await this.http.post(this.apiUrl, createUserDto, {
+            headers: new HttpHeaders({ Authorization: `Bearer ${newToken}` })
+          }).toPromise();
+        } else {
+          throw error;
+        }
+      }
 
       this.ngZone.run(() => this.router.navigate(['/home']));
       return user;
@@ -112,7 +132,10 @@ export class AuthService {
   async logout() {
     try {
       await signOut(this.auth);
-      this.router.navigate(['/sign-in']);
+      localStorage.removeItem('token');
+      
+      this.userService.clearCachedProfile();  // delete cashed profile
+      this.ngZone.run(() => this.router.navigate(['/sign-in']));
     } catch (error: any) {
       throw new Error(error.message);
     }

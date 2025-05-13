@@ -7,29 +7,32 @@ import { UserService } from '../../core/services/user/user.service';
 import { PaymentComponent } from '../../features/payment/payment.component';
 import { FormsModule } from '@angular/forms';
 import { NotificationService, Notification } from '../../core/services/Notification/notification.service';
+
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule,PaymentComponent,FormsModule],
+  imports: [CommonModule, RouterModule, PaymentComponent, FormsModule],
   templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.css',
+  styleUrls: ['./navbar.component.css'],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   menuOpen = false;
   isLoggedIn = false;
   isClientDropdownOpen = false;
   isProfileDropdownOpen = false;
-  isFreelanceDropdownOpen=false;
+  isFreelanceDropdownOpen = false;
   isBalanceDropdownOpen = false;
   userBalance: number = 0;
   userId: string | null = null;
   notifications: Notification[] = [];
-  unreadCount = 0;
-  showNotifications = false;
-  
+  isnotificationsshowDropdown = false;
   private destroy$ = new Subject<void>();
 
-  constructor(private authService: AuthService,private userService: UserService,private notificationService: NotificationService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit() {
     this.authService.user$
@@ -38,129 +41,115 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.isLoggedIn = !!user;
         this.userId = user?.uid ?? null; // get uid
         console.log('User authentication state:', this.isLoggedIn);
-  
+
         if (this.userId) {
           this.userService.getUserProfile(this.userId).subscribe({
             next: (userData) => {
-              this.userBalance = userData.balance; //get user balance
+              this.userBalance = userData.balance; // get user balance
             },
             error: (err) => {
               console.error('Error fetching user profile:', err);
             }
           });
+
+          // Subscribe to notifications and update the notifications array
+        this.notificationService.notifications$
+          .pipe(takeUntil(this.destroy$))
+          .subscribe((notificationsMap) => {
+            if (this.userId) {
+              this.notifications = notificationsMap.get(this.userId) || [];
+            }
+          });
         }
       });
-      // this.notificationService.notifications$.subscribe(notifications => {
-      //   this.notifications = notifications;
-      // });
- 
-         // Subscribe to notifications and filter based on userId
-         this.notificationService.notifications$
-         .pipe(takeUntil(this.destroy$))
-         .subscribe((notifications) => {
-           if (this.userId) {  // Ensure userId is not null before processing notifications
-             const userNotifications = notifications.get(this.userId) || [];
-             this.notifications = userNotifications;
-             // Update unread count
-             this.unreadCount = this.notificationService.getUnreadCount(this.userId);
-           }
-         });
-     }
- 
-   
-
+  }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  
 
-
-
-  toggleFreelanceDropdown(){
+  toggleFreelanceDropdown() {
     this.isFreelanceDropdownOpen = !this.isFreelanceDropdownOpen;
-    // close other dropdowns
     this.isClientDropdownOpen = false;
     this.isProfileDropdownOpen = false;
-    this.isBalanceDropdownOpen=false;
+    this.isBalanceDropdownOpen = false;
+    this.isnotificationsshowDropdown=false;
   }
 
   toggleBalanceDropdown() {
     this.isBalanceDropdownOpen = !this.isBalanceDropdownOpen;
-    // close other dropdowns
     this.isClientDropdownOpen = false;
     this.isProfileDropdownOpen = false;
-    this.isFreelanceDropdownOpen =false;
+    this.isFreelanceDropdownOpen = false;
+    this.isnotificationsshowDropdown=false;
   }
+
   toggleClientDropdown() {
     this.isClientDropdownOpen = !this.isClientDropdownOpen;
     this.isProfileDropdownOpen = false;
-    this.isBalanceDropdownOpen=false;
-    this.isFreelanceDropdownOpen =false;
+    this.isBalanceDropdownOpen = false;
+    this.isFreelanceDropdownOpen = false;
+    this.isnotificationsshowDropdown=false;
   }
 
   toggleProfileDropdown() {
     this.isProfileDropdownOpen = !this.isProfileDropdownOpen;
     this.isClientDropdownOpen = false;
-    this.isBalanceDropdownOpen=false;
-    this.isFreelanceDropdownOpen =false;
+    this.isBalanceDropdownOpen = false;
+    this.isFreelanceDropdownOpen = false;
+    this.isnotificationsshowDropdown=false;
   }
 
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.client-dropdown') && !target.closest('.profile-dropdown')) {
+    if (
+      !target.closest('.client-dropdown') &&
+      !target.closest('.profile-dropdown')&&
+      !target.closest('.notifications-dropdown') &&
+      !target.closest('.freelance-dropdown') 
+        
+    ) {
       this.isClientDropdownOpen = false;
       this.isProfileDropdownOpen = false;
       this.isBalanceDropdownOpen = false;
+      this.isnotificationsshowDropdown = false; 
+      this.isFreelanceDropdownOpen = false; 
     }
   }
 
   toggleMenu() {
     this.menuOpen = !this.menuOpen;
   }
-  // toggleNotifications() {
-  //   this.showNotifications = !this.showNotifications;
-  //   if (this.showNotifications) {
-  //     this.markAllAsRead();
-  //   }
-  // }
-  
-  // markAllAsRead() {
-  //   this.notificationService.markAllAsRead();
-  // }
-  // toggleNotifications() {
-  //   this.showNotifications = !this.showNotifications;
-  //   if (this.showNotifications) {
-  //     this.markAllAsRead();
-  //   }
-  // }
 
-  // markAllAsRead() {
-  //   if (this.userId) {
-  //     this.notificationService.markAllAsRead(this.userId);
-  //   }
-  // }
-
-
-
-  toggleNotifications() {
-  this.showNotifications = !this.showNotifications;
-  if (this.showNotifications) {
-    // هنا يمكن أن تضع شرطًا إذا أردت تعيين إشعار معين كـ "مقروء"
-    // على سبيل المثال، يمكن أن تختار أول إشعار لمعرفه
-    if (this.notifications.length > 0) {
-      this.markAsRead(this.notifications[0].id);  // يمكن اختيار أول إشعار أو إشعار معين
-    }
+  toggleNotificationsDropdown() {
+    this.isProfileDropdownOpen = false;
+    this.isClientDropdownOpen = false;
+    this.isBalanceDropdownOpen = false;
+    this.isFreelanceDropdownOpen = false;
+    this.isnotificationsshowDropdown = !this.isnotificationsshowDropdown;
   }
-}
 
-markAsRead(notificationId: number) {
+ markAllAsRead() {
   if (this.userId) {
-    this.notificationService.markNotificationAsRead(this.userId, notificationId);
+    this.notificationService.markAllAsRead(this.userId);
+    // Update notification state to reflect read status
+    this.notifications = this.notifications.map(notification => ({
+      ...notification,
+      read: true
+    }));
   }
 }
+
+getUnreadCount(): number {
+  if (this.userId) {
+    return this.notificationService.getUnreadCount(this.userId);
+  }
+  return 0;  // Return 0 if userId is null
+}
+
+
 
   logout() {
     this.authService.logout().then(() => {
@@ -169,5 +158,4 @@ markAsRead(notificationId: number) {
       console.error('Logout error:', error);
     });
   }
-  
 }

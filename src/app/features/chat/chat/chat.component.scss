@@ -1,0 +1,36 @@
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #DEBD63;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c9a95a;
+}
+
+/* Firefox */
+.messages-container {
+  scrollbar-width: thin;
+  scrollbar-color: #DEBD63 #f1f1f1;
+}
+
+/* Ensure message container takes appropriate height */
+.message-container-wrapper {
+  height: calc(100vh - 180px);
+  max-height: 80vh;
+}
+
+/* Ensure message bubbles don't overflow */
+.message-bubble {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
