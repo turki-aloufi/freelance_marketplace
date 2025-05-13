@@ -113,8 +113,8 @@
                   
 
             <!-- bell icon-->
-          <div class="relative">
-            <button (click)="toggleDropdown()" class="relative">
+          <div class="relative notifications-dropdown">
+            <button (click)="toggleNotificationsDropdown()" class="relative">
               <svg class="w-6 h-6 text-white hover:text-[#DEBD63]" fill="none" stroke="currentColor" stroke-width="2"
                   viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 00-3 0v.68C6.64 5.36 5 7.92 5 11v3.159c0 .538-.214 1.055-.595 1.436L3 17h5m7 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -126,17 +126,17 @@
             </button>
 
             <!-- Dropdown menu-->
-            <div *ngIf="showDropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
+            <div *ngIf="showDropdown" class="absolute right-0 mt-2 w-80 bg-black  rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
               <div class="p-4 border-b flex justify-between items-center">
-                <span class="font-semibold text-gray-700">Notifications</span>
-                <button (click)="markAllAsRead()" class="text-sm text-blue-500 hover:underline">Mark all as read</button>
+                <span class="font-semibold text-white ">Notifications</span>
+                <button (click)="markAllAsRead()" class="text-sm text-yellow-500 hover:underline">Mark all as read</button>
               </div>
 
               <ng-container *ngIf="notifications.length; else noNotifications">
                 <ul>
-                  <li *ngFor="let notification of notifications" class="px-4 py-2 hover:bg-gray-100 flex items-start">
+                  <li *ngFor="let notification of notifications" class="px-4 py-2 flex items-start">
                     <div class="flex-1">
-                      <p class="text-sm text-gray-800" [class.font-semibold]="!notification.read">{{ notification.message }}</p>
+                      <p class="text-sm text-white" [class.font-semibold]="!notification.read">{{ notification.message }}</p>
                       <p class="text-xs text-gray-500">{{ notification.timestamp | date:'short' }}</p>
                     </div>
                     <div *ngIf="!notification.read" class="ml-2 mt-1 w-2 h-2 bg-red-500 rounded-full"></div>
@@ -145,10 +145,11 @@
               </ng-container>
 
               <ng-template #noNotifications>
-                <div class="p-4 text-sm text-gray-500 text-center">No notifications</div>
+                <div class="p-4 text-sm text-white text-center">No notifications</div>
               </ng-template>
             </div>
           </div>
+
 
 
           <!-- Profile Dropdown -->
@@ -267,46 +268,46 @@
      
    
                  
-  <!-- bell icon-->
-<div class="relative">
-  <button (click)="toggleDropdown()" class="relative">
-    <svg class="w-6 h-6 text-white hover:text-[#DEBD63]" fill="none" stroke="currentColor" stroke-width="2"
-         viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 00-3 0v.68C6.64 5.36 5 7.92 5 11v3.159c0 .538-.214 1.055-.595 1.436L3 17h5m7 0v1a3 3 0 11-6 0v-1m6 0H9" />
-    </svg>
+     
+            <!-- bell icon-->
+          <div class="relative notifications-dropdown">
+            <button (click)="toggleNotificationsDropdown()" class="relative">
+              <svg class="w-6 h-6 text-white hover:text-[#DEBD63]" fill="none" stroke="currentColor" stroke-width="2"
+                  viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 00-3 0v.68C6.64 5.36 5 7.92 5 11v3.159c0 .538-.214 1.055-.595 1.436L3 17h5m7 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
 
-    <!-- Red dot for unread notifications-->
-    <span *ngIf="getUnreadCount() > 0"
-          class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-500"></span>
-  </button>
+              <!-- Red dot for unread notifications-->
+              <span *ngIf="getUnreadCount() > 0"
+                    class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-500"></span>
+            </button>
 
-  <!-- Dropdown menu-->
-  <div *ngIf="showDropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
-    <div class="p-4 border-b flex justify-between items-center">
-      <span class="font-semibold text-gray-700">Notifications</span>
-      <button (click)="markAllAsRead()" class="text-sm text-blue-500 hover:underline">Mark all as read</button>
-    </div>
+            <!-- Dropdown menu-->
+            <div *ngIf="showDropdown" class="absolute right-0 mt-2 w-80 bg-black  rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
+              <div class="p-4 border-b flex justify-between items-center">
+                <span class="font-semibold text-white ">Notifications</span>
+                <button (click)="markAllAsRead()" class="text-sm text-yellow-500 hover:underline">Mark all as read</button>
+              </div>
 
-    <ng-container *ngIf="notifications.length; else noNotifications">
-      <ul>
-        <li *ngFor="let notification of notifications" class="px-4 py-2 hover:bg-gray-100 flex items-start">
-          <div class="flex-1">
-            <p class="text-sm text-gray-800" [class.font-semibold]="!notification.read">{{ notification.message }}</p>
-            <p class="text-xs text-gray-500">{{ notification.timestamp | date:'short' }}</p>
+              <ng-container *ngIf="notifications.length; else noNotifications">
+                <ul>
+                  <li *ngFor="let notification of notifications" class="px-4 py-2 flex items-start">
+                    <div class="flex-1">
+                      <p class="text-sm text-white" [class.font-semibold]="!notification.read">{{ notification.message }}</p>
+                      <p class="text-xs text-gray-500">{{ notification.timestamp | date:'short' }}</p>
+                    </div>
+                    <div *ngIf="!notification.read" class="ml-2 mt-1 w-2 h-2 bg-red-500 rounded-full"></div>
+                  </li>
+                </ul>
+              </ng-container>
+
+              <ng-template #noNotifications>
+                <div class="p-4 text-sm text-white text-center">No notifications</div>
+              </ng-template>
+            </div>
           </div>
-          <div *ngIf="!notification.read" class="ml-2 mt-1 w-2 h-2 bg-red-500 rounded-full"></div>
-        </li>
-      </ul>
-    </ng-container>
-
-    <ng-template #noNotifications>
-      <div class="p-4 text-sm text-gray-500 text-center">No notifications</div>
-    </ng-template>
-  </div>
-</div>
 
 
-    
         <!-- Profile Dropdown -->
         <div class="relative profile-dropdown" (click)="$event.stopPropagation()">
           <button (click)="toggleProfileDropdown()"
