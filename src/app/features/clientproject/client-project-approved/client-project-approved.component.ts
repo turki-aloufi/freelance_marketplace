@@ -86,6 +86,15 @@ export class ClientProjectApprovedComponent implements OnInit {
       }
     });
   }
+  contactFreelancer(freelancerId: string) {
+    if (!freelancerId) {
+      console.error('No freelancer ID provided');
+      return;
+    }
+    this.router.navigate(['/messages'], { 
+      queryParams: { userId: freelancerId }
+    });
+  }
 
 navigateToUserProfile(freelancerId: string) {
   if (freelancerId) {
