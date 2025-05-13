@@ -29,13 +29,13 @@
         >{{ userProfile.phone }}</a
       ><br />
       <button
-        *ngIf="!isOwnProfile()"
-        class="mt-2 bg-black text-white px-4 py-1 rounded"
-        [routerLink]="['/messages']"
-        [queryParams]="{ userId: userId }"
-      >
-        Contact
-      </button>
+      *ngIf="!isOwnProfile()"
+      class="mt-2 bg-black text-white px-4 py-1 rounded"
+      [routerLink]="['/messages']"
+      [queryParams]="{ userId: userId }"
+    >
+      Contact
+    </button>
     </div>
   </div>
 
