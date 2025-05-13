@@ -1,9 +1,7 @@
-// src/app/features/messages/messages.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatListComponent } from '../chat-list/chat-list.component';
 import { ChatComponent } from '../chat/chat.component';
-import { NewChatComponent } from '../new-chat/new-chat.component';
 import { ChatService } from '../../../core/services/chat.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { Subject, takeUntil } from 'rxjs';
@@ -18,7 +16,6 @@ import { take, switchMap } from 'rxjs/operators';
     CommonModule,
     ChatListComponent,
     ChatComponent,
-    NewChatComponent,
     RouterModule
   ],
   templateUrl: './messages.component.html',
@@ -35,33 +32,40 @@ export class MessagesComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // Track active chat changes
     this.chatService.activeChat$
       .pipe(takeUntil(this.destroy$))
       .subscribe(chat => {
         this.activeChat = chat;
       });
     
+    // Check for userId in query parameters
     this.route.queryParams
-  .pipe(takeUntil(this.destroy$))
-  .subscribe(params => {
-    const userId = params['userId'];
-    console.log('Received userId in messages component:', userId);
-    
-    if (userId) {
-      this.authService.user$
-        .pipe(take(1))
-        .subscribe(currentUser => {
-          if (currentUser) {
-            console.log('Current user:', currentUser.uid);
-            console.log('Starting chat with user:', userId);
-            this.startChatWithUser(currentUser.uid, userId);
-          }
-        });
-    }
-  });
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const userId = params['userId'];
+        console.log('Received userId in messages component:', userId);
+        
+        if (userId) {
+          // Only start a chat if userId is provided
+          this.authService.user$
+            .pipe(take(1))
+            .subscribe(currentUser => {
+              if (currentUser) {
+                console.log('Current user:', currentUser.uid);
+                console.log('Starting chat with user:', userId);
+                this.startChatWithUser(currentUser.uid, userId);
+              }
+            });
+        } else {
+          // When no userId provided, clear any active chat
+          this.chatService.setActiveChat(null);
+        }
+      });
   }
 
   private startChatWithUser(currentUserId: string, targetUserId: string): void {
+    // Keep your existing implementation
     if (!targetUserId || !currentUserId) {
       console.error('Missing user IDs', { currentUserId, targetUserId });
       return;

@@ -1,7 +1,8 @@
 // src/app/core/services/chat.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, BehaviorSubject, from } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { ChatDto, MessageDto, SendMessageDto, CreateChatDto } from '../models/chat.model';
 import { SignalrService } from './signalr.service';
 import { AuthService } from './auth.service';
@@ -29,36 +30,59 @@ export class ChatService {
     });
   }
 
+  // Helper method to get headers with authorization token
+  private getAuthHeaders() {
+    return from(this.authService.getValidToken()).pipe(
+      switchMap(token => {
+        if (!token) {
+          throw new Error('Authentication token not available');
+        }
+        return [new HttpHeaders().set('Authorization', `Bearer ${token}`)];
+      })
+    );
+  }
+
   setActiveChat(chat: ChatDto | null): void {
-    console.log('Setting active chat:', chat);
+    // First, set the local value to null to force clean reinitialization
+    this.activeChatSubject.next(null);
     
-    // Clear current chat first
-    if (this.activeChatSubject.value) {
-      console.log('Leaving chat room:', this.activeChatSubject.value.chatId);
-      this.signalrService.leaveChatRoom(this.activeChatSubject.value.chatId)
-        .catch(err => console.error('Error leaving previous chat room:', err));
-    }
-    
-    // Short pause before setting new chat
+    // Short delay to ensure cleanup completes
     setTimeout(() => {
-      // Join new chat room if provided
-      if (chat) {
-        console.log('Joining new chat room:', chat.chatId);
-        this.signalrService.joinChatRoom(chat.chatId)
-          .catch(err => console.error('Error joining new chat room:', err));
+      if (chat?.chatId !== this.activeChatSubject.value?.chatId) {
+        // Leave previous chat room if exists
+        if (this.activeChatSubject.value) {
+          this.signalrService.leaveChatRoom(this.activeChatSubject.value.chatId)
+            .catch(err => console.error('Error leaving chat room:', err));
+        }
+        
+        // Join new chat room if provided
+        if (chat) {
+          this.signalrService.joinChatRoom(chat.chatId)
+            .catch(err => console.error('Error joining chat room:', err));
+        }
+        
+        this.activeChatSubject.next(chat);
       }
-      
-      // Update the active chat
-      this.activeChatSubject.next(chat);
     }, 100);
   }
 
   getUserChats(userId: string): Observable<ChatDto[]> {
-    return this.http.get<ChatDto[]>(`${this.apiUrl}/Chats/user/${userId}`);
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => {
+        return this.http.get<ChatDto[]>(`${this.apiUrl}/Chats/user/${userId}`, { headers });
+      })
+    );
   }
 
   getChatMessages(chatId: number, userId: string): Observable<MessageDto[]> {
-    return this.http.get<MessageDto[]>(`${this.apiUrl}/Chats/${chatId}/messages?userId=${userId}`);
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => {
+        return this.http.get<MessageDto[]>(
+          `${this.apiUrl}/Chats/${chatId}/messages?userId=${userId}`, 
+          { headers }
+        );
+      })
+    );
   }
 
   sendMessage(chatId: number, senderId: string, content: string): Observable<MessageDto> {
@@ -66,17 +90,38 @@ export class ChatService {
       senderId,
       content
     };
-    return this.http.post<MessageDto>(`${this.apiUrl}/Chats/${chatId}/messages`, message);
+    
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => {
+        return this.http.post<MessageDto>(
+          `${this.apiUrl}/Chats/${chatId}/messages`, 
+          message, 
+          { headers }
+        );
+      })
+    );
   }
 
   createChat(clientId: string, freelancerId: string): Observable<ChatDto> {
-    return this.http.post<ChatDto>(`${this.apiUrl}/chats/create`, { 
-      clientId, 
-      freelancerId 
-    });
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => {
+        return this.http.post<ChatDto>(
+          `${this.apiUrl}/chats/create`, 
+          { clientId, freelancerId }, 
+          { headers }
+        );
+      })
+    );
   }
 
   checkChatExists(clientId: string, freelancerId: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/Chats/check?clientId=${clientId}&freelancerId=${freelancerId}`);
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => {
+        return this.http.get(
+          `${this.apiUrl}/Chats/check?clientId=${clientId}&freelancerId=${freelancerId}`,
+          { headers }
+        );
+      })
+    );
   }
 }
