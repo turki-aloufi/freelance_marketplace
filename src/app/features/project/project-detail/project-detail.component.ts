@@ -146,10 +146,9 @@ export class ProjectDetailComponent implements OnInit {
         this.notificationService.addNotification(
           `Congratulations! Your proposal has been accepted for Project No.${this.projectId}`,  
           proposal.freelancerId // <== This identifies the recipient.
-        );
-    
-        
+        )
       },
+    
       (error) => {
         console.error('Error assigning project:', error);
         alert('Failed to assign the project.');
