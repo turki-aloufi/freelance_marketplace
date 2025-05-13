@@ -7,7 +7,7 @@ import { ProposalCardComponent } from '../../../shared/components/proposal-card/
 import { ProjectService, Project, Proposal,AssignProjectDto } from '../../../core/services/project/project.service';
 import { AuthService } from '../../../core/services/auth.service'; 
 import { NotificationService } from '../../../core/services/Notification/notification.service'; 
-
+import { UserService } from '../../../core/services/user/user.service';
 @Component({
   selector: 'app-project-detail',
   standalone: true,
@@ -39,7 +39,7 @@ export class ProjectDetailComponent implements OnInit {
     private projectService: ProjectService,
     private authService: AuthService,
     private notificationService: NotificationService,
-  
+    private userService :UserService,
   ) {}
 
   ngOnInit(): void {
@@ -158,6 +158,7 @@ export class ProjectDetailComponent implements OnInit {
       () => {
         
         proposal.status = 'Accepted';
+
         this.acceptedProposalId = proposal.proposalId;  
       console.log('Proposal accepted and project assigned successfully.');
 
@@ -171,6 +172,9 @@ export class ProjectDetailComponent implements OnInit {
           `Congratulations! Your proposal has been accepted for Project No.${this.projectId}`,  
           proposal.freelancerId // <== This identifies the recipient.
         )
+       // clear user cashed
+        this.userService.clearCachedProfile(); 
+        this.userService.refreshUserProfile();
       },
     
       (error) => {
