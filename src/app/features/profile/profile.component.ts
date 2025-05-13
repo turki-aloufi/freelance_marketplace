@@ -31,6 +31,7 @@ export class ProfileComponent {
     }
   }
   isOwnProfile(): boolean {
+    this.currentUserId =  this.userService.getCurrentUserId();
     return this.userId === this.currentUserId;
   }
 }
