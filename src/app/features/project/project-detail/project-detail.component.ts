@@ -39,6 +39,7 @@ export class ProjectDetailComponent implements OnInit {
     private authService: AuthService,
     private notificationService: NotificationService,
       private router:Router,
+      private userService :UserService,
   ) {}
 
   ngOnInit(): void {
@@ -163,6 +164,9 @@ export class ProjectDetailComponent implements OnInit {
           `Congratulations! Your proposal has been accepted for Project No.${this.projectId}`,  
           proposal.freelancerId // <== This identifies the recipient.
         );
+           // clear user cashed
+        this.userService.clearCachedProfile(); 
+        this.userService.refreshUserProfile();
       },
       (error) => {
         console.error('Error assigning project:', error);
