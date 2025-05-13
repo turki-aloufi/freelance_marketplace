@@ -126,15 +126,16 @@ export class ProjectDetailComponent implements OnInit {
       alert("Please fill in all fields");
     }
   }
-
+//assign project
   acceptProposal(proposal: Proposal): void {
   
     const model: AssignProjectDto = {
      
       freelancerId:proposal.freelancerId,
-      proposalId: proposal.proposalId
+      proposalId: proposal.proposalId,
+      freelancerPhoneNumber:proposal.freelancerPhoneNumber, 
     };
-
+    console.log("the body: ", model)
     this.projectService.assignProject(this.projectId, model).subscribe(
       () => {
         
