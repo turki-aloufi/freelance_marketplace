@@ -126,15 +126,16 @@ export class ProjectDetailComponent implements OnInit {
       alert("Please fill in all fields");
     }
   }
-
+//assign project
   acceptProposal(proposal: Proposal): void {
   
     const model: AssignProjectDto = {
      
       freelancerId:proposal.freelancerId,
-      proposalId: proposal.proposalId
+      proposalId: proposal.proposalId,
+      freelancerPhoneNumber:proposal.freelancerPhoneNumber, 
     };
-
+    console.log("the body: ", model)
     this.projectService.assignProject(this.projectId, model).subscribe(
       () => {
         
@@ -146,10 +147,9 @@ export class ProjectDetailComponent implements OnInit {
         this.notificationService.addNotification(
           `Congratulations! Your proposal has been accepted for Project No.${this.projectId}`,  
           proposal.freelancerId // <== This identifies the recipient.
-        );
-    
-        
+        )
       },
+    
       (error) => {
         console.error('Error assigning project:', error);
         alert('Failed to assign the project.');
