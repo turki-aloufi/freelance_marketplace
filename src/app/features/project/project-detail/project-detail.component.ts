@@ -6,6 +6,7 @@ import { ProposalCardComponent } from '../../../shared/components/proposal-card/
 import { ProjectService, Project, Proposal, AssignProjectDto } from '../../../core/services/project/project.service';
 import { AuthService } from '../../../core/services/auth.service'; 
 import { NotificationService } from '../../../core/services/Notification/notification.service'; 
+import { UserService } from '../../../core/services/user/user.service';
 import { Router } from '@angular/router';
 @Component({
   selector: 'app-project-detail',
