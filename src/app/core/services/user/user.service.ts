@@ -36,13 +36,21 @@ export interface UserProfileDto {
   balance: number;
   skills: SkillDto[];
   projects: ProfileProjectDto[];
-  
+
+}
+
+export interface EditProfileDto {
+  name: string;
+  phone: string;
+  imageUrl: string;
+  aboutMe: string;
+  skills: { skillId: number }[];
 }
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:5021/api/Auth'; 
+  private apiUrl = 'http://localhost:5021/api/Auth';
   private user$: Observable<User | null>;
   private cachedProfile: UserProfileDto | null = null;
   constructor(private http: HttpClient, private auth: Auth) {
@@ -50,15 +58,15 @@ export class UserService {
 
   }
 
-    private getAuthToken(): Observable<string> {
-        return this.user$.pipe(
-          take(1),
-          switchMap(user => {
-            if (!user) throw new Error('No authenticated user');
-            return user.getIdToken();
-          })
-        );
-      }
+  private getAuthToken(): Observable<string> {
+    return this.user$.pipe(
+      take(1),
+      switchMap(user => {
+        if (!user) throw new Error('No authenticated user');
+        return user.getIdToken();
+      })
+    );
+  }
 
   getUserProfile(userId: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/users/${userId}`);
@@ -78,19 +86,28 @@ export class UserService {
   getCurrentUserId(): string | null {
     return this.auth.currentUser?.uid || null;
   }
-  
 
-clearCachedProfile() {
-  this.cachedProfile = null;
-}
 
-async refreshUserProfile(): Promise<void> {
-  const userId = this.getCurrentUserId();
-  if (!userId) return;
+  clearCachedProfile() {
+    this.cachedProfile = null;
+  }
 
-  const profile = await firstValueFrom(this.getUserProfile(userId));
-  this.cachedProfile = profile;
-}
+  async refreshUserProfile(): Promise<void> {
+    const userId = this.getCurrentUserId();
+    if (!userId) return;
 
- 
+    const profile = await firstValueFrom(this.getUserProfile(userId));
+    this.cachedProfile = profile;
+  }
+  updateUserProfile(data: EditProfileDto): Observable<void> {
+    return this.getAuthToken().pipe(
+      switchMap(token => {
+        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+        return this.http.put<void>(`${this.apiUrl}/users/profile`, data, { headers });
+      })
+    );
+  }
+
+
+
 }
