@@ -10,7 +10,7 @@
         <img [src]="proposal.freelancerAvatar" alt="User Profile" class="rounded-full w-10 h-10 object-cover">
       </a>
       <div>
-        <h5 class="font-semibold text-lg">{{ proposal.freelancerName }}</h5>
+        <h5 (click)="navigateToUserProfile(proposal.freelancerId)" class="font-semibold text-lg cursor-pointer underline">{{ proposal.freelancerName }}</h5>
         <p class="text-gray-600">{{ proposal.coverLetter }}</p>
       </div>
     </div>

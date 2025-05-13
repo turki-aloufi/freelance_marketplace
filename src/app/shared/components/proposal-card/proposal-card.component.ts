@@ -1,5 +1,6 @@
 import { Component,Input,Output } from '@angular/core';
 import { EventEmitter } from '@angular/core';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-proposal-card',
   imports: [],
@@ -17,6 +18,14 @@ export class ProposalCardComponent {
     freelancerId: string;
     proposalId: number;
   };
+  constructor (
+    private router:Router
 
+  ){}
   @Output() accept = new EventEmitter<void>();
+  navigateToUserProfile(freelancerId: string) {
+    if (freelancerId) {
+      this.router.navigate(['/profile', freelancerId]);
+    }
+  }
 }
