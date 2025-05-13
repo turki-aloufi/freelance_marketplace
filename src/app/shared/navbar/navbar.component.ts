@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { Subject, takeUntil } from 'rxjs';
-import { UserService } from '../../core/services/user/user.service';
+import { UserService,UserProfileDto } from '../../core/services/user/user.service';
 import { PaymentComponent } from '../../features/payment/payment.component';
 import { FormsModule } from '@angular/forms';
 import { NotificationService, Notification } from '../../core/services/Notification/notification.service';
@@ -22,7 +22,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isProfileDropdownOpen = false;
   isFreelanceDropdownOpen = false;
   isBalanceDropdownOpen = false;
-  userBalance: number = 0;
+  userProfile: UserProfileDto | null = null;
   userId: string | null = null;
   notifications: Notification[] = [];
   isnotificationsshowDropdown = false;
@@ -42,15 +42,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.userId = user?.uid ?? null; // get uid
         console.log('User authentication state:', this.isLoggedIn);
 
-        if (this.userId) {
-          this.userService.getUserProfile(this.userId).subscribe({
-            next: (userData) => {
-              this.userBalance = userData.balance; // get user balance
-            },
-            error: (err) => {
-              console.error('Error fetching user profile:', err);
-            }
-          });
+         if (this.userId) {
+        
+        this.userService.getUserProfile(this.userId).subscribe({
+          next: (userData) => {
+            this.userProfile = userData;
+          },
+          error: (err) => {
+            console.error('Error fetching user profile:', err);
+          }
+        });
 
           // Subscribe to notifications and update the notifications array
         this.notificationService.notifications$

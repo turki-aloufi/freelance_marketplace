@@ -36,47 +36,47 @@
 
 
  <!-- Services Section -->
- <section class="text-center py-10">
-  <h2 class="text-2xl font-semibold mb-4">Find <span class="text-[#D3A72F]">Services</span></h2>
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-5xl mx-auto px-4">
+<section class="text-center py-10 w-full bg-white">
+  <h2 class="text-2xl font-semibold mb-6">Find <span class="text-[#D3A72F]">Services</span></h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 container mx-auto px-4 md:px-8 lg:px-16">
     <!-- Service Card -->
-    <button  (click)="filterByCategory('Graphic Design')" class="relative transform hover:scale-105 transition duration-300">
+    <button (click)="filterByCategory('Graphic Design')" class="relative transform hover:scale-105 transition duration-300">
       <img src="assets/images/unsplash_v9vII5gV8Lw.png" class="rounded-lg w-full h-32 object-cover" alt="Graphic Design">
       <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-lg">
         <span class="text-white font-semibold">Graphic Design</span>
       </div>
-    </button >
-    <button  (click)="filterByCategory('Programming')" class="relative transform hover:scale-105 transition duration-300">
-      <img src="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=1200,h=635,q=80/https://builtin.com/sites/www.builtin.com/files/2024-09/programming-languages.jpg" class="rounded-lg w-full h-32 object-cover" alt="Cartoon Animation">
+    </button>
+    <button (click)="filterByCategory('Programming')" class="relative transform hover:scale-105 transition duration-300">
+      <img src="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=1200,h=635,q=80/https://builtin.com/sites/www.builtin.com/files/2024-09/programming-languages.jpg" class="rounded-lg w-full h-32 object-cover" alt="Programming">
       <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-lg">
         <span class="text-white font-semibold">Programming</span>
       </div>
     </button>
-    <button   (click)="filterByCategory('Data Science')" class="relative transform hover:scale-105 transition duration-300">
-      <img src="assets/images/unsplash_uhtDG9ePLQI.png" class="rounded-lg w-full h-32 object-cover" alt="Illustration">
+    <button (click)="filterByCategory('Data Science')" class="relative transform hover:scale-105 transition duration-300">
+      <img src="assets/images/unsplash_uhtDG9ePLQI.png" class="rounded-lg w-full h-32 object-cover" alt="Data Science">
       <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-lg">
         <span class="text-white font-semibold">Data Science</span>
       </div>
     </button>
-    <button  (click)="filterByCategory('Marketing')" class="relative transform hover:scale-105 transition duration-300">
-      <img src="assets/images/unsplash_jPd5A9_mS-g.png" class="rounded-lg w-full h-32 object-cover" alt="Flyers & Vouchers">
+    <button (click)="filterByCategory('Marketing')" class="relative transform hover:scale-105 transition duration-300">
+      <img src="assets/images/unsplash_jPd5A9_mS-g.png" class="rounded-lg w-full h-32 object-cover" alt="Marketing">
       <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-lg">
         <span class="text-white font-semibold">Marketing</span>
       </div>
     </button>
-    <button  (click)="filterByCategory('Mobile Development')" class="relative transform hover:scale-105 transition duration-300">
-      <img src="assets/images/unsplash_gxGtqG5ul2g.png" class="rounded-lg w-full h-32 object-cover" alt="Logo Design">
+    <button (click)="filterByCategory('Mobile Development')" class="relative transform hover:scale-105 transition duration-300">
+      <img src="assets/images/unsplash_gxGtqG5ul2g.png" class="rounded-lg w-full h-32 object-cover" alt="Mobile Development">
       <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-lg">
         <span class="text-white font-semibold">Mobile Development</span>
       </div>
     </button>
     <button (click)="filterByCategory('Business Consulting')" class="relative transform hover:scale-105 transition duration-300">
-      <img src="assets/images/unsplash_s9CC2SKySJM.png" class="rounded-lg w-full h-32 object-cover" alt="Social Graphics">
+      <img src="assets/images/unsplash_s9CC2SKySJM.png" class="rounded-lg w-full h-32 object-cover" alt="Business Consulting">
       <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-lg">
         <span class="text-white font-semibold">Business Consulting</span>
       </div>
     </button>
-    <button  (click)="filterByCategory('Writing')" class="relative transform hover:scale-105 transition duration-300">
+    <button (click)="filterByCategory('Writing')" class="relative transform hover:scale-105 transition duration-300">
       <img src="assets/images/unsplash_qnWPjzewewA.png" class="rounded-lg w-full h-32 object-cover" alt="Article Writing">
       <div class="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-lg">
         <span class="text-white font-semibold">Article Writing</span>
@@ -91,25 +91,27 @@
   </div>
 </section>
 
-  <!-- Search Bar -->
-  <section class="flex justify-center my-6">
-    <input type="text" [(ngModel)]="searchTerm" (input)="onSearch(searchTerm)" placeholder="Search ..." class="border p-2 w-60 rounded-l-md">
-    <button class="bg-black text-white px-4 rounded-r-md">
+<!-- Search Bar -->
+<section class="flex justify-center my-10 px-4 md:px-8 lg:px-16 w-full">
+  <div class="flex w-full max-w-3xl">
+    <input type="text" [(ngModel)]="searchTerm" (input)="onSearch(searchTerm)" placeholder="Search ..." class="border p-2 flex-grow rounded-l-md">
+    <button class="bg-black text-white px-4 rounded-r-none">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z" />
       </svg>
     </button>
-    <button (click)="clearFilters()" class="bg-gray-200 text-black px-4 py-1 ml-2 rounded hover:bg-gray-300">
-     <i class="fa-solid fa-rotate "></i>
+    <button (click)="clearFilters()" class="bg-gray-200 text-black px-4 py-1 rounded-r-md hover:bg-gray-300">
+      <i class="fa-solid fa-rotate"></i>
     </button>
-  </section>
+  </div>
+</section>
 
-  <!-- Project Cards -->
-<section id="ProjectCards" #projectCards class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto p-4 px-16">
+<!-- Project Cards -->
+<section id="ProjectCards" #projectCards class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 container mx-auto px-4 md:px-8 lg:px-16 pb-16">
   <div *ngFor="let project of filteredProjects" class="bg-gray-50 p-4 rounded-xl shadow text-center">
     <h3 class="font-semibold text-lg mb-2 truncate">{{ project.title }}</h3>
     <p class="text-gray-600 text-sm mb-2 truncate">{{ project.projectOverview }}</p>
-    <div class="flex justify-between px-16 items-center">
+    <div class="flex justify-between px-6 items-center">
       <div class="font-semibold text-gray-600 text-sm">
         <p>Budget</p>
         <p>${{ project.budget }}</p>
@@ -118,3 +120,4 @@
     </div>
   </div>
 </section>
+

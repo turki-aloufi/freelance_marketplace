@@ -99,7 +99,7 @@
             class="absolute right-0 mt-3 bg-gray-900 w-72 bg-[#0f1116] text-white rounded-xl shadow-lg z-50 p-4"
           >
             <div class="text-lg font-semibold text-[#DEBD63] mb-2">
-              My balance: <span class="text-white font-bold">{{ userBalance }} $</span>
+              My balance: <span class="text-white font-bold">{{ userProfile?.balance }} $</span>
             </div>        
             <!-- form payment -->
             <app-payment></app-payment>
@@ -150,16 +150,22 @@
             </div>
           </div>
 
-
-
+          <div class="flex items-center ">
+           <div class=" px-2">
+            Hello, {{userProfile?.name}}
+          </div>
           <!-- Profile Dropdown -->
-          <div class="relative profile-dropdown" (click)="$event.stopPropagation()">
+          <div class="relative profile-dropdown ml-0" (click)="$event.stopPropagation()">
+           
             <button
               (click)="toggleProfileDropdown()"
               class="text-white hover:text-[#DEBD63] transition duration-300 flex items-center"
             >
               <img
-                src="https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg"
+                [src]="
+          userProfile?.imageUrl ||
+          'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'
+        "
                 alt="User Profile"
                 class="rounded-full w-10 h-10 object-cover"
               />
@@ -185,7 +191,7 @@
               </a>
             </div>
           </div>
-          
+          </div>
 
         </div>
       </ng-template>
@@ -194,141 +200,149 @@
 
   <!-- Mobile Menu -->
   <div *ngIf="menuOpen" class="md:hidden mt-4 space-y-3">
-    <ng-container *ngIf="!isLoggedIn; else userLinks">
+    <ng-container *ngIf="!isLoggedIn; else mobileUserLinks">
       <a routerLink="/home" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
       <a routerLink="/sign-in" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Sign In</a>
       <a routerLink="/sign-up" class="block font-semibold hover:text-[#DEBD63] transition duration-300">Sign Up</a>
     </ng-container>
   </div>
 
-  <!-- User Links Template (Shared for Desktop and Mobile) -->
-  <ng-template #userLinks>
-    <div class="flex flex-col md:flex-row md:items-center md:space-x-9 space-y-3 md:space-y-0">
-      <a routerLink="/home" class="font-semibold hover:text-[#DEBD63] transition duration-300">Home</a>
-
-      <!-- Client Dropdown -->
-      <div class="relative client-dropdown" (click)="$event.stopPropagation()">
-        <button (click)="toggleClientDropdown()"
-          class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300">
-          <span>Client Projects</span>
-          <i class="fa fa-angle-down pt-1 md:pt-0"></i>
-        </button>
-
-        <div *ngIf="isClientDropdownOpen" class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50">
-          <a routerLink="/client/projects"
-            class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300">
-            <i class="fa fa-folder-open mr-2 text-[#DEBD63]"></i> Client Projects
-          </a>
-          <a routerLink="/client/projects/approved"
-            class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300">
-            <i class="fa fa-check-circle mr-2 text-[#DEBD63]"></i> Approved Projects
-          </a>
-        </div>
-      </div>
-
-      <!-- Freelance Dropdown -->
-      <div class="relative freelance-dropdown" (click)="$event.stopPropagation()">
-        <button (click)="toggleFreelanceDropdown()"
-          class="font-semibold flex items-center space-x-2 hover:text-[#DEBD63] transition duration-300">
-          <span>Freelance Projects</span>
-          <i class="fa fa-angle-down pt-1 md:pt-0"></i>
-        </button>
-
-        <div *ngIf="isFreelanceDropdownOpen" class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50">
-          <a routerLink="/freelance/projects"
-            class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300">
-            <i class="fa-solid fa-bars-progress mr-2 text-[#DEBD63]"></i> Freelance Projects
-          </a>
-          <a routerLink="/freelancerProposals"
-            class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300">
-            <i class="fa-solid fa-file-lines mr-2 text-[#DEBD63]"></i> My Proposals
-          </a>
-        </div>
-      </div>
-
-      <!-- Icons -->
-      <div class="flex items-center space-x-6 text-2xm">
-        <!-- Balance Dropdown -->
-        <div class="relative" (click)="$event.stopPropagation()">
-          <button (click)="toggleBalanceDropdown()" class="text-white hover:text-[#DEBD63] transition duration-300">
-            <i class="fa fa-dollar-sign"></i>
-          </button>
-
-          <div *ngIf="isBalanceDropdownOpen"
-            class="absolute right-0 mt-3 bg-gray-900 w-72 bg-[#0f1116] text-white rounded-xl shadow-lg z-50 p-4">
-            <div class="text-lg font-semibold text-[#DEBD63] mb-2">
-              My balance: <span class="text-white font-bold">{{ userBalance }} $</span>
-            </div>
-            <app-payment></app-payment>
+  <ng-template #mobileUserLinks>
+  <div class="flex flex-col space-y-4 text-white w-full">
+    <div class="">
+            Hello, {{userProfile?.name}}
           </div>
-        </div>
+    <!-- Home -->
+    <a routerLink="/home" class="font-semibold hover:text-[#DEBD63] transition duration-300 px-4">Home</a>
 
-        <a routerLink="/messages" class="text-white hover:text-[#DEBD63] transition duration-300"><i
-            class="fa fa-envelope"></i></a>
-     
-   
-                 
-     
-            <!-- bell icon-->
-          <div class="relative notifications-dropdown">
-            <button (click)="toggleNotificationsDropdown()" class="relative">
-              <svg class="w-6 h-6 text-white hover:text-[#DEBD63]" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 00-3 0v.68C6.64 5.36 5 7.92 5 11v3.159c0 .538-.214 1.055-.595 1.436L3 17h5m7 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-
-              <!-- Red dot for unread notifications-->
-              <span *ngIf="getUnreadCount() > 0"
-                    class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-500"></span>
-            </button>
-
-            <!-- Dropdown menu-->
-            <div *ngIf="isnotificationsshowDropdown" class="absolute right-0 mt-2 w-80 bg-black  rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
-              <div class="p-4 border-b flex justify-between items-center">
-                <span class="font-semibold text-white ">Notifications</span>
-                <button (click)="markAllAsRead()" class="text-sm text-yellow-500 hover:underline">Mark all as read</button>
-              </div>
-
-              <ng-container *ngIf="notifications.length; else noNotifications">
-                <ul>
-                  <li *ngFor="let notification of notifications" class="px-4 py-2 flex items-start">
-                    <div class="flex-1">
-                      <p class="text-sm text-white" [class.font-semibold]="!notification.read">{{ notification.message }}</p>
-                      <p class="text-xs text-gray-500">{{ notification.timestamp | date:'short' }}</p>
-                    </div>
-                    <div *ngIf="!notification.read" class="ml-2 mt-1 w-2 h-2 bg-red-500 rounded-full"></div>
-                  </li>
-                </ul>
-              </ng-container>
-
-              <ng-template #noNotifications>
-                <div class="p-4 text-sm text-white text-center">No notifications</div>
-              </ng-template>
-            </div>
-          </div>
-
-
-        <!-- Profile Dropdown -->
-        <div class="relative profile-dropdown" (click)="$event.stopPropagation()">
-          <button (click)="toggleProfileDropdown()"
-            class="text-white hover:text-[#DEBD63] transition duration-300 flex items-center">
-            <img src="https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg" alt="User Profile"
-              class="rounded-full w-10 h-10 object-cover" />
-            <i class="fa fa-angle-down ml-2"></i>
-          </button>
-
-          <div *ngIf="isProfileDropdownOpen" class="absolute right-0 mt-2 bg-gray-900 rounded-md shadow-lg w-48 z-50">
-            <a [routerLink]="['/profile', userId]"
-              class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300">
-              <i class="fa fa-user mr-2 text-[#DEBD63]"></i> View Profile
-            </a>
-            <a href="javascript:void(0)" (click)="logout()"
-              class="flex items-center px-4 py-2 hover:bg-gray-800 transition-colors duration-300">
-              <i class="fa fa-sign-out-alt mr-2 text-[#DEBD63]"></i> Logout
-            </a>
-          </div>
-        </div>
+    <!-- Client Dropdown -->
+    <div class="w-full px-4" (click)="$event.stopPropagation()">
+      <button
+        (click)="toggleClientDropdown()"
+        class="w-full font-semibold flex justify-between items-center bg-gray-800 px-4 py-2 rounded-md"
+      >
+        <span>Client Projects</span>
+        <i class="fa fa-angle-down"></i>
+      </button>
+      <div
+        *ngIf="isClientDropdownOpen"
+        class="mt-2 w-full bg-gray-900 rounded-md shadow-lg p-2 space-y-2"
+      >
+        <a routerLink="/client/projects" class="block hover:text-[#DEBD63]"><i class="fa fa-folder-open mr-2 text-[#DEBD63]"></i>Client Projects</a>
+        <a routerLink="clientProjects/approved" class="block hover:text-[#DEBD63]"><i class="fa fa-check-circle mr-2 text-[#DEBD63]"></i>Approved Projects</a>
       </div>
     </div>
-  </ng-template>
+
+    <!-- Freelance Dropdown -->
+    <div class="w-full px-4" (click)="$event.stopPropagation()">
+      <button
+        (click)="toggleFreelanceDropdown()"
+        class="w-full font-semibold flex justify-between items-center bg-gray-800 px-4 py-2 rounded-md"
+      >
+        <span>Freelance Projects</span>
+        <i class="fa fa-angle-down"></i>
+      </button>
+      <div
+        *ngIf="isFreelanceDropdownOpen"
+        class="mt-2 w-full bg-gray-900 rounded-md shadow-lg p-2 space-y-2"
+      >
+        <a routerLink="workingin/" class="block hover:text-[#DEBD63]"><i class="fa-solid fa-bars-progress mr-2 text-[#DEBD63]"></i>Freelance Projects</a>
+        <a routerLink="my-proposals/" class="block hover:text-[#DEBD63]"><i class="fa-solid fa-file-lines mr-2 text-[#DEBD63]"></i>My Proposals</a>
+      </div>
+    </div>
+
+    <!-- Icons Section -->
+    <div class="w-full px-4 space-y-4">
+      
+      <!-- Balance -->
+      <div class="w-full" (click)="$event.stopPropagation()">
+        <button
+          (click)="toggleBalanceDropdown()"
+          class="w-full font-semibold flex justify-start items-center bg-gray-800 px-4 py-2 rounded-md"
+        >
+          <i class="fa fa-dollar-sign mr-2"></i> Balance
+        </button>
+        <div
+          *ngIf="isBalanceDropdownOpen"
+          class="mt-2 bg-[#0f1116] text-white rounded-xl shadow-lg w-full p-4"
+        >
+          <div class="text-lg font-semibold text-[#DEBD63] mb-2">
+            My balance: <span class="text-white font-bold">{{ userProfile?.balance }} $</span>
+          </div>
+          <app-payment></app-payment>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <a routerLink="/messages" class="flex font-semibold items-center bg-gray-800 px-4 py-2 rounded-md hover:text-[#DEBD63]">
+        <i class="fa fa-envelope mr-2"></i> Messages
+      </a>
+
+      <!-- Notifications -->
+      <div class="w-full" (click)="$event.stopPropagation()">
+        <button
+          (click)="toggleNotificationsDropdown()"
+          class="w-full font-semibold flex items-center justify-between bg-gray-800 px-4 py-2 rounded-md"
+        >
+          <span><i class="fa fa-bell mr-2 "></i> Notifications</span>
+          <span *ngIf="getUnreadCount() > 0" class="h-2 w-2 rounded-full bg-red-500"></span>
+        </button>
+        <div
+          *ngIf="isnotificationsshowDropdown"
+          class="mt-2 w-full bg-black rounded-md shadow-lg max-h-96 overflow-y-auto"
+        >
+          <div class="p-4 border-b flex justify-between items-center">
+            <span class="font-semibold">Notifications</span>
+            <button (click)="markAllAsRead()" class="text-sm text-yellow-500 hover:underline">Mark all as read</button>
+          </div>
+          <ng-container *ngIf="notifications.length; else noNotifications">
+            <ul>
+              <li *ngFor="let notification of notifications" class="px-4 py-2 flex items-start">
+                <div class="flex-1">
+                  <p class="text-sm" [class.font-semibold]="!notification.read">{{ notification.message }}</p>
+                  <p class="text-xs text-gray-500">{{ notification.timestamp | date:'short' }}</p>
+                </div>
+                <div *ngIf="!notification.read" class="ml-2 mt-1 w-2 h-2 bg-red-500 rounded-full"></div>
+              </li>
+            </ul>
+          </ng-container>
+          <ng-template #noNotifications>
+            <div class="p-4 text-sm text-center">No notifications</div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Profile -->
+      <div class="w-full" (click)="$event.stopPropagation()">
+        <button
+          (click)="toggleProfileDropdown()"
+          class="w-full flex items-center bg-gray-800 px-4 py-2 rounded-md"
+        >
+          <img
+            [src]="
+          userProfile?.imageUrl ||
+          'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'
+        "
+            alt="User Profile"
+            class="rounded-full w-8 h-8 object-cover mr-2"
+          />
+          <span class="font-semibold">Profile</span>
+        </button>
+        <div
+          *ngIf="isProfileDropdownOpen"
+          class="mt-2 bg-gray-900 rounded-md shadow-lg p-2 w-full space-y-2"
+        >
+          <a [routerLink]="['/profile', userId]" class="block hover:text-[#DEBD63]">
+            <i class="fa fa-user mr-2 text-[#DEBD63]"></i> View Profile
+          </a>
+          <a href="javascript:void(0)" (click)="logout()" class="block hover:text-[#DEBD63]">
+            <i class="fa fa-sign-out-alt mr-2 text-[#DEBD63]"></i> Logout
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</ng-template>
+
 </nav>
