@@ -6,13 +6,45 @@ import { Auth, user, User } from '@angular/fire/auth';
 export interface BalanceChangeDto {
   amount: number;
 }
+export interface SkillDto {
+  skillId: number;
+  skill: string;
+  category: string;
+}
+
+export interface ProfileProjectDto {
+  projectId: number;
+  title: string;
+  projectOverview: string;
+  requiredTasks: string;
+  additionalNotes: string;
+  budget: number;
+  deadline: string;
+  status: string;
+  createdAt: string;
+  skills: SkillDto[];
+}
+
+export interface UserProfileDto {
+  userId: string;
+  name: string;
+  email: string;
+  phone: string;
+  imageUrl: string;
+  aboutMe: string;
+  rating: number;
+  balance: number;
+  skills: SkillDto[];
+  projects: ProfileProjectDto[];
+  
+}
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   private apiUrl = 'http://localhost:5021/api/Auth'; 
   private user$: Observable<User | null>;
-
+  private cachedProfile: UserProfileDto | null = null;
   constructor(private http: HttpClient, private auth: Auth) {
     this.user$ = user(this.auth);
 
@@ -47,5 +79,18 @@ export class UserService {
     return this.auth.currentUser?.uid || null;
   }
   
+
+clearCachedProfile() {
+  this.cachedProfile = null;
+}
+
+async refreshUserProfile(): Promise<void> {
+  const userId = this.getCurrentUserId();
+  if (!userId) return;
+
+  const profile = await firstValueFrom(this.getUserProfile(userId));
+  this.cachedProfile = profile;
+}
+
  
 }

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule, Router } from '@angular/router';
 import { ApprovedProjectService } from '../../../core/services/clientProjects/approved-project.service';
+import { UserService } from '../../../core/services/user/user.service';
 @Component({
   selector: 'app-client-project-approved',
   imports: [CommonModule, FormsModule, RouterModule],
@@ -24,7 +25,8 @@ export class ClientProjectApprovedComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private approvedProjectService: ApprovedProjectService,
-    private router: Router
+    private router: Router,
+    private userService :UserService
   ) { }
 
   ngOnInit() {
@@ -72,6 +74,8 @@ export class ClientProjectApprovedComponent implements OnInit {
       next: (response) => {
         console.log('Project marked as completed:', response);
         this.message = true;
+
+
         // Hide the message after 5 seconds
         setTimeout(() => {
           this.message = false;
@@ -79,7 +83,10 @@ export class ClientProjectApprovedComponent implements OnInit {
 
         // Fetch all client approved project after update
         this.loadApprovedProjects();
+        // call api again
+        this.userService.getUserProfile(this.userID);
       },
+
       error: (err) => {
         console.error('Failed to mark the project as complete', err);
         alert('Error: Could not mark project as completed.');
