@@ -126,7 +126,7 @@
             </button>
 
             <!-- Dropdown menu-->
-            <div *ngIf="isnotificationsshowDropdown" class="absolute right-0 mt-2 w-80 bg-black  rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
+            <div *ngIf="isnotificationsshowDropdown" class="absolute right-0 mt-2 w-80 bg-gray-900  rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
               <div class="p-4 border-b flex justify-between items-center">
                 <span class="font-semibold text-white ">Notifications</span>
                 <button (click)="markAllAsRead()" class="text-sm text-yellow-500 hover:underline">Mark all as read</button>
@@ -312,6 +312,7 @@
         </div>
       </div>
 
+
       <!-- Profile -->
       <div class="w-full" (click)="$event.stopPropagation()">
         <button
@@ -338,6 +339,7 @@
           <a href="javascript:void(0)" (click)="logout()" class="block hover:text-[#DEBD63]">
             <i class="fa fa-sign-out-alt mr-2 text-[#DEBD63]"></i> Logout
           </a>
+
         </div>
       </div>
 
