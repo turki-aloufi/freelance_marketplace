@@ -1,10 +1,3 @@
-.project-container {
-  @apply px-4 sm:px-6 lg:px-12 py-6;
-}
-
-.project-card {
-  @apply bg-white shadow-md rounded-2xl p-6 border border-gray-100 transition hover:shadow-xl;
-}
 
 .project-title {
   @apply text-xl sm:text-2xl font-semibold text-gray-900;
@@ -23,7 +16,7 @@
 }
 
 .skills-section {
-  @apply mt-4;
+  @apply mt-4; /* Example of adding margin-top */
 }
 
 .skills-title {
@@ -54,8 +47,19 @@
   @apply bg-yellow-100 text-yellow-800;
 }
 
-.status-pending {
-  @apply bg-gray-100 text-gray-700;
+.view-link {
+  @apply text-white bg-[#D3A72F] hover:bg-[#c89a29] transition duration-300 px-4 py-2 rounded-full text-sm font-semibold shadow;
 }
 
 
+select {
+  @apply text-sm sm:text-lg bg-white border border-gray-300 rounded-md p-2 sm:px-4 sm:py-2;
+}
+
+select:focus {
+  @apply ring-2 ring-[#D3A72F];
+}
+
+.project-card {
+  @apply bg-white shadow-md rounded-2xl p-6 border border-gray-100 transition hover:shadow-xl flex flex-col h-full;
+}
