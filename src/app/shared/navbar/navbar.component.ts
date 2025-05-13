@@ -25,7 +25,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   userBalance: number = 0;
   userId: string | null = null;
   notifications: Notification[] = [];
-  showDropdown = false;
+  isnotificationsshowDropdown = false;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -53,7 +53,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
           });
 
           // Subscribe to notifications and update the notifications array
-           // Subscribe to notifications and update the notifications array
         this.notificationService.notifications$
           .pipe(takeUntil(this.destroy$))
           .subscribe((notificationsMap) => {
@@ -75,6 +74,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.isClientDropdownOpen = false;
     this.isProfileDropdownOpen = false;
     this.isBalanceDropdownOpen = false;
+    this.isnotificationsshowDropdown=false;
   }
 
   toggleBalanceDropdown() {
@@ -82,6 +82,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.isClientDropdownOpen = false;
     this.isProfileDropdownOpen = false;
     this.isFreelanceDropdownOpen = false;
+    this.isnotificationsshowDropdown=false;
   }
 
   toggleClientDropdown() {
@@ -89,6 +90,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.isProfileDropdownOpen = false;
     this.isBalanceDropdownOpen = false;
     this.isFreelanceDropdownOpen = false;
+    this.isnotificationsshowDropdown=false;
   }
 
   toggleProfileDropdown() {
@@ -96,6 +98,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.isClientDropdownOpen = false;
     this.isBalanceDropdownOpen = false;
     this.isFreelanceDropdownOpen = false;
+    this.isnotificationsshowDropdown=false;
   }
 
   @HostListener('document:click', ['$event'])
@@ -103,11 +106,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLElement;
     if (
       !target.closest('.client-dropdown') &&
-      !target.closest('.profile-dropdown')
+      !target.closest('.profile-dropdown')&&
+      !target.closest('.notifications-dropdown') &&
+      !target.closest('.freelance-dropdown') 
+        
     ) {
       this.isClientDropdownOpen = false;
       this.isProfileDropdownOpen = false;
       this.isBalanceDropdownOpen = false;
+      this.isnotificationsshowDropdown = false; 
+      this.isFreelanceDropdownOpen = false; 
     }
   }
 
@@ -115,8 +123,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.menuOpen = !this.menuOpen;
   }
 
-  toggleDropdown() {
-    this.showDropdown = !this.showDropdown;
+  toggleNotificationsDropdown() {
+    this.isProfileDropdownOpen = false;
+    this.isClientDropdownOpen = false;
+    this.isBalanceDropdownOpen = false;
+    this.isFreelanceDropdownOpen = false;
+    this.isnotificationsshowDropdown = !this.isnotificationsshowDropdown;
   }
 
  markAllAsRead() {
@@ -136,8 +148,6 @@ getUnreadCount(): number {
   }
   return 0;  // Return 0 if userId is null
 }
-
-
 
 
 

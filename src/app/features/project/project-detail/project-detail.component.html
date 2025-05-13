@@ -1,4 +1,21 @@
 <div *ngIf="project" class="container mx-auto p-6 space-y-8">
+  <div *ngIf="assignMessage === 'success'"
+  class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-300"
+  role="alert">
+ Sent successfully!
+</div>
+
+<div *ngIf="assignMessage === 'error'"
+  class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-300"
+  role="alert">
+  Sending failed. Please try again.
+</div>
+
+<div *ngIf="assignMessage === 'warning'"
+  class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-300"
+  role="alert">
+ Please fill in all fields.
+</div>
   <!-- Project Info-->
   <div class="mb-12">
     <section class="space-y-8">

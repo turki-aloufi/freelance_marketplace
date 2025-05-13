@@ -7,7 +7,7 @@ import { ProposalCardComponent } from '../../../shared/components/proposal-card/
 import { ProjectService, Project, Proposal,AssignProjectDto } from '../../../core/services/project/project.service';
 import { AuthService } from '../../../core/services/auth.service'; 
 import { NotificationService } from '../../../core/services/Notification/notification.service'; 
-
+import { UserService } from '../../../core/services/user/user.service';
 @Component({
   selector: 'app-project-detail',
   standalone: true,
@@ -32,12 +32,14 @@ export class ProjectDetailComponent implements OnInit {
   acceptedProposalId: number | null = null;
    // Add the isLoggedInNotOwner property
   isLoggedInNotOwner: boolean = false;
+  assignMessage: 'success' | 'error' | 'warning'| null = null;
+
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
     private authService: AuthService,
     private notificationService: NotificationService,
-  
+    private userService :UserService,
   ) {}
 
   ngOnInit(): void {
@@ -45,6 +47,7 @@ export class ProjectDetailComponent implements OnInit {
 
     this.projectService.getProjectById(this.projectId).subscribe(project => {
       this.project = project;
+    
       console.log('Project Data:', project);
       const currentUser = this.authService.user$.value;
       const token = currentUser?.getIdToken();
@@ -116,14 +119,29 @@ export class ProjectDetailComponent implements OnInit {
           this.comment = '';
           this.proposalDate = '';
           this.proposalPrice = null;
+           this.assignMessage = 'success';
+      setTimeout(() => {
+        this.assignMessage = null;
+      }, 5000);
         },
         (error) => {
           console.error('Error sending proposal:', error);
-          alert('There was an error while submitting your proposal.');
+         
+            this.assignMessage = 'error';
+             setTimeout(() => {
+            this.assignMessage = null;
+      }, 5000);
         }
       );
     } else {
-      alert("Please fill in all fields");
+    
+         // Show error message
+      this.assignMessage = 'warning';
+      setTimeout(() => {
+        this.assignMessage = null;
+      }, 5000);
+      
+  
     }
   }
 //assign project
@@ -140,19 +158,33 @@ export class ProjectDetailComponent implements OnInit {
       () => {
         
         proposal.status = 'Accepted';
-        this.acceptedProposalId = proposal.proposalId; 
-        console.log('Proposal accepted and project assigned successfully.');
-        alert('Proposal accepted successfully.');
-      
+
+        this.acceptedProposalId = proposal.proposalId;  
+      console.log('Proposal accepted and project assigned successfully.');
+
+      // Show success message
+      this.assignMessage = 'success';
+      setTimeout(() => {
+        this.assignMessage = null;
+      }, 5000);
+
         this.notificationService.addNotification(
           `Congratulations! Your proposal has been accepted for Project No.${this.projectId}`,  
           proposal.freelancerId // <== This identifies the recipient.
         )
+       // clear user cashed
+        this.userService.clearCachedProfile(); 
+        this.userService.refreshUserProfile();
       },
     
       (error) => {
         console.error('Error assigning project:', error);
-        alert('Failed to assign the project.');
+       
+         // Show error message
+      this.assignMessage = 'error';
+      setTimeout(() => {
+        this.assignMessage = null;
+      }, 5000);
       }
     );
   }

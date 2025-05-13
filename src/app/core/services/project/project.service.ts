@@ -53,16 +53,7 @@ export class ProjectService {
     this.user$ = user(this.auth);
   }
 
-  // private getAuthToken(): Observable<string> {
-  //   return this.user$.pipe(
-  //     take(1),
-  //     switchMap(user => {
-  //       if (!user) throw new Error('No authenticated user');
-        
-  //       return user.getIdToken(); // Get Firebase JWT token
-  //     })
-  //   );
-  // }
+
 private getAuthToken(): Observable<string | null> {
   return this.user$.pipe(
     take(1),
@@ -77,16 +68,6 @@ private getAuthToken(): Observable<string | null> {
 }
 
 
-
-  // getProjectById(id: number): Observable<Project> {
-  //   return this.getAuthToken().pipe(
-  //     switchMap(token => {
-        
-  //       const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-  //       return this.http.get<Project>(`${this.baseUrl}/FreelancerProposal/${id}`, { headers });
-  //     })
-  //   );
-  // }
  getProjectById(id: number): Observable<Project> {
     return this.getAuthToken().pipe(
       switchMap(token => {
