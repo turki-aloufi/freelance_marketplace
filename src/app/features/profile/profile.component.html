@@ -28,14 +28,23 @@
         class="text-sm text-gray-400 hover:underline"
         >{{ userProfile.phone }}</a
       ><br />
-      <button
-      *ngIf="!isOwnProfile()"
+          <button
+      *ngIf="!isOwnProfile(); else editButton"
       class="mt-2 bg-black text-white px-4 py-1 rounded"
       [routerLink]="['/messages']"
       [queryParams]="{ userId: userId }"
     >
       Contact
     </button>
+
+    <ng-template #editButton>
+      <button
+        class="mt-2 bg-black text-white px-4 py-1 rounded"
+        [routerLink]="['/profile', userId, 'edit']"
+      >
+        Edit Profile
+      </button>
+    </ng-template>
     </div>
   </div>
 
