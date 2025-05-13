@@ -1,0 +1,36 @@
+<!-- Proposal Card Container -->
+<div class="bg-white p-4 rounded-xl shadow transition-transform duration-200 transform hover:shadow-lg space-y-4">
+  
+  <!-- Main Row: Avatar + Name/Message + Date/Price -->
+  <div class="flex justify-between items-start">
+    
+    <!-- Left Side -->
+    <div class="flex items-center space-x-4">
+      <a href="#" class="text-white hover:text-[#DEBD63] transition duration-300">
+        <img [src]="proposal.freelancerAvatar" alt="User Profile" class="rounded-full w-10 h-10 object-cover">
+      </a>
+      <div>
+        <h5 (click)="navigateToUserProfile(proposal.freelancerId)" class="font-semibold text-lg cursor-pointer underline">{{ proposal.freelancerName }}</h5>
+        <p class="text-gray-600">{{ proposal.coverLetter }}</p>
+      </div>
+    </div>
+
+    <!-- Right Side: Date + Price in a row -->
+    <div class="flex items-center gap-6 text-sm text-right">
+      <div class="flex items-center gap-2 text-gray-500">
+        <i class="fa-regular fa-clock text-blue-500"></i>
+        <span>{{ proposal.deadline }}</span>
+      </div>
+
+      <div class="flex items-center gap-2 text-green-500 font-semibold">
+       <i class="fa-solid fa-money-bill-wave text-green-500"></i>
+        <span>{{ proposal.proposedAmount }}$</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Content (e.g., Accept Button) -->
+  <div class="text-right ">
+    <ng-content></ng-content>
+  </div>
+</div>

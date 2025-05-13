@@ -1,0 +1,156 @@
+<div class="min-h-screen bg-gray-50 flex flex-col">
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center justify-center py-10">
+    <h2 class="text-3xl font-bold mb-6">SIGN UP</h2>
+
+    <!-- Google Sign Up -->
+    <button (click)="loginWithGoogle()"
+      class="flex items-center space-x-2 border border-gray-300 rounded-full p-2 hover:shadow-md mb-4"
+      [disabled]="isLoading">
+      <img src="assets/images/download.png" alt="Google Logo" class="w-6 h-6" />
+      <span *ngIf="isLoading" class="ml-2">
+        <svg class="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+      </span>
+    </button>
+
+    <div class="flex items-center w-full max-w-md mb-6">
+      <div class="flex-grow border-t border-gray-300"></div>
+      <span class="px-2 text-gray-500 text-sm">Or sign up with</span>
+      <div class="flex-grow border-t border-gray-300"></div>
+    </div>
+
+    <!-- Sign Up Form -->
+    <form class="w-full max-w-md space-y-4">
+      <!-- First Name and Last Name -->
+      <div class="flex space-x-4">
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700">*First Name</label>
+          <input type="text" [(ngModel)]="firstName" name="firstName" placeholder="First Name"
+            class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required [disabled]="isLoading" />
+        </div>
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700">*Last Name</label>
+          <input type="text" [(ngModel)]="lastName" name="lastName" placeholder="Last Name"
+            class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required [disabled]="isLoading" />
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">*Email</label>
+        <input type="email" [(ngModel)]="email" name="email" placeholder="Email"
+          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required
+          [disabled]="isLoading" />
+      </div>
+
+      <!-- Contact Number -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">*Contact Number</label>
+        <input type="tel" [(ngModel)]="contactNumber" name="contactNumber" placeholder="Contact Number"
+          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required
+          [disabled]="isLoading" />
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">*Password</label>
+        <input type="password" [(ngModel)]="password" name="password" placeholder="Password"
+          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" required
+          [disabled]="isLoading" />
+      </div>
+
+      <!-- Required Skills
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Required Skills</label>
+        <div class="relative">
+          <input
+            type="text"
+            [(ngModel)]="skillSearch"
+            name="skillSearch"
+            (ngModelChange)="onSkillSearchChange()"
+            placeholder="Search skills..."
+            class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            [disabled]="isLoading || isLoadingSkills"
+          />
+          <div *ngIf="isLoadingSkills" class="absolute right-2 top-2">
+            <svg
+              class="animate-spin h-5 w-5 text-gray-500"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              ></path>
+            </svg>
+          </div>
+          <ul
+            *ngIf="filteredSkills.length > 0 && skillSearch && !isLoadingSkills"
+            class="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 max-h-40 overflow-y-auto"
+          >
+            <li
+              *ngFor="let skill of filteredSkills"
+              (click)="addSkill(skill)"
+              class="p-2 hover:bg-gray-100 cursor-pointer"
+            >
+              {{ skill.Skill }} ({{ skill.Category }})
+            </li>
+          </ul>
+        </div>
+        <div *ngIf="error && !isLoadingSkills" class="mt-2 text-red-500 text-sm">
+          {{ error }}
+          <button (click)="fetchSkills()" class="ml-2 underline">Retry</button>
+        </div>
+        <div class="mt-2 flex flex-wrap gap-2">
+          <span
+            *ngFor="let skill of skills"
+            class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-sm flex items-center"
+          >
+            {{ skill.Skill }}
+            <button (click)="removeSkill(skill)" class="ml-1 text-red-500" [disabled]="isLoading">×</button>
+          </span>
+        </div>
+      </div> -->
+      <app-skill-selector [(selectedSkills)]="skills"></app-skill-selector>
+      <!-- About Experience -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700">About Your Experience</label>
+        <textarea [(ngModel)]="about" name="about" placeholder="Write your experience"
+          class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" rows="4"
+          [disabled]="isLoading"></textarea>
+      </div>
+
+      <!-- Error Message -->
+      <p *ngIf="error" class="text-red-500 text-sm">{{ error }}</p>
+
+      <!-- Sign Up Button -->
+      <button type="submit" (click)="signUp()"
+        class="w-full bg-black text-white py-2 rounded hover:bg-gray-800 font-semibold flex items-center justify-center"
+        [disabled]="isLoading">
+        <span *ngIf="!isLoading">SIGN UP</span>
+        <span *ngIf="isLoading" class="flex items-center">
+          <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          Loading...
+        </span>
+      </button>
+
+      <!-- Sign In Link -->
+      <p class="text-center text-sm text-gray-600">
+        Already have an account? <a routerLink="/sign-in" class="underline">Sign In</a>
+      </p>
+    </form>
+  </main>
+</div>

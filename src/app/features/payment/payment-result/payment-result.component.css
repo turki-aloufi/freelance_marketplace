@@ -1,0 +1,24 @@
+.animate-bounce-in {
+    animation: bounceIn 0.6s ease-out;
+}
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+.animate-check {
+    animation: check 0.3s ease-out;
+}
+@keyframes bounceIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+@keyframes check {
+    0% { transform: scale(0); }
+    80% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}

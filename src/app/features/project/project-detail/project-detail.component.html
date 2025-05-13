@@ -1,0 +1,162 @@
+<div *ngIf="project" class="container mx-auto p-6 space-y-8">
+  <div *ngIf="assignMessage === 'success'"
+  class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-300"
+  role="alert">
+ Sent successfully!
+</div>
+
+<div *ngIf="assignMessage === 'error'"
+  class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-300"
+  role="alert">
+  Sending failed. Please try again.
+</div>
+
+<div *ngIf="assignMessage === 'warning'"
+  class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-300"
+  role="alert">
+ Please fill in all fields.
+</div>
+  <!-- Project Info-->
+  <div class="mb-12">
+    <section class="space-y-8">
+      <h2 class="text-2xl font-bold">Let's See <span class="text-yellow-500">Project Details</span></h2>
+      <h3 class="text-xl font-semibold">{{ project.title }}</h3>
+
+      <div class="flex gap-4 items-start">
+        <!-- Left side -->
+        <div class="w-1/4 space-y-6">
+          <h4 class="text-xl font-semibold">Project Details:</h4>
+          <div class="flex items-center gap-2 text-gray-600">
+            <i class="fa-regular fa-calendar-days text-yellow-500"></i>
+            <span>{{ project.deadline }}</span>
+          </div>
+          <div class="flex items-center gap-2 text-gray-600">
+            <i class="fa-solid fa-dollar-sign text-yellow-500"></i>
+            <span>AVG: {{ project.budget }}</span>
+          </div>
+          <h4 class="text-xl font-semibold">
+            <i class="fa-solid fa-star text-yellow-500"></i> Skills:
+          </h4>
+          <div class="flex gap-2 flex-wrap">
+            <span *ngFor="let skill of project.skills" class="px-3 py-1 bg-gray-200 rounded-full text-sm">{{ skill }}</span>
+          </div>
+              <!-- Add Owner's Name -->
+         <div class="flex items-center gap-2 text-gray-600">
+          <i class="fa-solid fa-user text-yellow-500"></i>
+          <h2 class="font-bold">Owner: <span>{{ project.clientName }}</span></h2>
+         
+        </div>
+        </div>
+     
+
+        
+        <!-- Vertical Line -->
+        <div class="w-px bg-gray-300 self-stretch"></div>
+
+        <!-- Right side -->
+        <div class="flex-1 space-y-6 pl-8">
+          <div class="space-y-2">
+            <h4 class="text-lg font-semibold">Project Overview:</h4>
+            <p class="text-gray-700">{{ project.overview }}</p>
+          </div>
+
+          <div class="space-y-2">
+            <h4 class="text-lg font-semibold">Required tasks:</h4> 
+            <ul class="list-disc list-inside text-gray-700 space-y-1">
+              <li *ngFor="let task of requiredTasksArray">
+                {{ task }}
+              </li>
+            </ul>
+          </div> 
+
+          <div class="space-y-2">
+            <h4 class="text-lg font-semibold">Additional Notes:</h4>
+            <p class="text-gray-700">{{ project.additionalNotes }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+
+
+<!-- Proposal Section -->
+<div class="space-y-8">
+  <h3 class="text-xl font-bold border-b pb-2">Proposals:</h3>
+  <div class="space-y-10">
+    <div *ngFor="let proposal of proposals">
+      <!-- If user is not the project owner, only show the proposal card without the accept button -->
+      <app-proposal-card *ngIf="!isProjectOwner" [proposal]="proposal" ></app-proposal-card>
+
+      <!-- If user is the project owner, show the accept button inside the proposal card -->
+      <ng-container *ngIf="isProjectOwner">
+        <app-proposal-card [proposal]="proposal">
+          <!-- Button inside the card (will be rendered inside app-proposal-card using ng-content) -->
+
+            <button
+      [disabled]="proposal.status === 'Accepted' || acceptedProposalId !== null"
+      [ngClass]="{
+        'bg-gray-400 cursor-not-allowed': proposal.status === 'Accepted' || acceptedProposalId !== null,
+        'bg-yellow-500 hover:bg-yellow-600': proposal.status !== 'Accepted' && acceptedProposalId === null
+      }"
+      class="text-white font-bold py-2 px-6 rounded-lg m-5 transition"
+      (click)="acceptProposal(proposal)"
+    >
+  {{ proposal.status === 'Accepted' ? 'Accepted' : 'Accept' }}
+</button>
+
+            </app-proposal-card>
+          </ng-container>
+          
+    </div>
+  </div>
+  <div class="border-b"></div>
+</div>
+
+
+
+
+
+  <!-- Share Proposal Form (Only shows if user is not the project owner) -->
+  <section class="space-y-6" *ngIf="isLoggedInNotOwner">
+    <h3 class="text-2xl font-bold">Share <span class="text-yellow-500 font-normal">your Proposal</span></h3>
+
+    <!-- Proposal Form -->
+    <div class="flex flex-col md:flex-row gap-4">
+      <input
+        type="date"
+        class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        placeholder="Set Date"
+        [(ngModel)]="proposalDate"
+      />
+      <input
+        type="number"
+        class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        placeholder="Set Price"
+        [(ngModel)]="proposalPrice"
+      />
+    </div>
+
+    <!-- Comment Field -->
+    <div class="relative">
+      <textarea
+        [(ngModel)]="comment"
+        maxlength="200"
+        rows="4"
+        class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-16 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        placeholder="Write your comment..."
+      ></textarea>
+      <div class="absolute bottom-2 right-4 text-xs text-gray-400">
+        {{ comment.length }}/200
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button
+      class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-lg transition mt-2"
+      (click)="sendProposal()"
+    >
+      Send
+    </button>
+  </section>
+</div>

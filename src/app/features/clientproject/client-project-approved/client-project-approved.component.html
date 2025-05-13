@@ -1,0 +1,92 @@
+<div [class.hidden]="!message"
+  class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-300"
+  role="alert">
+  Project marked as completed successfully!
+</div>
+
+<div class="p-6">
+  <!-- Search and Filter -->
+  <div class="flex justify-between items-center mb-6">
+    <!-- Search Box -->
+    <input type="text" [(ngModel)]="searchTerm" placeholder="Search by project name..."
+      class="border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 w-1/2" />
+
+    <!-- Filter Dropdown -->
+    <select [(ngModel)]="selectedStatus"
+      class="border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+      <option value="All">All</option>
+      <option value="In Progress">In Progress</option>
+      <option value="Completed">Completed</option>
+    </select>
+  </div>
+
+  <!-- No project found -->
+  <div *ngIf="!initialLoading && filteredProjects.length === 0" class="text-center text-gray-500 mt-10">
+    No projects found.
+  </div>
+
+
+  <!-- Loading Spinner-->
+  <div *ngIf="initialLoading" class="flex justify-center items-center my-10">
+    <i class="fas fa-spinner fa-spin text-yellow-500 text-5xl"></i>
+  </div>
+
+  <!-- Projects Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div *ngFor="let project of filteredProjects" class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+
+      <div class="flex justify-between items-center mb-2">
+        <h1 class="text-2xl font-bold tracking-tight text-gray-900">{{ project.title }}</h1>
+
+        @if(project.status=="Completed"){
+        <span class="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-black-800">
+          {{ project.status }}
+        </span>
+        }@else{
+        <span class="text-xs font-semibold px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">
+          {{ project.status }}
+        </span>
+        }
+      </div>
+
+      <h2 class="mb-1 text-lg text-gray-700">Delivery Date: {{ project.deadline }}</h2>
+      <h2 class="mb-4 text-lg text-gray-700">Price: {{ project.budget }} $</h2>
+
+      <!-- Freelancer -->
+      <h5 class="mb-2 text-xl font-medium text-gray-900">Assigned to:</h5>
+      <div class="flex items-center space-x-4 mb-4">
+        <!-- Photo -->
+        <img src="https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg" alt="User Profile"
+          class="w-20 h-20 rounded-full object-cover" />
+
+        <div class="flex-1 flex flex-col space-y-2">
+          <!-- Freelancer Name -->
+          <a (click)="navigateToUserProfile(project.freelancer.freelancerId)"
+            class="text-lg font-semibold text-gray-900 underline text-left cursor-pointer">
+            {{ project.freelancer.freelancerName }}
+          </a>
+
+          <!-- Buttons Row -->
+          <div class="flex justify-between items-center">
+            <!-- Message Button -->
+            
+<button 
+(click)="contactFreelancer(project.freelancer.freelancerId)"
+class="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-black-800 focus:ring-4 focus:outline-none focus:ring-black-300">
+Message
+</button>
+
+            <!-- Done Button -->
+            @if(project.status!="Completed"){
+            <button (click)="onDoneClick(project.projectId)"
+              class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300">
+              Done
+            </button>
+            }
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
