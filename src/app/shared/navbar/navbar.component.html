@@ -126,7 +126,7 @@
             </button>
 
             <!-- Dropdown menu-->
-            <div *ngIf="showDropdown" class="absolute right-0 mt-2 w-80 bg-black  rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
+            <div *ngIf="isnotificationsshowDropdown" class="absolute right-0 mt-2 w-80 bg-black  rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
               <div class="p-4 border-b flex justify-between items-center">
                 <span class="font-semibold text-white ">Notifications</span>
                 <button (click)="markAllAsRead()" class="text-sm text-yellow-500 hover:underline">Mark all as read</button>
@@ -283,7 +283,7 @@
             </button>
 
             <!-- Dropdown menu-->
-            <div *ngIf="showDropdown" class="absolute right-0 mt-2 w-80 bg-black  rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
+            <div *ngIf="isnotificationsshowDropdown" class="absolute right-0 mt-2 w-80 bg-black  rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
               <div class="p-4 border-b flex justify-between items-center">
                 <span class="font-semibold text-white ">Notifications</span>
                 <button (click)="markAllAsRead()" class="text-sm text-yellow-500 hover:underline">Mark all as read</button>
