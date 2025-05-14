@@ -82,7 +82,7 @@ export class ProjectDetailComponent implements OnInit {
         deadline: p.deadline,
         proposedAmount: p.proposedAmount,
         freelancerName: p.freelancerName || 'Unknown',
-        freelancerAvatar: p.freelancerAvatar || 'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg',
+        profilePictureUrl: p.profilePictureUrl || 'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg',
         status: p['status'] || 'Pending',
         freelancerPhoneNumber: p.freelancerPhoneNumber
       }));
