@@ -3,7 +3,7 @@ import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@micros
 import { BehaviorSubject, Observable, Subject, firstValueFrom } from 'rxjs';
 import { MessageDto, ChatDto } from '../models/chat.model';
 import { filter, take } from 'rxjs/operators';
-
+import {environment} from '../../../environment.prod'
 @Injectable({
   providedIn: 'root'
 })
@@ -26,7 +26,7 @@ export class SignalrService {
     }
 
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl('http://localhost:5021/chatHub')
+      .withUrl(`${environment.apiUrl}/chatHub`)
       .withAutomaticReconnect()
       .build();
     

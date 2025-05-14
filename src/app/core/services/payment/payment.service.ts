@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Auth, user, User } from '@angular/fire/auth';
 import { firstValueFrom, switchMap, take, Observable } from 'rxjs';
-
+import {environment} from '../../../../environment.prod'
 interface SessionResponse { sessionId: string; }
 
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
-  apiUrl='http://localhost:5021/api/payment';
+  apiUrl=`${environment.apiUrl}/api/payment`;
   private user$: Observable<User | null>;
 
   constructor(

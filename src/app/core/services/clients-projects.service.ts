@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Observable } from 'rxjs';
-
+import {environment} from '../../../environment.prod'
 export interface Project {
   projectId: number;
   title: string;
@@ -30,7 +30,7 @@ export interface Freelancer {
 })
 export class ClientsProjectsService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:5021/api/projects';
+  private apiUrl = `${environment.apiUrl}/api/projects`;
 
   getClientProjects(): Observable<Project[]> {
     const token = localStorage.getItem('token');

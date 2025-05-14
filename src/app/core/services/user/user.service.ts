@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom, switchMap, take, Observable ,BehaviorSubject} from 'rxjs';
 import { Auth, user, User } from '@angular/fire/auth';
-
+import {environment} from '../../../../environment.prod'
 export interface BalanceChangeDto {
   amount: number;
 }
@@ -50,7 +50,7 @@ export interface EditProfileDto {
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:5021/api/Auth';
+  private apiUrl = `${environment.apiUrl}/api/Auth`;
   private user$: Observable<User | null>;
   private cachedProfile: UserProfileDto | null = null;
 

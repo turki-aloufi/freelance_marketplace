@@ -7,6 +7,8 @@ import { BehaviorSubject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { UserService } from './user/user.service';
 
+import {environment} from '../../../environment.prod'
+// Interface for the backend DTO
 export interface CreateUserDto {
   userId: string;
   name: string;
@@ -28,7 +30,7 @@ export interface SkillDto {
 export class AuthService {
   user$ = new BehaviorSubject<any>(null);
   private authStateResolved = false;
-  private apiUrl = 'http://localhost:5021/api/users/create';
+  private apiUrl = `${environment.apiUrl}/api/users/create`;
 
   constructor(
     private auth: Auth,

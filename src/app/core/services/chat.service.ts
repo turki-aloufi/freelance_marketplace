@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { BehaviorSubject, Observable, from, Subject } from 'rxjs';
 import { MessageDto, ChatDto } from '../models/chat.model';
-
+import {environment} from '../../../environment.prod'
 @Injectable({
   providedIn: 'root'
 })
@@ -20,7 +20,7 @@ export class SignalrService {
 
   public startConnection(userId: string): Promise<void> {
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl('http://localhost:5021/chatHub')
+      .withUrl(`${environment.apiUrl}/chatHub`)
       .withAutomaticReconnect()
       .build();
     
