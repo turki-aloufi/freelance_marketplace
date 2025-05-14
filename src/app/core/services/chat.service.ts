@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, from } from 'rxjs';
+import { Observable, BehaviorSubject, from, throwError } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { ChatDto, MessageDto, SendMessageDto, CreateChatDto } from '../models/chat.model';
 import { SignalrService } from './signalr.service';
@@ -102,16 +102,22 @@ export class ChatService {
   }
 
   createChat(clientId: string, freelancerId: string): Observable<ChatDto> {
-    return this.getAuthHeaders().pipe(
-      switchMap(headers => {
-        return this.http.post<ChatDto>(
-          `${this.apiUrl}/chats/create`, 
-          { clientId, freelancerId }, 
-          { headers }
-        );
-      })
-    );
+  // Prevent creating a chat with yourself
+  if (clientId === freelancerId) {
+    return throwError(() => new Error('You cannot create a chat with yourself'));
   }
+  
+  return this.getAuthHeaders().pipe(
+    switchMap(headers => {
+      return this.http.post<ChatDto>(
+        `${this.apiUrl}/chats/create`, 
+        { clientId, freelancerId }, 
+        { headers }
+      );
+    })
+  );
+}
+
 
   checkChatExists(clientId: string, freelancerId: string): Observable<any> {
     return this.getAuthHeaders().pipe(

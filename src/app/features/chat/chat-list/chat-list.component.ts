@@ -50,8 +50,13 @@ export class ChatListComponent implements OnInit, OnDestroy {
     this.chatService.getUserChats(userId)
       .subscribe({
         next: (chats) => {
-          // Sort chats by last message time (most recent first)
-          this.chats = this.sortChatsByRecency(chats);
+          // Filter out chats with no messages
+          const nonEmptyChats = chats.filter(chat => 
+            chat.lastMessage != null && chat.lastMessage.trim() !== ''
+          );
+          
+          // Sort the non-empty chats by recency
+          this.chats = this.sortChatsByRecency(nonEmptyChats);
           this.loading = false;
         },
         error: (err) => {
@@ -61,14 +66,12 @@ export class ChatListComponent implements OnInit, OnDestroy {
       });
   }
 
-  // New method to sort chats by recency
+  // Keep your existing sortChatsByRecency method
   private sortChatsByRecency(chats: ChatDto[]): ChatDto[] {
     return [...chats].sort((a, b) => {
-      // If no last message time, put at the bottom
       if (!a.lastMessageTime) return 1;
       if (!b.lastMessageTime) return -1;
       
-      // Compare timestamps (most recent first)
       const timeA = new Date(a.lastMessageTime).getTime();
       const timeB = new Date(b.lastMessageTime).getTime();
       return timeB - timeA;
@@ -80,10 +83,10 @@ export class ChatListComponent implements OnInit, OnDestroy {
   }
 
   formatTime(timestamp: string): string {
+    // Keep your existing formatTime method
     const date = new Date(timestamp);
     const now = new Date();
     
-    // Today - show time only
     if (date.toDateString() === now.toDateString()) {
       return date.toLocaleTimeString([], { 
         hour: '2-digit', 
@@ -92,13 +95,11 @@ export class ChatListComponent implements OnInit, OnDestroy {
       });
     }
     
-    // Within last week - show day name
     const daysAgo = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
     if (daysAgo < 7) {
       return date.toLocaleDateString([], { weekday: 'short' });
     }
     
-    // Older - show month and day
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
   }
 }
