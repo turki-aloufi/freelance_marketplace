@@ -22,7 +22,8 @@ jobs:
         run: npm ci
 
       - name: Build Angular project
-        run: npm run build --configuration production
+        run: ng build --configuration production
+
 
       - name: Deploy to S3
         env:
