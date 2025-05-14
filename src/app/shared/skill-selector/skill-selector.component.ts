@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Subject, debounceTime, retry, takeUntil } from 'rxjs';
-
+import { environment } from '../../../environment.prod';
 interface Skill {
   SkillId: number;
   Skill: string;
@@ -54,7 +54,7 @@ export class SkillSelectorComponent implements OnInit, OnDestroy {
     this.isLoadingSkills = true;
 
     this.http
-      .get<Skill[]>('http://localhost:5021/api/Skills')
+      .get<Skill[]>(`${environment.apiUrl}/api/Skills`)
       .pipe(retry(2), takeUntil(this.destroy$))
       .subscribe({
         next: (skills) => {
