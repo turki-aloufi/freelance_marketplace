@@ -98,11 +98,10 @@ freelance_marketplace/
               }; ```
    
 6. **Run the development server**
-    ```txt
- ng serve
-```
+   
+`ng serve`
 
-7. **Visit the app at**
+8. **Visit the app at**
     `http://localhost:4200`
 ---
 
