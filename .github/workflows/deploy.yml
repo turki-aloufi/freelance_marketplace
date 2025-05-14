@@ -35,4 +35,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          aws s3 sync dist/freelance_marketplace/browser/ s3://freelancerfrontend --delete
+          aws s3 sync dist/freelance_marketplace/browser/browser/ s3://freelancerfrontend --delete
