@@ -55,37 +55,38 @@ freelance_marketplace/
 ├── .gitignore                      # Ignored files for Git
 └── README.md                       # Project documentation
 
+---
 
 ## 🔧 Getting Started
 
-## 📦 Technologies Used
+### 📦 Technologies Used
 
-- Angular 19
-- Firebase (Auth + Firestore)
-- Tailwind CSS
-- Angular Material
-- Stripe API
-- SignalR
+- **Angular 19**
+- **Firebase** (Authentication + Firestore)
+- **Tailwind CSS**
+- **Angular Material**
+- **Stripe API**
+- **SignalR**
 
-### Prerequisites
+### ✅ Prerequisites
 
 - Node.js (v18+ recommended)
 - Angular CLI
-- Firebase project (with authentication enabled)
+- Firebase project with enabled authentication
 
-### Setup
+### ⚙️ Setup Instructions
 
-1. Clone the repo:
-2. 
-   pre> \`\`\`bash git clone https://github.com/turki-aloufi/freelance_marketplace.git
-   cd freelance_marketplace \`\`\` </pre>
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/turki-aloufi/freelance_marketplace.git
+   cd freelance_marketplace
 
-3. pre> ` npm install `
+2. **install dependencies**   ```bash npm install 
 
-4. Set your Firebase config:
+4. **Set your Firebase config**
    Update src/environments/environment.ts with your Firebase credentials.
 
-pre> \`\`\ export const environment = {
+```bash export const environment = {
               production: false,
               firebase: {
               apiKey: 'YOUR_API_KEY',
@@ -95,21 +96,22 @@ pre> \`\`\ export const environment = {
               messagingSenderId: 'YOUR_SENDER_ID',
               appId: 'YOUR_APP_ID',
                 }
-              }; \`\`\` </pre>
+              }; 
    
-6. Start the development server:
-    `ng serve`
+6. **Run the development server**
+    ```bash ng serve
 
-7. Visit the app at:
+7. **Visit the app at**
     `http://localhost:4200`
+---
 
 ## 🔗 Backend Repository
 
 The backend for this project is developed using .NET and SignalR.  
 You can find it here:  
 
-pre> \`\`\ https://github.com/turki-aloufi/freelance_marketplace_backend \`\`\` </pre>
-
+`https://github.com/turki-aloufi/freelance_marketplace_backend`
+---
 
 ## 👥 Team Members
 
