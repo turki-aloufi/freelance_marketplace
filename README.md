@@ -83,19 +83,21 @@ freelance_marketplace/
 2. **install dependencies**   <pre> ```npm install``` </pre>
 
 4. **Set your Firebase config**
-   Update src/environments/environment.ts with your Firebase credentials.
-   <pre> ``` export const environment = {
-              production: false,
-              firebase: {
-              apiKey: 'YOUR_API_KEY',
-              authDomain: 'YOUR_AUTH_DOMAIN',
-              projectId: 'YOUR_PROJECT_ID',
-              storageBucket: 'YOUR_STORAGE_BUCKET',
-              messagingSenderId: 'YOUR_SENDER_ID',
-              appId: 'YOUR_APP_ID',
-                } 
-};``` </pre>
-   
+   Update `src/environments/environment.ts` with your Firebase credentials.
+```ts
+export const environment = {
+  production: false,
+  firebase: {
+    apiKey: 'YOUR_API_KEY',
+    authDomain: 'YOUR_AUTH_DOMAIN',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_STORAGE_BUCKET',
+    messagingSenderId: 'YOUR_SENDER_ID',
+    appId: 'YOUR_APP_ID',
+  }
+};
+
+
 6. **Run the development server**    <pre> ```ng serve``` </pre>
 
 8. **Visit the app at**
