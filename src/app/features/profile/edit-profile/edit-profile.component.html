@@ -1,6 +1,6 @@
 <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
   <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit Profile</h2>
-  
+
   <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="space-y-6">
     <!-- Loading state -->
     <div *ngIf="isLoading" class="text-center py-8">
@@ -10,18 +10,30 @@
 
     <!-- Profile form -->
     <div *ngIf="!isLoading" class="space-y-6">
+
+      <!-- Image -->
+      <div>
+        <label for="imageUpload" class="block text-sm font-medium text-gray-700">Profile Image</label>
+        <div class="flex items-center gap-4 mt-2">
+          <img [src]="
+      imagePreview ||
+      profileForm.get('imageUrl')?.value ||
+      'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'
+    " alt="Profile preview" class="h-24 w-24 rounded-full object-cover">
+          <input id="imageUpload" type="file" accept="image/*" (change)="onFileSelected($event)"
+            class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+        </div>
+      </div>
+
       <!-- Name -->
       <div>
         <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-        <input
-          id="name"
-          type="text"
-          formControlName="name"
+        <input id="name" type="text" formControlName="name"
           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-          required
-        >
-        <div *ngIf="profileForm.get('name')?.invalid && (profileForm.get('name')?.dirty || profileForm.get('name')?.touched)"
-             class="text-red-500 text-sm mt-1">
+          required>
+        <div
+          *ngIf="profileForm.get('name')?.invalid && (profileForm.get('name')?.dirty || profileForm.get('name')?.touched)"
+          class="text-red-500 text-sm mt-1">
           Name is required
         </div>
       </div>
@@ -29,61 +41,37 @@
       <!-- Phone -->
       <div>
         <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
-        <input
-          id="phone"
-          type="tel"
-          formControlName="phone"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-        >
-      </div>
-
-      <!-- Image -->
-      <div>
-        <label for="imageUrl" class="block text-sm font-medium text-gray-700">Profile Image</label>
-        <input
-          id="imageUrl"
-          type="url"
-          formControlName="imageUrl"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-        >
-        <div *ngIf="profileForm.get('imageUrl')?.value" class="mt-2">
-          <img [src]="profileForm.get('imageUrl')?.value" alt="Profile preview" class="h-20 w-20 rounded-full object-cover">
-        </div>
+        <input id="phone" type="tel" formControlName="phone"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border">
       </div>
 
       <!-- About Me -->
       <div>
         <label for="aboutMe" class="block text-sm font-medium text-gray-700">About Me</label>
-        <textarea
-          id="aboutMe"
-          formControlName="aboutMe"
-          rows="4"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
-        ></textarea>
+        <textarea id="aboutMe" formControlName="aboutMe" rows="4"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"></textarea>
       </div>
 
       <!-- Skills Selector -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Skills</label>
-        <app-skill-selector 
-          [selectedSkills]="selectedSkills"
-          (selectedSkillsChange)="onSkillsChange($event)"
-        ></app-skill-selector>
+        <app-skill-selector [selectedSkills]="selectedSkills"
+          (selectedSkillsChange)="onSkillsChange($event)"></app-skill-selector>
       </div>
 
-          <!-- Submit Button -->
+      <!-- Submit Button -->
       <div class="pt-4">
-        <button
-          type="submit"
-          [disabled]="profileForm.invalid || isSubmitting"
+        <button type="submit" [disabled]="profileForm.invalid || isSubmitting"
           class="w-full py-2 px-4 rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          [style.background-color]="'rgb(211 167 47)'"
-        >
+          [style.background-color]="'rgb(211 167 47)'">
           <span *ngIf="!isSubmitting">Save Changes</span>
           <span *ngIf="isSubmitting">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg"
+              fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+              </path>
             </svg>
             Saving...
           </span>
