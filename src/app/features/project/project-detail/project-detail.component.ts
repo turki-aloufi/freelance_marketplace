@@ -47,13 +47,9 @@ export class ProjectDetailComponent implements OnInit {
 
     this.projectService.getProjectById(this.projectId).subscribe(project => {
       this.project = project;
-      console.log('Project Data:', project);
-
       const currentUser = this.authService.user$.value;
       const token = currentUser?.getIdToken();
-      console.log('token:', token);  
-      console.log('Current User:', currentUser);
-      console.log('PostedBy:', project.clientId);
+
 
       if (currentUser && project.clientId && project.clientId === currentUser.uid) {
         this.isProjectOwner = true;
@@ -61,12 +57,8 @@ export class ProjectDetailComponent implements OnInit {
         this.isProjectOwner = false;
       }
     
-      console.log('isProjectOwner:', this.isProjectOwner);
-      
       // Check if the user is logged in and is not the project owner
       this.isLoggedInNotOwner = currentUser && !this.isProjectOwner;
-      console.log('isLoggedInNotOwner:', this.isLoggedInNotOwner);
-
       if (project.requiredTasks && typeof project.requiredTasks === 'string') {
         this.requiredTasksArray = project.requiredTasks.split(',').map(task => task.trim());
       } else if (Array.isArray(project.requiredTasks)) {
