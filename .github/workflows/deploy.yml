@@ -3,7 +3,7 @@ name: Deploy Angular to S3
 on:
   push:
     branches:
-      - production  # branch 'production'
+      - production  # Trigger on push to the production branch
 
 jobs:
   deploy:
@@ -11,23 +11,28 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '22'  #version Node.js
+          node-version: '22'  # Match your local node version
 
       - name: Install dependencies
         run: npm install
-
+      
+      - name: Install Angular CLI
+        run: npm install -g @angular/cli
+      
       - name: Build Angular project
-        run: npm run build --configuration production
+        run: ng build --configuration production
+
+
 
       - name: Deploy to S3
-        run: |
-          aws s3 sync dist/freelance_marketplace/ s3://freelancerfrontend --delete
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          aws s3 sync dist/freelance_marketplace/browser/ s3://freelancerfrontend --delete
