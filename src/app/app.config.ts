@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection, ErrorHandler  } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
@@ -9,6 +9,12 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 import { NotificationService } from './core/services/Notification/notification.service';
+
+//Bugsnag
+import { BugsnagErrorHandler } from '@bugsnag/plugin-angular';
+export function errorHandlerFactory() {
+  return new BugsnagErrorHandler();
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,5 +27,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch()),
     provideAnimations(),
     NotificationService,
+    { provide: ErrorHandler, useFactory: errorHandlerFactory },
   ]
 };
