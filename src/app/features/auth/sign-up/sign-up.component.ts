@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { debounceTime, Subject, switchMap, takeUntil, retry } from 'rxjs';
 import { SkillSelectorComponent } from '../../../shared/skill-selector/skill-selector.component';
-
+import {environment} from '../../../../environment.prod'
 interface Skill {
   SkillId: number;
   Skill: string;
@@ -69,7 +69,7 @@ export class SignUpComponent implements OnInit, OnDestroy {
 
     this.isLoadingSkills = true;
     this.http
-      .get<Skill[]>('http://localhost:5021/api/Skills')
+      .get<Skill[]>(`${environment.apiUrl}/api/Skills`)
       .pipe(retry(2), takeUntil(this.destroy$))
       .subscribe({
         next: (skills) => {
