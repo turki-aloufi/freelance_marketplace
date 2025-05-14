@@ -23,7 +23,6 @@ The frontend is built with **Angular 19**, offering a modern, responsive interfa
 ## 🗂️ Project Structure
 
 
-
 ```txt
 freelance_marketplace/
 ├── .vscode/                        # VSCode workspace settings
@@ -85,8 +84,8 @@ freelance_marketplace/
 
 4. **Set your Firebase config**
    Update src/environments/environment.ts with your Firebase credentials.
-
-```bash export const environment = {
+   ```txt
+        export const environment = {
               production: false,
               firebase: {
               apiKey: 'YOUR_API_KEY',
