@@ -80,7 +80,7 @@ freelance_marketplace/
    git clone https://github.com/turki-aloufi/freelance_marketplace.git
    cd freelance_marketplace
 
-2. **install dependencies**   <pre> ```bash npm install``` </pre>
+2. **install dependencies**   <pre> ```npm install``` </pre>
 
 4. **Set your Firebase config**
    Update src/environments/environment.ts with your Firebase credentials.
