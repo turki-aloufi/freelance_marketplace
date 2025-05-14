@@ -16,7 +16,7 @@ export interface Project {
   proposals: Proposal[];
   clientId: string;
   clientName:string,
-  Status:string;
+  status:string;
 }
 
 export interface Proposal {

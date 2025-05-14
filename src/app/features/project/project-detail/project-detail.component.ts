@@ -141,16 +141,18 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   acceptProposal(proposal: Proposal): void {
-    const model: AssignProjectDto = {
-      freelancerId: proposal.freelancerId,
-      proposalId: proposal.proposalId,
-      freelancerPhoneNumber: proposal.freelancerPhoneNumber,
-    };
-    
-    console.log("the body: ", model);
-    
-    this.projectService.assignProject(this.projectId, model).subscribe(
-      () => {
+  const model: AssignProjectDto = {
+    freelancerId: proposal.freelancerId,
+    proposalId: proposal.proposalId,
+    freelancerPhoneNumber: proposal.freelancerPhoneNumber,
+  };
+
+  console.log("the body: ", model);
+
+  this.projectService.assignProject(this.projectId, model).subscribe(
+    () => {
+      if (this.project) { 
+        this.project.status = 'In Progress'; 
         proposal.status = 'Accepted';
         this.acceptedProposalId = proposal.proposalId;
         console.log('Proposal accepted and project assigned successfully.');
@@ -164,22 +166,27 @@ export class ProjectDetailComponent implements OnInit {
           `Congratulations! Your proposal has been accepted for Project No.${this.projectId}`,  
           proposal.freelancerId // <== This identifies the recipient.
         );
-           // clear user cashed
+        // Clear cached user data
         this.userService.clearCachedProfile(); 
         this.userService.refreshUserProfile();
-      },
-      (error) => {
-        console.error('Error assigning project:', error);
-        this.assignMessage = 'error';
-        setTimeout(() => {
-          this.assignMessage = null;
-        }, 5000);
       }
-    );
-  }
+    },
+    (error) => {
+      console.error('Error assigning project:', error);
+      this.assignMessage = 'error';
+      setTimeout(() => {
+        this.assignMessage = null;
+      }, 5000);
+    }
+  );
+}
+
    navigateToUserProfile(clientId: string) {
     if (this.project?.clientId) {
       this.router.navigate(['/profile', this.project?.clientId]);
     }
   }
+ 
+
+
 }
