@@ -80,11 +80,11 @@ freelance_marketplace/
    git clone https://github.com/turki-aloufi/freelance_marketplace.git
    cd freelance_marketplace
 
-2. **install dependencies**   ```bash npm install 
+2. **install dependencies**   <pre> ```bash npm install``` </pre>
 
 4. **Set your Firebase config**
    Update src/environments/environment.ts with your Firebase credentials.
-   ```txt
+   <pre> ```bash
         export const environment = {
               production: false,
               firebase: {
@@ -95,11 +95,11 @@ freelance_marketplace/
               messagingSenderId: 'YOUR_SENDER_ID',
               appId: 'YOUR_APP_ID',
                 }
-              }; ```
+              };``` </pre>
    
 6. **Run the development server**
    
-`ng serve`
+<pre> ```ng serve``` </pre>
 
 8. **Visit the app at**
     `http://localhost:4200`
