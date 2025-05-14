@@ -7,7 +7,6 @@ import { BehaviorSubject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { UserService } from './user/user.service';
 
-// Interface for the backend DTO
 export interface CreateUserDto {
   userId: string;
   name: string;
@@ -28,6 +27,7 @@ export interface SkillDto {
 })
 export class AuthService {
   user$ = new BehaviorSubject<any>(null);
+  private authStateResolved = false;
   private apiUrl = 'http://localhost:5021/api/users/create';
 
   constructor(
@@ -40,11 +40,12 @@ export class AuthService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     onAuthStateChanged(this.auth, (user) => {
+      this.authStateResolved = true; // Mark auth state as resolved
       this.user$.next(user);
       if (isPlatformBrowser(this.platformId)) {
         if (user) {
           localStorage.setItem('user', JSON.stringify(user));
-          this.refreshToken(); // Ensure a fresh token on auth state change
+          this.refreshToken();
         } else {
           localStorage.removeItem('user');
           localStorage.removeItem('token');
@@ -53,34 +54,44 @@ export class AuthService {
     });
   }
 
-  // Refresh the token and store it
+  // Wait for Firebase auth state to resolve
+  waitForAuthState(): Promise<any> {
+    return new Promise((resolve) => {
+      if (this.authStateResolved) {
+        resolve(this.auth.currentUser); // Already resolved, return current user
+      } else {
+        const unsubscribe = onAuthStateChanged(this.auth, (user) => {
+          unsubscribe(); // Clean up listener
+          resolve(user); // Resolve with user (or null if not authenticated)
+        });
+      }
+    });
+  }
   async refreshToken(): Promise<string | null> {
     try {
       const user = this.auth.currentUser;
       if (user) {
-        const token = await user.getIdToken(true); // Force refresh
+        const token = await user.getIdToken(true);
         localStorage.setItem('token', token);
         return token;
       }
       return null;
     } catch (error: any) {
       console.error('Token refresh failed:', error.message);
-      await this.logout(); // Log out if refresh fails
+      await this.logout();
       return null;
     }
   }
 
-  // Get the current token, refreshing if necessary
   async getValidToken(): Promise<string | null> {
     const user = this.auth.currentUser;
     if (!user) return null;
-
     try {
       const token = await user.getIdToken();
       return token;
     } catch (error: any) {
       console.error('Error getting token:', error.message);
-      return await this.refreshToken(); // Attempt to refresh if token fetch fails
+      return await this.refreshToken();
     }
   }
 
@@ -93,7 +104,6 @@ export class AuthService {
       const token = await this.getValidToken();
       if (!token) throw new Error('Failed to obtain a valid token');
 
-      // Prepare data for backend API
       const createUserDto: CreateUserDto = {
         userId: user.uid,
         name: `${firstName} ${lastName}`,
@@ -103,27 +113,12 @@ export class AuthService {
         skills
       };
 
-      // Call backend API to save user data with token
-      try {
-        await this.http.post(this.apiUrl, createUserDto, {
-          headers: new HttpHeaders({ Authorization: `Bearer ${token}` })
-        }).toPromise();
+      await this.http.post(this.apiUrl, createUserDto, {
+        headers: new HttpHeaders({ Authorization: `Bearer ${token}` })
+      }).toPromise();
 
-        this.userService.clearCachedProfile(); 
-        await this.userService.refreshUserProfile();
-        
-      } catch (error: any) {
-        if (error.status === 401) {
-          // Token might be expired, try refreshing and retrying
-          const newToken = await this.refreshToken();
-          if (!newToken) throw new Error('Session expired. Please log in again.');
-          await this.http.post(this.apiUrl, createUserDto, {
-            headers: new HttpHeaders({ Authorization: `Bearer ${newToken}` })
-          }).toPromise();
-        } else {
-          throw error;
-        }
-      }
+      this.userService.clearCachedProfile();
+      await this.userService.refreshUserProfile();
 
       this.ngZone.run(() => this.router.navigate(['/home']));
       return user;
@@ -150,23 +145,9 @@ export class AuthService {
         skills: []
       };
 
-      // Call backend API to save user data with token
-      try {
-        await this.http.post(this.apiUrl, createUserDto, {
-          headers: new HttpHeaders({ Authorization: `Bearer ${token}` })
-        }).toPromise();
-      } catch (error: any) {
-        if (error.status === 401) {
-          // Token might be expired, try refreshing and retrying
-          const newToken = await this.refreshToken();
-          if (!newToken) throw new Error('Session expired. Please log in again.');
-          await this.http.post(this.apiUrl, createUserDto, {
-            headers: new HttpHeaders({ Authorization: `Bearer ${newToken}` })
-          }).toPromise();
-        } else {
-          throw error;
-        }
-      }
+      await this.http.post(this.apiUrl, createUserDto, {
+        headers: new HttpHeaders({ Authorization: `Bearer ${token}` })
+      }).toPromise();
 
       this.ngZone.run(() => this.router.navigate(['/home']));
       return user;
@@ -185,7 +166,7 @@ export class AuthService {
 
       localStorage.setItem('token', token);
 
-      this.ngZone.run(() => this.router.navigate(['/dashboard']));
+      this.ngZone.run(() => this.router.navigate(['/home']));
       return user;
     } catch (error: any) {
       throw new Error(error.message);
@@ -196,8 +177,7 @@ export class AuthService {
     try {
       await signOut(this.auth);
       localStorage.removeItem('token');
-      
-      this.userService.clearCachedProfile();  // delete cashed profile
+      this.userService.clearCachedProfile();
       this.ngZone.run(() => this.router.navigate(['/sign-in']));
     } catch (error: any) {
       throw new Error(error.message);
@@ -209,7 +189,7 @@ export class AuthService {
   }
 
   async isAuthenticatedAsync(): Promise<boolean> {
-    const user = await this.auth.currentUser;
+    const user = await this.waitForAuthState();
     return !!user;
   }
 }
