@@ -4,6 +4,7 @@ export interface ChatDto {
     freelancerId: string;
     startedAt: string;
     otherUserName: string;
+    otherUserImageUrl: string;
     lastMessage: string;
     lastMessageTime: string | null;
     isLastMessageFromMe: boolean;

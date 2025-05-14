@@ -17,11 +17,17 @@
     [class.bg-gray-200]="activeChat?.chatId === chat.chatId"
   >
     <div class="flex items-center">
-      <div class="w-12 h-12 bg-gray-300 rounded-full mr-3 flex-shrink-0">
-        <!-- User avatar placeholder -->
-        <div class="flex items-center justify-center h-full text-gray-600">
-          <i class="fa fa-user"></i>
-        </div>
+      <div class="w-12 h-12 rounded-full mr-3 flex-shrink-0 overflow-hidden">
+        <!-- User profile image -->
+        <img
+          [src]="
+            chat.otherUserImageUrl ||
+            'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'
+          "
+          alt="{{ chat.otherUserName }}"
+          class="w-full h-full object-cover"
+          onerror="this.src='https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'"
+        />
       </div>
       <div class="flex-grow min-w-0">
         <div class="flex justify-between items-baseline">
@@ -29,7 +35,7 @@
             {{ chat.otherUserName || "Unknown User" }}
           </h3>
           <span *ngIf="chat.lastMessageTime" class="text-xs text-gray-500">
-            {{ chat.lastMessageTime | date:'shortTime':'UTC+6' }}
+            {{ chat.lastMessageTime | date : "shortTime" : "UTC+6" }}
           </span>
         </div>
         <p class="text-sm text-gray-600 truncate" *ngIf="chat.lastMessage">
