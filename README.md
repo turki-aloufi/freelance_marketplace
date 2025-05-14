@@ -84,8 +84,8 @@ freelance_marketplace/
 
 4. **Set your Firebase config**
    Update `src/environments/environment.ts` with your Firebase credentials.
-```ts
-export const environment = {
+   
+<pre> ```export const environment = {
   production: false,
   firebase: {
     apiKey: 'YOUR_API_KEY',
@@ -95,7 +95,7 @@ export const environment = {
     messagingSenderId: 'YOUR_SENDER_ID',
     appId: 'YOUR_APP_ID',
   }
-};```
+};``` </pre>
 
 
 6. **Run the development server**    <pre> ```ng serve``` </pre>
