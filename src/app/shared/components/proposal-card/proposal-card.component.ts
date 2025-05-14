@@ -14,7 +14,7 @@ export class ProposalCardComponent {
     deadline: string;
     proposedAmount: number;
     freelancerName: string;
-    freelancerAvatar: string;
+    profilePictureUrl: string;
     freelancerId: string;
     proposalId: number;
   };
