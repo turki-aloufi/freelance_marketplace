@@ -28,7 +28,7 @@ freelance_marketplace/
 ├── .vscode/                        # VSCode workspace settings
 ├── src/                            # Main source code folder
 │   ├── app/                        # Angular application code
-│   │   ├── core/                   # Core services (e.g., AuthService, Interceptors)
+│   │   ├── core/                   # Core services (e.g., AuthService, Interceptors) + guards
 │   │   ├── features/               # Main Angular Components (e.g., HomeProfile, AddProject)
 │   │   ├── shared/                 # Reusable components (footer, navbar, skill-selector, Proposal-card)
 │   │   ├── app-route.ts            # Application routing configuration
