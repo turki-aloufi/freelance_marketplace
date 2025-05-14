@@ -19,10 +19,14 @@ jobs:
           node-version: '22'  # Match your local node version
 
       - name: Install dependencies
-        run: npm ci
-
+        run: npm install
+      
+      - name: Install Angular CLI
+        run: npm install -g @angular/cli
+      
       - name: Build Angular project
         run: ng build --configuration production
+
 
 
       - name: Deploy to S3
