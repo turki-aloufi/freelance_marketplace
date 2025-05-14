@@ -7,7 +7,7 @@ import { provideClientHydration, withEventReplay } from '@angular/platform-brows
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
-import { environment } from '../environments/environment';
+import { environment} from '../environment.prod'
 import { NotificationService } from './core/services/Notification/notification.service';
 
 export const appConfig: ApplicationConfig = {
