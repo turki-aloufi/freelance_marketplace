@@ -21,28 +21,27 @@ The frontend is built with **Angular 19**, offering a modern, responsive interfa
 ---
 
 ## 🗂️ Project Structure
-pre> ```freelance_marketplace/
+
+
+
+```txt
+freelance_marketplace/
 ├── .vscode/                        # VSCode workspace settings
-│
 ├── src/                            # Main source code folder
 │   ├── app/                        # Angular application code
 │   │   ├── core/                   # Core services (e.g., AuthService, Interceptors)
-│   │   ├── features/               # Main Angular Component (e.g., HomeProfile, AddProject)
+│   │   ├── features/               # Main Angular Components (e.g., HomeProfile, AddProject)
 │   │   ├── shared/                 # Reusable components (footer, navbar, skill-selector, Proposal-card)
 │   │   ├── app-route.ts            # Application routing configuration
 │   │   ├── app.component.ts        # Root component
 │   │   └── app.component.html      # Root component html
-│   │
 │   ├── assets/                     # Static assets (images in the home page)
-│   │
-├── ├──environments/                # Environment-specific config               
-│   └── environment.ts              # Development environment
-│   │
+│   ├── environments/               # Environment-specific config
+│   │   └── environment.ts          # Development environment
 │   ├── main.ts                     # App entry point (browser)
 │   ├── main.server.ts              # App entry point for SSR
 │   ├── styles.css                  # Global styles (Tailwind + Angular Material)
 │   └── server.ts                   # SSR server logic
-│
 ├── angular.json                    # Angular CLI configuration
 ├── package.json                    # Project metadata, scripts, and dependencies
 ├── tailwind.config.js              # Tailwind CSS configuration
@@ -53,7 +52,8 @@ pre> ```freelance_marketplace/
 ├── tsconfig.spec.json              # TypeScript config for tests
 ├── karma.conf.js                   # Karma test runner config
 ├── .gitignore                      # Ignored files for Git
-└── README.md                       # Project documentation``` </pre
+└── README.md                       # Project documentation
+```
 
 ---
 
