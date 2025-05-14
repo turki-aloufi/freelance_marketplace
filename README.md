@@ -21,7 +21,7 @@ The frontend is built with **Angular 19**, offering a modern, responsive interfa
 ---
 
 ## 🗂️ Project Structure
-freelance_marketplace/
+pre> ```freelance_marketplace/
 ├── .vscode/                        # VSCode workspace settings
 │
 ├── src/                            # Main source code folder
@@ -53,7 +53,7 @@ freelance_marketplace/
 ├── tsconfig.spec.json              # TypeScript config for tests
 ├── karma.conf.js                   # Karma test runner config
 ├── .gitignore                      # Ignored files for Git
-└── README.md                       # Project documentation
+└── README.md                       # Project documentation``` </pre
 
 ---
 
@@ -96,7 +96,7 @@ freelance_marketplace/
               messagingSenderId: 'YOUR_SENDER_ID',
               appId: 'YOUR_APP_ID',
                 }
-              }; 
+              }; ```
    
 6. **Run the development server**
     ```bash ng serve
