@@ -54,8 +54,7 @@
 
       <!-- Skills Selector -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Skills</label>
-        <app-skill-selector [selectedSkills]="selectedSkills"
+        <app-skill-selector [selectedSkills]="selectedSkills" [forceFetch]="true"
           (selectedSkillsChange)="onSkillsChange($event)"></app-skill-selector>
       </div>
 
