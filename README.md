@@ -98,7 +98,9 @@ freelance_marketplace/
               }; ```
    
 6. **Run the development server**
-    ```bash ng serve
+    ```txt
+ ng serve
+```
 
 7. **Visit the app at**
     `http://localhost:4200`
