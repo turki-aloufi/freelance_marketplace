@@ -95,7 +95,7 @@ export const environment = {
     messagingSenderId: 'YOUR_SENDER_ID',
     appId: 'YOUR_APP_ID',
   }
-};
+};```
 
 
 6. **Run the development server**    <pre> ```ng serve``` </pre>
