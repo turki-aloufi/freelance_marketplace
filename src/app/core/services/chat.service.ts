@@ -5,12 +5,12 @@ import { Observable, BehaviorSubject } from 'rxjs';
 import { ChatDto, MessageDto, SendMessageDto, CreateChatDto } from '../models/chat.model';
 import { SignalrService } from './signalr.service';
 import { AuthService } from './auth.service';
-
+import {environment} from '../../../environment.prod'
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
-  private apiUrl = 'http://localhost:5021/api';
+  private apiUrl = `${environment.apiUrl}/api`;
   private activeChatSubject = new BehaviorSubject<ChatDto | null>(null);
   public activeChat$ = this.activeChatSubject.asObservable();
 

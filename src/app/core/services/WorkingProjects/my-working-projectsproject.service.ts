@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Auth, user, User } from '@angular/fire/auth';
 import { Observable, switchMap, take } from 'rxjs';
-
+import {environment} from '../../../../environment.prod'
 export interface ProjectSummary {
   projectId: number;
   title: string;
@@ -26,7 +26,7 @@ export interface ProjectSummary {
   providedIn: 'root',
 })
 export class ProjectService {
-  private apiUrl = 'http://localhost:5021/api/Projects';
+  private apiUrl = `${environment.apiUrl}/api/Projects`;
   private user$: Observable<User | null>;
 
   constructor(private http: HttpClient, private auth: Auth) {
