@@ -6,6 +6,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { UserService } from './user/user.service';
+
 // Interface for the backend DTO
 export interface CreateUserDto {
   userId: string;
@@ -205,5 +206,10 @@ export class AuthService {
 
   get isAuthenticated(): boolean {
     return !!this.user$.value;
+  }
+
+  async isAuthenticatedAsync(): Promise<boolean> {
+    const user = await this.auth.currentUser;
+    return !!user;
   }
 }
