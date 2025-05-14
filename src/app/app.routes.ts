@@ -7,8 +7,8 @@ import { ClientApprovedProjectsComponent } from './features/client-approved-proj
 import { AddProjectComponent } from './features/add-project/add-project.component';
 
 import { ProfileComponent } from './features/profile/profile.component';
-
-import {ProjectDetailComponent} from './features/project/project-detail/project-detail.component';
+import { EditProfileComponent } from './features/profile/edit-profile/edit-profile.component';
+import { ProjectDetailComponent } from './features/project/project-detail/project-detail.component';
 import { ClientProjectApprovedComponent } from './features/clientproject/client-project-approved/client-project-approved.component';
 import { PaymentComponent } from './features/payment/payment.component';
 import { MessagesComponent } from './features/chat/messages/messages.component';
@@ -29,7 +29,9 @@ export const routes: Routes = [
   { path: 'client/projects/approved', component: ClientApprovedProjectsComponent },
   { path: 'payment', component: PaymentResultComponent },
 
-  { path: 'profile/:id',component: ProfileComponent },
+  { path: 'profile/:id', component: ProfileComponent },
+  { path: 'profile/:id/edit', component: EditProfileComponent },
+
 
   { path: 'project-details/:id', component: ProjectDetailComponent },
   { path: 'clientProjects/approved', component: ClientProjectApprovedComponent },
@@ -38,7 +40,7 @@ export const routes: Routes = [
   { path: 'workingin', component: MyWorkingProjectsComponent},
 
   { path: '**', redirectTo: '/home' },
- 
+
 
 
 ];

@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { UserService } from '../../core/services/user/user.service';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-profile',
   imports: [RouterLink,RouterModule,CommonModule],
@@ -14,23 +15,31 @@ export class ProfileComponent {
   userId = ''; // Replace it later
   userProfile: any;
   currentUserId:any;
+   private routeSub!: Subscription;
   constructor(
     private userService: UserService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    
   ) {}
 
   ngOnInit(): void {
-    const userId = this.route.snapshot.paramMap.get('id'); // get user id from url
+    //const userId = this.route.snapshot.paramMap.get('id'); // get user id from url
     this.currentUserId =  this.userService.getCurrentUserId();
-    if (userId) {
-      this.userId = userId;
-      this.userService.getUserProfile(userId).subscribe({
-        next: (data) => this.userProfile = data,
-        error: (err) => console.error('Error fetching profile:', err)
-      });
-    }
+    this.routeSub = this.route.paramMap.subscribe(params => {
+      const userId = params.get('id');
+      if (userId) {
+        this.userId = userId;
+
+        //get user profile
+        this.userService.getUserProfile(userId).subscribe({
+          next: data => this.userProfile = data,
+          error: err => console.error('Error fetching profile:', err)
+        });
+      }
+    });
   }
   isOwnProfile(): boolean {
+    this.currentUserId =  this.userService.getCurrentUserId();
     return this.userId === this.currentUserId;
   }
 }

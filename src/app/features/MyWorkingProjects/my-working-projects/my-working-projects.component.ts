@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { ProjectService, ProjectSummary } from '../../../core/services/WorkingProjects/my-working-projectsproject.service';
 import { FormsModule } from '@angular/forms'; 
+import { ProjectDetailComponent } from '../../project/project-detail/project-detail.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-my-working-projects',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,ProjectDetailComponent, RouterLink],
   templateUrl: './my-working-projects.component.html',
   styleUrls: ['./my-working-projects.component.css']
 })
