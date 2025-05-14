@@ -84,7 +84,7 @@ freelance_marketplace/
 
 4. **Set your Firebase config**
    Update src/environments/environment.ts with your Firebase credentials.
-   <pre> ```bash
+   <pre> ```
         export const environment = {
               production: false,
               firebase: {
@@ -97,9 +97,7 @@ freelance_marketplace/
                 }
               };``` </pre>
    
-6. **Run the development server**
-   
-<pre> ```ng serve``` </pre>
+6. **Run the development server**    <pre> ```ng serve``` </pre>
 
 8. **Visit the app at**
     `http://localhost:4200`
