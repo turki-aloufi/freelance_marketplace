@@ -2,12 +2,11 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatListComponent } from '../chat-list/chat-list.component';
 import { ChatComponent } from '../chat/chat.component';
-import { ChatService } from '../../../core/services/chat.service';
+import { SignalrService } from '../../../core/services/signalr.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, take, filter } from 'rxjs';
 import { ChatDto } from '../../../core/models/chat.model';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { take, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-messages',
@@ -23,28 +22,41 @@ import { take, switchMap } from 'rxjs/operators';
 })
 export class MessagesComponent implements OnInit, OnDestroy {
   activeChat: ChatDto | null = null;
+  isConnected = false;
   private destroy$ = new Subject<void>();
 
   constructor(
-    private chatService: ChatService,
+    private signalrService: SignalrService,
     private authService: AuthService,
     private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    // Track connection state
+    this.signalrService.connectionEstablished$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(connected => {
+        this.isConnected = connected;
+        
+        // Process route params when connection is established
+        if (connected) {
+          this.processRouteParams();
+        }
+      });
+    
     // Track active chat changes
-    this.chatService.activeChat$
+    this.signalrService.activeChat$
       .pipe(takeUntil(this.destroy$))
       .subscribe(chat => {
         this.activeChat = chat;
       });
-    
-    // Check for userId in query parameters
+  }
+
+  private processRouteParams(): void {
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
         const userId = params['userId'];
-        console.log('Received userId in messages component:', userId);
         
         if (userId) {
           // Only start a chat if userId is provided
@@ -52,59 +64,66 @@ export class MessagesComponent implements OnInit, OnDestroy {
             .pipe(take(1))
             .subscribe(currentUser => {
               if (currentUser) {
-                console.log('Current user:', currentUser.uid);
-                console.log('Starting chat with user:', userId);
                 this.startChatWithUser(currentUser.uid, userId);
               }
             });
         } else {
           // When no userId provided, clear any active chat
-          this.chatService.setActiveChat(null);
+          this.signalrService.setActiveChat(null);
         }
       });
   }
 
   private startChatWithUser(currentUserId: string, targetUserId: string): void {
-    // Keep your existing implementation
     if (!targetUserId || !currentUserId) {
       console.error('Missing user IDs', { currentUserId, targetUserId });
       return;
     }
     
-    console.log('Checking if chat exists between', currentUserId, 'and', targetUserId);
+    // Only proceed if connected
+    if (!this.isConnected) {
+      console.log('Waiting for connection before starting chat...');
+      this.signalrService.connectionEstablished$
+        .pipe(
+          filter(connected => connected), 
+          take(1),
+          takeUntil(this.destroy$)
+        )
+        .subscribe(() => {
+          this.startChatWithUser(currentUserId, targetUserId);
+        });
+      return;
+    }
     
-    this.chatService.checkChatExists(currentUserId, targetUserId)
+    this.signalrService.checkChatExists(currentUserId, targetUserId)
       .subscribe({
-        next: (response: any) => {
-          console.log('Chat exists check response:', response);
-          
+        next: (response: {exists: boolean, chatId: number}) => {
           if (response && response.exists) {
-            this.chatService.getUserChats(currentUserId)
-              .subscribe(chats => {
-                console.log('User chats:', chats);
-                const existingChat = chats.find(c => c.chatId === response.chatId);
-                if (existingChat) {
-                  console.log('Setting active chat:', existingChat);
-                  this.chatService.setActiveChat(existingChat);
-                } else {
-                  console.error('Could not find chat with ID', response.chatId);
+            this.signalrService.getUserChats(currentUserId)
+              .subscribe({
+                next: (chats: ChatDto[]) => {
+                  const existingChat = chats.find(c => c.chatId === response.chatId);
+                  if (existingChat) {
+                    this.signalrService.setActiveChat(existingChat);
+                  }
+                },
+                error: (err: Error) => {
+                  console.error('Error getting user chats:', err);
                 }
               });
           } else {
-            console.log('Creating new chat between', currentUserId, 'and', targetUserId);
-            this.chatService.createChat(currentUserId, targetUserId)
+            this.signalrService.createChat(currentUserId, targetUserId)
               .subscribe({
-                next: (createdChat) => {
-                  console.log('Chat created:', createdChat);
-                  this.chatService.setActiveChat(createdChat);
+                next: (createdChat: ChatDto) => {
+                  this.signalrService.setActiveChat(createdChat);
                 },
-                error: (err) => {
+                error: (err: Error) => {
                   console.error('Error creating chat:', err);
                 }
               });
           }
         },
-        error: (err) => {
+        error: (err: Error) => {
           console.error('Error checking if chat exists:', err);
         }
       });

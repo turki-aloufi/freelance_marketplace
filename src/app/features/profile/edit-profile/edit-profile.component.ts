@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import axios from 'axios'; 
+import Bugsnag from '@bugsnag/js'; 
 
 interface UISkill {
   SkillId: number;
@@ -97,66 +98,97 @@ export class EditProfileComponent implements OnInit {
     this.imagePreview = URL.createObjectURL(file); // Create local preview URL
   }
 
-  async uploadImageToCloudinary(): Promise<string | null> {
-    if (!this.selectedFile) return null;
+async uploadImageToCloudinary(): Promise<string | null> {
+  if (!this.selectedFile) return null;
 
-    const formData = new FormData();
-    formData.append('file', this.selectedFile);
-    formData.append('upload_preset', 'unsigned_preset'); // Replace with your Cloudinary preset
+  const formData = new FormData();
+  formData.append('file', this.selectedFile);
+  formData.append('upload_preset', 'unsigned_preset');
 
-    try {
-      const response = await axios.post(
-        'https://api.cloudinary.com/v1_1/dpvg0vp6t/image/upload', // Replace with your Cloudinary cloud name
-        formData
-      );
-      return response.data.secure_url;
-    } catch (err) {
-      console.error('Image upload failed:', err);
-      return null;
+  try {
+    const response = await axios.post(
+      'https://api.cloudinary.com/v1_1/dpvg0vp6t/image/upload',
+      formData
+    );
+    return response.data.secure_url;
+  } catch (error: unknown) {  // Explicitly type as unknown
+    console.error('Image upload failed:', error);
+    
+    // Type guard to ensure it's an Error
+    if (error instanceof Error) {
+      Bugsnag.notify(error, event => {
+        event.severity = 'error';
+        event.context = 'Cloudinary Upload Failed';
+        
+        // For Axios errors specifically
+        if (axios.isAxiosError(error)) {
+          event.addMetadata('Upload Error', {
+            status: error.response?.status,
+            data: error.response?.data,
+            fileName: this.selectedFile?.name,
+            fileSize: this.selectedFile?.size
+          });
+        }
+      });
     }
+    
+    return null;
   }
+}
 
   async onSubmit(): Promise<void> {
-    if (this.profileForm.invalid || this.isSubmitting || !this.userId) return;
+  if (this.profileForm.invalid || this.isSubmitting || !this.userId) return;
 
-    this.isSubmitting = true;
+  this.isSubmitting = true;
 
-    // Upload image to Cloudinary if a file was selected
-    const uploadedImageUrl = await this.uploadImageToCloudinary();
-    if (uploadedImageUrl) {
-      this.profileForm.patchValue({ imageUrl: uploadedImageUrl }); // Update form with Cloudinary URL
-    }
-
-    const formData = this.profileForm.value;
-    const editProfileDto = {
-      ...formData,
-      skills: this.selectedSkills.map(skill => ({
-        skillId: skill.SkillId,
-        Skill: skill.Skill,
-        Category: skill.Category
-      }))
-    };
-
-    this.userService.updateUserProfile(editProfileDto).pipe(
-      finalize(() => {
-        this.isSubmitting = false;
-        // Clean up preview URL to avoid memory leaks
-        if (this.imagePreview) {
-          URL.revokeObjectURL(this.imagePreview);
-          this.imagePreview = null;
-        }
-        this.selectedFile = null; // Clear selected file
-      })
-    ).subscribe({
-      next: () => {
-        this.userService.clearCachedProfile();
-        this.router.navigate(['/profile', this.userId]);
-      },
-      error: (err) => {
-        console.error('Failed to update profile', err);
-      }
-    });
+  // Upload image to Cloudinary if a file was selected
+  const uploadedImageUrl = await this.uploadImageToCloudinary();
+  if (uploadedImageUrl) {
+    this.profileForm.patchValue({ imageUrl: uploadedImageUrl });
   }
+
+  const formData = this.profileForm.value;
+  const editProfileDto = {
+    ...formData,
+    skills: this.selectedSkills.map(skill => ({
+      skillId: skill.SkillId,
+      Skill: skill.Skill,
+      Category: skill.Category
+    }))
+  };
+
+  this.userService.updateUserProfile(editProfileDto).pipe(
+    finalize(() => {
+      this.isSubmitting = false;
+      // Clean up preview URL to avoid memory leaks
+      if (this.imagePreview) {
+        URL.revokeObjectURL(this.imagePreview);
+        this.imagePreview = null;
+      }
+      this.selectedFile = null;
+    })
+  ).subscribe({
+    next: () => {
+      this.userService.refreshUserProfile();
+      this.router.navigate(['/profile', this.userId]);
+    },
+    error: (err) => {
+      console.error('Failed to update profile', err);
+      // Add Bugsnag notification exactly like in ProjectDetailComponent
+      const errorMessage = err.error?.message || 'Failed to update profile';
+      Bugsnag.notify(err, event => {
+        event.setUser(this.userId || undefined, undefined, '');
+        event.addMetadata('ProfileUpdateError', {
+          userId: this.userId,
+          responseMessage: errorMessage,
+          statusCode: err.status,
+          statusText: err.statusText,
+        });
+      });
+    }
+  });
+ 
+}
 
   onSkillsChange(skills: UISkill[]): void {
     this.selectedSkills = skills;

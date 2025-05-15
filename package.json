@@ -24,6 +24,8 @@
     "@angular/platform-server": "^19.2.0",
     "@angular/router": "^19.2.0",
     "@angular/ssr": "^19.2.0",
+    "@bugsnag/js": "^8.2.0",
+    "@bugsnag/plugin-angular": "^8.3.0",
     "@microsoft/signalr": "^8.0.7",
     "@stripe/stripe-js": "^7.2.0",
     "axios": "^1.9.0",

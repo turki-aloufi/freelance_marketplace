@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/Notification/notification.service'; 
 import { UserService } from '../../../core/services/user/user.service';
 import { Router } from '@angular/router';
+import Bugsnag from '@bugsnag/js';
 @Component({
   selector: 'app-project-detail',
   standalone: true,
@@ -159,24 +160,37 @@ export class ProjectDetailComponent implements OnInit {
           this.assignMessage = null;
         }, 5000);
 
-        this.notificationService.addNotification(
-          `Congratulations! Your proposal has been accepted for Project No.${this.projectId}`,  
-          proposal.freelancerId // <== This identifies the recipient.
-        );
-        // Clear cached user data
-        this.userService.clearCachedProfile(); 
-        this.userService.refreshUserProfile();
+          this.notificationService.addNotification(
+            `Congratulations! Your proposal has been accepted for Project No.${this.projectId}`,
+            proposal.freelancerId // <== This identifies the recipient.
+          );
+          // Clear cached user data
+          this.userService.clearCachedProfile();
+          this.userService.refreshUserProfile();
+        }
+      },
+      (error) => {
+        console.error('Error assigning project:', error);
+        this.assignMessage = 'error';
+        //bugsnag
+        const errorMessage = error.error?.message || 'Failed to assign the project.';
+        Bugsnag.notify(error, event => {
+          event.setUser(proposal.freelancerId, undefined, '');
+          event.addMetadata('AssignProjectError', {
+            projectId: this.projectId,
+            proposalId: proposal.proposalId,
+            freelancerId: proposal.freelancerId,
+            responseMessage: errorMessage,
+            statusCode: error.status,
+            statusText: error.statusText,
+          });
+        });
+        setTimeout(() => {
+          this.assignMessage = null;
+        }, 5000);
       }
-    },
-    (error) => {
-      console.error('Error assigning project:', error);
-      this.assignMessage = 'error';
-      setTimeout(() => {
-        this.assignMessage = null;
-      }, 5000);
-    }
-  );
-}
+    );
+  }
 
    navigateToUserProfile(clientId: string) {
     if (this.project?.clientId) {

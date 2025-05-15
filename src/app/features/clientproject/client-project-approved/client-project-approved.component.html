@@ -56,7 +56,10 @@
       <h5 class="mb-2 text-xl font-medium text-gray-900">Assigned to:</h5>
       <div class="flex items-center space-x-4 mb-4">
         <!-- Photo -->
-        <img src="https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg" alt="User Profile"
+         <img [src]="
+          project.freelancer?.freelancerImage ||
+          'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'
+        " alt="User Profile"
           class="w-20 h-20 rounded-full object-cover" />
 
         <div class="flex-1 flex flex-col space-y-2">

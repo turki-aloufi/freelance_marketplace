@@ -1,10 +1,17 @@
 <div class="flex flex-col h-[calc(100vh-180px)]">
   <div class="p-3 border-b sticky top-0 bg-white z-10">
     <div class="flex items-center">
-      <div class="w-10 h-10 bg-gray-300 rounded-full mr-3 flex-shrink-0">
-        <div class="flex items-center justify-center h-full text-gray-600">
-          <i class="fa fa-user"></i>
-        </div>
+      <div class="w-10 h-10 rounded-full mr-3 flex-shrink-0 overflow-hidden">
+        <!-- User profile image -->
+        <img
+          [src]="
+            activeChat?.otherUserImageUrl ||
+            'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'
+          "
+          alt="{{ activeChat?.otherUserName }}"
+          class="w-full h-full object-cover"
+          onerror="this.src='https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'"
+        />
       </div>
       <div>
         <h3 class="font-semibold">
@@ -19,6 +26,17 @@
     class="flex-grow overflow-y-auto p-4"
     (scroll)="onScroll()"
   >
+    <div *ngIf="loading" class="text-center text-gray-500 my-4">
+      <i class="fa fa-spinner fa-spin mr-2"></i> Loading messages...
+    </div>
+
+    <div
+      *ngIf="!loading && messages.length === 0"
+      class="text-center text-gray-500 my-4"
+    >
+      No messages yet. Start the conversation!
+    </div>
+
     <div *ngFor="let message of messages" class="mb-4">
       <div class="flex" [ngClass]="{ 'justify-end': message.isFromMe }">
         <div
@@ -31,7 +49,7 @@
         >
           <div>{{ message.content }}</div>
           <div class="text-xs mt-1 opacity-70 text-right">
-            {{ message.sentAt | date : "shortTime" : "UTC+6" }}
+            {{ message.sentAt | date : "shortTime" }}
           </div>
         </div>
       </div>
