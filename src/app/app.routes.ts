@@ -28,7 +28,7 @@ export const routes: Routes = [
   { path: 'payment', component: PaymentResultComponent, canActivate: [AuthGuard] },
   { path: 'profile/:id', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'profile/:id/edit', component: EditProfileComponent, canActivate: [AuthGuard] },
-  { path: 'project-details/:id', component: ProjectDetailComponent, canActivate: [AuthGuard] },
+  { path: 'project-details/:id', component: ProjectDetailComponent },
   { path: 'clientProjects/approved', component: ClientProjectApprovedComponent, canActivate: [AuthGuard] },
   { path: 'my-proposals', component: ProposalsComponent, canActivate: [AuthGuard] },
   { path: 'workingin', component: MyWorkingProjectsComponent, canActivate: [AuthGuard] },
