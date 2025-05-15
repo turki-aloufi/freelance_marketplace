@@ -90,6 +90,7 @@ export class ProjectDetailComponent implements OnInit {
         this.acceptedProposalId = accepted.proposalId;
       }
     });
+    
   }
 
   sendProposal(): void {
@@ -145,10 +146,20 @@ export class ProjectDetailComponent implements OnInit {
     freelancerPhoneNumber: proposal.freelancerPhoneNumber,
   };
 
-
-
   this.projectService.assignProject(this.projectId, model).subscribe(
     () => {
+      
+     
+      this.proposals = this.proposals.map(p => {
+        if (p.proposalId === proposal.proposalId) {
+          return { ...p, status: 'Accepted' };
+        } else {
+          return { ...p, status: 'Rejected' };
+        }
+      });
+       this.acceptedProposalId = proposal.proposalId;
+
+      console.log('Updated proposals:', this.proposals);
       if (this.project) { 
         this.project.status = 'In Progress'; 
         proposal.status = 'Accepted';
