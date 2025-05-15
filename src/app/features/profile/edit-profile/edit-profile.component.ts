@@ -169,7 +169,7 @@ async uploadImageToCloudinary(): Promise<string | null> {
     })
   ).subscribe({
     next: () => {
-      this.userService.clearCachedProfile();
+      this.userService.refreshUserProfile();
       this.router.navigate(['/profile', this.userId]);
     },
     error: (err) => {
@@ -187,6 +187,7 @@ async uploadImageToCloudinary(): Promise<string | null> {
       });
     }
   });
+ 
 }
 
   onSkillsChange(skills: UISkill[]): void {
