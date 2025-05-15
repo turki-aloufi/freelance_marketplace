@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ChatService } from '../../../core/services/chat.service';
+import { SignalrService } from '../../../core/services/signalr.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatDto } from '../../../core/models/chat.model';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, finalize } from 'rxjs';
 
 @Component({
   selector: 'app-chat-list',
@@ -17,56 +17,81 @@ export class ChatListComponent implements OnInit, OnDestroy {
   chats: ChatDto[] = [];
   loading = true;
   activeChat: ChatDto | null = null;
+  error: string | null = null;
   private destroy$ = new Subject<void>();
 
   constructor(
-    private chatService: ChatService,
+    private signalrService: SignalrService,
     private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.authService.user$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(user => {
-        if (user) {
-          this.loadChats(user.uid);
-        }
-      });
+    console.log('ChatListComponent initialized');
+    
+    // Manually initialize the connection for immediate user
+    this.authService.user$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(user => {
+      if (user) {
+        console.log('User detected, initializing connection and loading chats:', user);
+        this.initializeConnectionAndLoadChats(user.uid);
+      } else {
+        console.log('No user available');
+      }
+    });
 
-    this.chatService.activeChat$
+    // Track active chat
+    this.signalrService.activeChat$
       .pipe(takeUntil(this.destroy$))
       .subscribe(chat => {
         this.activeChat = chat;
       });
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  initializeConnectionAndLoadChats(userId: string): void {
+    console.log('Initializing connection for user:', userId);
+    this.loading = true;
+    this.error = null;
+    
+    // First ensure connection is established
+    this.signalrService.startConnection(userId)
+      .then(() => {
+        console.log('Connection established, loading chats');
+        this.loadChats(userId);
+      })
+      .catch(err => {
+        console.error('Failed to establish connection:', err);
+        this.error = 'Failed to connect to chat server. Please refresh the page.';
+        this.loading = false;
+      });
   }
 
   loadChats(userId: string): void {
+    console.log('Loading chats for user:', userId);
     this.loading = true;
-    this.chatService.getUserChats(userId)
+    this.error = null;
+    
+    this.signalrService.getUserChats(userId)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        }),
+        takeUntil(this.destroy$)
+      )
       .subscribe({
-        next: (chats) => {
-          // Filter out chats with no messages
-          const nonEmptyChats = chats.filter(chat => 
-            chat.lastMessage != null && chat.lastMessage.trim() !== ''
-          );
-          
-          // Sort the non-empty chats by recency
-          this.chats = this.sortChatsByRecency(nonEmptyChats);
+        next: (chats: ChatDto[]) => {
+          console.log('Chats loaded successfully:', chats);
+          this.chats = this.sortChatsByRecency(chats);
           this.loading = false;
         },
-        error: (err) => {
+        error: (err: Error) => {
           console.error('Error loading chats:', err);
+          this.error = 'Failed to load chats. Please try again.';
           this.loading = false;
         }
       });
   }
 
-  // Keep your existing sortChatsByRecency method
   private sortChatsByRecency(chats: ChatDto[]): ChatDto[] {
     return [...chats].sort((a, b) => {
       if (!a.lastMessageTime) return 1;
@@ -79,27 +104,22 @@ export class ChatListComponent implements OnInit, OnDestroy {
   }
 
   selectChat(chat: ChatDto): void {
-    this.chatService.setActiveChat(chat);
+    this.signalrService.setActiveChat(chat);
   }
 
-  formatTime(timestamp: string): string {
-    // Keep your existing formatTime method
-    const date = new Date(timestamp);
-    const now = new Date();
-    
-    if (date.toDateString() === now.toDateString()) {
-      return date.toLocaleTimeString([], { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-      });
-    }
-    
-    const daysAgo = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    if (daysAgo < 7) {
-      return date.toLocaleDateString([], { weekday: 'short' });
-    }
-    
-    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  retryLoadChats(): void {
+    this.authService.user$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(user => {
+      if (user) {
+        this.initializeConnectionAndLoadChats(user.uid);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    console.log('ChatListComponent destroyed');
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
