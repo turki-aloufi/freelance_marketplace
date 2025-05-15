@@ -67,30 +67,35 @@ export class ChatListComponent implements OnInit, OnDestroy {
   }
 
   loadChats(userId: string): void {
-    console.log('Loading chats for user:', userId);
-    this.loading = true;
-    this.error = null;
-    
-    this.signalrService.getUserChats(userId)
-      .pipe(
-        finalize(() => {
-          this.loading = false;
-        }),
-        takeUntil(this.destroy$)
-      )
-      .subscribe({
-        next: (chats: ChatDto[]) => {
-          console.log('Chats loaded successfully:', chats);
-          this.chats = this.sortChatsByRecency(chats);
-          this.loading = false;
-        },
-        error: (err: Error) => {
-          console.error('Error loading chats:', err);
-          this.error = 'Failed to load chats. Please try again.';
-          this.loading = false;
-        }
-      });
-  }
+  this.loading = true;
+  this.error = null;
+  
+  this.signalrService.getUserChats(userId)
+    .pipe(
+      finalize(() => {
+        this.loading = false;
+      }),
+      takeUntil(this.destroy$)
+    )
+    .subscribe({
+      next: (chats: ChatDto[]) => {
+        console.log('Chats loaded successfully:', chats);
+        
+        // Filter out chats with no messages
+        const chatsWithMessages = chats.filter(chat => 
+          chat.lastMessage && chat.lastMessage.trim() !== ''
+        );
+        
+        this.chats = this.sortChatsByRecency(chatsWithMessages);
+        this.loading = false;
+      },
+      error: (err: Error) => {
+        console.error('Error loading chats:', err);
+        this.error = 'Failed to load chats. Please try again.';
+        this.loading = false;
+      }
+    });
+}
 
   private sortChatsByRecency(chats: ChatDto[]): ChatDto[] {
     return [...chats].sort((a, b) => {
