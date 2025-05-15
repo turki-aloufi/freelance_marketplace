@@ -46,24 +46,7 @@ export class NotificationService {
     }
   }
 
-  //  Mark a single notification as read
-  // markNotificationAsRead(userId: string, notificationId: number) {
-  //   const userNotifications = this.notificationsSubject.value.get(userId);
-  //   if (!userNotifications) return;
 
-  //   const updated = userNotifications.map(notification =>
-  //     notification.id === notificationId ? { ...notification, read: true } : notification
-  //   );
-
-  //   this.notificationsSubject.next(
-  //     new Map(this.notificationsSubject.value).set(userId, updated)
-  //   );
-
-  //   // Save notifications in localStorage
-  //   if (typeof localStorage !== 'undefined') {
-  //     localStorage.setItem('notifications', JSON.stringify(Array.from(this.notificationsSubject.value.entries())));
-  //   }
-  // }
 
   //  Mark all notifications as read
   markAllAsRead(userId: string) {
