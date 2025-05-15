@@ -3,8 +3,18 @@
     <i class="fa fa-spinner fa-spin mr-2"></i> Loading conversations...
   </div>
 
+  <div *ngIf="!loading && error" class="p-4 text-center text-red-500">
+    <p>{{ error }}</p>
+    <button
+      (click)="retryLoadChats()"
+      class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+    >
+      Retry
+    </button>
+  </div>
+
   <div
-    *ngIf="!loading && chats.length === 0"
+    *ngIf="!loading && !error && chats.length === 0"
     class="p-4 text-center text-gray-500"
   >
     No conversations found
@@ -39,8 +49,12 @@
           </span>
         </div>
         <p class="text-sm text-gray-600 truncate" *ngIf="chat.lastMessage">
-          <span *ngIf="chat.isLastMessageFromMe">You: </span
-          >{{ chat.lastMessage }}
+          <ng-container *ngIf="chat.isLastMessageFromMe"
+            >You: {{ chat.lastMessage }}</ng-container
+          >
+          <ng-container *ngIf="!chat.isLastMessageFromMe">{{
+            chat.lastMessage
+          }}</ng-container>
         </p>
         <p *ngIf="!chat.lastMessage" class="text-sm text-gray-400 italic">
           No messages yet
