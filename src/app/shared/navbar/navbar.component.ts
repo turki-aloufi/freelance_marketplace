@@ -52,6 +52,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
             console.error('Error fetching user profile:', err);
           }
         });
+ // Subscribe to profile data
+         this.userService.userProfile$
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(profile => {
+            if (profile) {
+              this.userProfile = profile;
+            }
+          });
 
           // Subscribe to notifications and update the notifications array
         this.notificationService.notifications$
