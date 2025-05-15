@@ -1,42 +1,22 @@
 <div class="flex flex-col h-[calc(100vh-180px)]">
   <div class="p-3 border-b sticky top-0 bg-white z-10">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center">
-        <div class="w-10 h-10 rounded-full mr-3 flex-shrink-0 overflow-hidden">
-          <!-- User profile image -->
-          <img
-            [src]="
-              activeChat?.otherUserImageUrl ||
-              'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'
-            "
-            alt="{{ activeChat?.otherUserName }}"
-            class="w-full h-full object-cover"
-            onerror="this.src='https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'"
-          />
-        </div>
-        <div>
-          <h3 class="font-semibold">
-            {{ activeChat?.otherUserName || "Unknown User" }}
-          </h3>
-        </div>
+    <div class="flex items-center">
+      <div class="w-10 h-10 rounded-full mr-3 flex-shrink-0 overflow-hidden">
+        <!-- User profile image -->
+        <img
+          [src]="
+            activeChat?.otherUserImageUrl ||
+            'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'
+          "
+          alt="{{ activeChat?.otherUserName }}"
+          class="w-full h-full object-cover"
+          onerror="this.src='https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'"
+        />
       </div>
-
-      <!-- Connection status indicator -->
-      <div
-        class="px-2 py-1 rounded-full text-xs flex items-center"
-        [ngClass]="{
-          'bg-green-100 text-green-800': isConnected,
-          'bg-red-100 text-red-800': !isConnected
-        }"
-      >
-        <span
-          class="inline-block w-2 h-2 rounded-full mr-1"
-          [ngClass]="{
-            'bg-green-500': isConnected,
-            'bg-red-500': !isConnected
-          }"
-        ></span>
-        {{ getConnectionStatusText() }}
+      <div>
+        <h3 class="font-semibold">
+          {{ activeChat?.otherUserName || "Unknown User" }}
+        </h3>
       </div>
     </div>
   </div>
@@ -51,20 +31,7 @@
     </div>
 
     <div
-      *ngIf="errorMessage"
-      class="text-center text-red-500 my-4 p-3 bg-red-50 rounded"
-    >
-      <p class="mb-2">{{ errorMessage }}</p>
-      <button
-        (click)="retryLoadMessages()"
-        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-      >
-        Try Again
-      </button>
-    </div>
-
-    <div
-      *ngIf="!loading && !errorMessage && messages.length === 0"
+      *ngIf="!loading && messages.length === 0"
       class="text-center text-gray-500 my-4"
     >
       No messages yet. Start the conversation!
@@ -81,45 +48,12 @@
           class="rounded-lg p-3 shadow-sm"
         >
           <div>{{ message.content }}</div>
-          <div
-            class="text-xs mt-1 opacity-70 text-right flex justify-end items-center"
-          >
+          <div class="text-xs mt-1 opacity-70 text-right">
             {{ message.sentAt | date : "shortTime" }}
-            <!-- Pending indicator for messages with negative IDs -->
-            <span
-              *ngIf="message.messageId < 0"
-              class="ml-2 text-yellow-600"
-              title="Message sending..."
-            >
-              <i class="fa fa-clock-o"></i>
-            </span>
           </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Offline warning -->
-  <div
-    *ngIf="!isConnected"
-    class="bg-yellow-100 text-yellow-800 p-2 text-center text-sm"
-  >
-    You are currently offline. Messages will be sent when you reconnect.
-  </div>
-
-  <!-- Pending messages notification -->
-  <div
-    *ngIf="pendingMessages && pendingMessages.length > 0"
-    class="bg-yellow-100 text-yellow-800 p-2 text-center text-sm"
-  >
-    {{ pendingMessages.length }} message(s) waiting to be sent.
-    <button
-      *ngIf="isConnected"
-      (click)="retryPendingMessages()"
-      class="ml-2 underline text-blue-700 hover:text-blue-900"
-    >
-      Retry now
-    </button>
   </div>
 
   <button
