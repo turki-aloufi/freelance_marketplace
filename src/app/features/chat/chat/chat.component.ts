@@ -32,6 +32,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   ) {}
 
   ngOnInit(): void {
+    // Get current user ID
     this.authService.user$
       .pipe(takeUntil(this.destroy$))
       .subscribe(user => {
@@ -40,6 +41,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         }
       });
 
+    // Listen for active chat changes
     this.signalrService.activeChat$
       .pipe(takeUntil(this.destroy$))
       .subscribe(chat => {
@@ -57,6 +59,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
         }
       });
 
+    // Listen for real-time messages via SignalR
     this.signalrService.messageReceived$
       .pipe(takeUntil(this.destroy$))
       .subscribe(message => {
@@ -70,6 +73,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       });
   }
 
+  // Sort messages by time and ID
   sortMessages(): void {
     this.messages.sort((a, b) => {
       const timeA = new Date(a.sentAt).getTime();
@@ -119,9 +123,11 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
             this.sortMessages();
             this.shouldScrollToBottom = true;
           }
+          
           this.loading = false;
         },
-        error: (err) => {
+        error: (err: Error) => {
+          console.error('Error loading messages:', err);
           this.loading = false;
         }
       });
@@ -138,6 +144,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     const messageContent = this.newMessage.trim();
     this.newMessage = '';
     
+    // Create a temporary message for immediate display
     const tempMessage: MessageDto = {
       messageId: -Date.now(),
       chatId: this.activeChat.chatId,
@@ -153,7 +160,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     
     this.signalrService.sendMessage(this.activeChat.chatId, this.currentUserId, messageContent)
       .subscribe({
-        error: () => {
+        error: (err: Error) => {
+          console.error('Error sending message:', err);
+          // Remove the temp message on error
           this.messages = this.messages.filter(m => m.messageId !== tempMessage.messageId);
           this.newMessage = messageContent;
         }
@@ -164,6 +173,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     try {
       const element = this.messagesContainer.nativeElement;
       element.scrollTop = element.scrollHeight;
-    } catch (err) { }
+    } catch (err) {
+      console.error('Error scrolling to bottom:', err);
+    }
   }
 }
