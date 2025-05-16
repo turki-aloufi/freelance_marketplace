@@ -3,10 +3,6 @@ import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@micros
 import { BehaviorSubject, Observable, Subject, firstValueFrom } from 'rxjs';
 import { MessageDto, ChatDto } from '../models/chat.model';
 import { filter, take } from 'rxjs/operators';
-
-import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { MessageDto } from '../models/chat.model';
 import {environment} from '../../../environment.prod'
 @Injectable({
   providedIn: 'root'

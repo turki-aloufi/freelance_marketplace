@@ -2,18 +2,14 @@ import { Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 import { BehaviorSubject, Observable, from, Subject } from 'rxjs';
 import { MessageDto, ChatDto } from '../models/chat.model';
-
-import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { ChatDto, MessageDto, SendMessageDto, CreateChatDto } from '../models/chat.model';
-import { SignalrService } from './signalr.service';
-import { AuthService } from './auth.service';
 import {environment} from '../../../environment.prod'
 @Injectable({
   providedIn: 'root'
 })
-export class ChatService {
-  private apiUrl = 'http://localhost:5021/api';
+export class SignalrService {
+  private hubConnection!: HubConnection;
+  private messageReceivedSubject = new BehaviorSubject<MessageDto | null>(null);
+  private connectionEstablished = new BehaviorSubject<boolean>(false);
   private activeChatSubject = new BehaviorSubject<ChatDto | null>(null);
   
   public messageReceived$ = this.messageReceivedSubject.asObservable();
@@ -24,7 +20,7 @@ export class ChatService {
 
   public startConnection(userId: string): Promise<void> {
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl('http://localhost:5021/chatHub')
+      .withUrl(`${environment.apiUrl}/chatHub`)
       .withAutomaticReconnect()
       .build();
     
