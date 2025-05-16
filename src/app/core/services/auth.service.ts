@@ -8,7 +8,6 @@ import { isPlatformBrowser } from '@angular/common';
 import { UserService } from './user/user.service';
 
 import {environment} from '../../../environment.prod'
-// Interface for the backend DTO
 export interface CreateUserDto {
   userId: string;
   name: string;
