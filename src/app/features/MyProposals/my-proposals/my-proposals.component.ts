@@ -6,7 +6,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ConfirmDeleteDialogComponent } from '../../../core/custom_components/confirm-delete-dialog/confirm-delete-dialog.component';
 import { MatButtonModule } from '@angular/material/button';
-
+import { RouterModule } from '@angular/router'; 
 @Component({
   selector: 'app-my-proposals',
   standalone: true,
@@ -14,7 +14,8 @@ import { MatButtonModule } from '@angular/material/button';
     CommonModule,
     MatDialogModule,
     MatSnackBarModule,
-    MatButtonModule
+    MatButtonModule,
+    RouterModule,
   ],
   templateUrl: './my-proposals.component.html',
   styleUrls: ['./my-proposals.component.css']
@@ -23,12 +24,13 @@ export class ProposalsComponent implements OnInit {
   proposals: any[] = [];
   freelancerId: string = '';
   deletingProposalId: number | null = null;
+  loading = true;
 
   constructor(
     private proposalService: ProposalService,
     private authService: AuthService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
   ) {}
 
   ngOnInit(): void {
@@ -42,7 +44,7 @@ export class ProposalsComponent implements OnInit {
 
   loadProposals() {
     this.proposalService.getMyProposals(this.freelancerId).subscribe({
-      next: (data) => this.proposals = data,
+      next: (data) => {this.proposals = data, this.loading=false;},
       error: (err) => {
         console.error('Error loading proposals', err);
         this.snackBar.open('Failed to load proposals.', 'Close', {

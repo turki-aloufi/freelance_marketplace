@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { RouterModule, Router } from '@angular/router';
 import { ApprovedProjectService } from '../../../core/services/clientProjects/approved-project.service';
 import { UserService } from '../../../core/services/user/user.service';
+import { NotificationService } from '../../../core/services/Notification/notification.service'; 
 @Component({
   selector: 'app-client-project-approved',
   imports: [CommonModule, FormsModule, RouterModule],
@@ -26,7 +27,8 @@ export class ClientProjectApprovedComponent implements OnInit {
     private http: HttpClient,
     private approvedProjectService: ApprovedProjectService,
     private router: Router,
-    private userService :UserService
+    private userService :UserService,
+    private notificationService: NotificationService,
   ) { }
 
   ngOnInit() {
@@ -69,30 +71,43 @@ export class ClientProjectApprovedComponent implements OnInit {
     return projects;
   }
 
-  onDoneClick(projectID: string) {
-    this.approvedProjectService.markProjectAsCompleted(projectID).subscribe({
-      next: (response) => {
-        console.log('Project marked as completed:', response);
-        this.message = true;
+ 
+onDoneClick(projectID: string) {
+  
+  const project = this.allProjects.find(p => String(p.projectId) === String(projectID));
+  const freelancerId = project?.freelancer?.freelancerId;
+  console.log('Marking project done:', projectID);
 
-
-        // Hide the message after 5 seconds
-        setTimeout(() => {
-          this.message = false;
-        }, 5000);
-
-        // Fetch all client approved project after update
-        this.loadApprovedProjects();
-        // call api again
-        this.userService.getUserProfile(this.userID);
-      },
-
-      error: (err) => {
-        console.error('Failed to mark the project as complete', err);
-        alert('Error: Could not mark project as completed.');
-      }
-    });
+  if (!project) {
+    console.error('Project not found with ID:', projectID);
+    return;
   }
+
+  this.approvedProjectService.markProjectAsCompleted(projectID).subscribe({
+    next: (response) => {
+      console.log('Project marked as completed:', response);
+      this.message = true;
+
+      setTimeout(() => this.message = false, 5000);
+
+      if (freelancerId) {
+        this.notificationService.addNotification(
+          `Congratulations! The project #${projectID} has been marked as completed. Well done! `,
+          freelancerId
+        );
+      }
+
+      this.loadApprovedProjects();
+      this.userService.getUserProfile(this.userID);
+    },
+    error: (err) => {
+      console.error('Failed to mark the project as complete', err);
+      alert('Error: Could not mark project as completed.');
+    }
+  });
+}
+
+
   contactFreelancer(freelancerId: string) {
     if (!freelancerId) {
       console.error('No freelancer ID provided');
