@@ -61,17 +61,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
             }
           });
 
-      //     // Subscribe to notifications and update the notifications array
-      //   this.notificationService.notifications$
-      //     .pipe(takeUntil(this.destroy$))
-      //     .subscribe((notificationsMap) => {
-      //       if (this.userId) {
-      //         this.notifications = notificationsMap.get(this.userId) || [];
-      //       }
-      //     });
-      //   }
-      // });
-        // تحميل إشعارات المستخدم من Firestore
+  
+        //Download user notifications from Firestore
         this.notificationService.loadNotifications(this.userId);
 
         this.notificationService.notifications$
