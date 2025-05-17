@@ -1,11 +1,17 @@
 <div class="flex flex-col h-[calc(100vh-180px)]">
-
   <div class="p-3 border-b sticky top-0 bg-white z-10">
     <div class="flex items-center">
-      <div class="w-10 h-10 bg-gray-300 rounded-full mr-3 flex-shrink-0">
-        <div class="flex items-center justify-center h-full text-gray-600">
-          <i class="fa fa-user"></i>
-        </div>
+      <div class="w-10 h-10 rounded-full mr-3 flex-shrink-0 overflow-hidden">
+        <!-- User profile image -->
+        <img
+          [src]="
+            activeChat?.otherUserImageUrl ||
+            'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'
+          "
+          alt="{{ activeChat?.otherUserName }}"
+          class="w-full h-full object-cover"
+          onerror="this.src='https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'"
+        />
       </div>
       <div>
         <h3 class="font-semibold">
@@ -14,7 +20,6 @@
       </div>
     </div>
   </div>
-
 
   <div
     #messagesContainer
@@ -44,13 +49,12 @@
         >
           <div>{{ message.content }}</div>
           <div class="text-xs mt-1 opacity-70 text-right">
-            {{ message.sentAt | date:'shortTime':'UTC+6' }}
+            {{ message.sentAt | date : "shortTime" }}
           </div>
         </div>
       </div>
     </div>
   </div>
-
 
   <button
     *ngIf="userHasScrolled"
@@ -60,7 +64,6 @@
   >
     <i class="fa fa-arrow-down"></i>
   </button>
-
 
   <div class="p-3 border-t sticky bottom-0 bg-white">
     <div class="flex">

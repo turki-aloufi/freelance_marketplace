@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { throwError, Observable, switchMap, take } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Auth, user, User } from '@angular/fire/auth';
-
+import {environment} from '../../../../environment.prod'
 // Define interfaces
 export interface Project {
   title: string;
@@ -16,7 +16,7 @@ export interface Project {
   proposals: Proposal[];
   clientId: string;
   clientName:string,
-  Status:string;
+  status:string;
 }
 
 export interface Proposal {
@@ -24,7 +24,7 @@ export interface Proposal {
   deadline: string;
   proposedAmount: number;
   freelancerName: string;
-  freelancerAvatar: string;
+  profilePictureUrl: string;
   status: string;
   freelancerId: string;
   freelancerPhoneNumber: string;
@@ -43,7 +43,7 @@ export interface AssignProjectDto {
   providedIn: 'root'
 })
 export class ProjectService {
-  private baseUrl = 'http://localhost:5021/api';
+  private baseUrl = `${environment.apiUrl}/api`;
   private user$: Observable<User | null>;
 
   constructor(

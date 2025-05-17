@@ -1,6 +1,12 @@
-<main class="flex-grow bg-gray-50">
- 
-  <app-navbar></app-navbar>
-  <router-outlet></router-outlet>
-</main>
-<app-footer></app-footer>
+<div *ngIf="initialLoading; else content" class="loader-container">
+  <i class="fas fa-spinner fa-spin text-yellow-500 text-5xl"></i>
+</div>
+<ng-template #content>
+  <div class="flex flex-col min-h-screen">
+    <main class="flex-grow bg-gray-50">
+      <app-navbar></app-navbar>
+      <router-outlet></router-outlet>
+    </main>
+    <app-footer></app-footer>
+  </div>
+</ng-template>

@@ -1,8 +1,10 @@
 export const environment = {
   production: true,
+  apiUrl: 'https://freelance-marketplace-backend-0mp0.onrender.com',
   "stripe": {
     "publishableKey": "pk_test_51RJiMwIyGkuZhmdotUorbeSaWwVa0PayGNnEmVCChQ5fjcxqJebJx0PlOWAtOvnxKObMMejXscYHA4pwVEhnnk1o00FGE6WjKu",
    },
+bugsnagApiKey: '57275aeb5e5f2cfbc08f4e8df830e4a8',
   firebaseConfig: {
     apiKey: "AIzaSyBi4IxieY_oEjIHVI7Cg7WxOUrS45qiMLg",
     authDomain: "freelance-marketplace-caf38.firebaseapp.com",

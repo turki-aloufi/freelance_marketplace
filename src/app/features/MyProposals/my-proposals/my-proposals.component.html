@@ -1,45 +1,65 @@
-<div class="proposals-container px-4 sm:px-6 lg:px-12 py-6">
-  <h1 class="text-2xl font-bold text-gray-800 mb-6">My Proposals</h1>
-
-  <div *ngIf="proposals.length === 0" class="text-center text-gray-600">
-    <p>No proposals found.</p>
+<main class="p-4 sm:p-6 md:p-8 max-w-screen-xl mx-auto">
+  <div class="items-end mb-4 sm:mb-6">
+    <div>
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold">Proposals logs</h1>
+      <p class="text-base sm:text-lg text-gray-500 mt-1">Browse your Proposals</p>
+    </div>
+<!-- loading -->
+  <div *ngIf="loading==true" class="flex justify-center items-center my-10">
+    <i class="fas fa-spinner fa-spin text-yellow-500 text-5xl"></i>
   </div>
+    <div *ngIf="proposals.length === 0 && !loading" class="text-center text-gray-600">
+      <p>No proposals found.</p>
+    </div>
 
-  <div *ngIf="proposals.length > 0" class="space-y-6">
-    <div *ngFor="let proposal of proposals"
-      class="relative bg-white shadow-md rounded-2xl p-6 border border-gray-100 transition hover:shadow-xl">
+    <div *ngIf="proposals.length > 0" class="space-y-6">
+      <div *ngFor="let proposal of proposals"
+        class="relative bg-white shadow-md rounded-2xl p-6 border border-gray-100 transition hover:shadow-xl">
 
-      <!-- Delete Button -->
-      <button *ngIf="proposal.status !== 'Accepted'" (click)="confirmDelete(proposal.proposalId)"
-        class="absolute top-4 right-4 text-red-500 hover:text-red-700 transition text-lg font-bold"
-        aria-label="Delete proposal" [disabled]="deletingProposalId === proposal.proposalId">
-        ×
-      </button>
+        <!-- Delete Button -->
+        <button *ngIf="proposal.status !== 'Accepted'" (click)="confirmDelete(proposal.proposalId)"
+          class="absolute top-2 right-4 top-2  text-red-500 hover:text-red-700 transition text-lg font-bold"
+          aria-label="Delete proposal" [disabled]="deletingProposalId === proposal.proposalId">
+          ×
+        </button>
 
+        <!-- Proposal Info -->
+        <div class="flex flex-col gap-4 mt-4">
 
-      <!-- Proposal Info -->
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div class="flex-1">
-          <h2 class="text-lg font-bold text-gray-900">{{ proposal.projectTitle }}</h2>
-          <p class="text-sm text-gray-700 mt-1 line-clamp-2">{{ proposal.coverLetter }}</p>
+          <!-- Title + CoverLetter (left) | Deadline + Amount (right) -->
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div class="flex-1">
+              <h2 class="text-lg font-bold text-gray-900">{{ proposal.projectTitle }}</h2>
+              <p class="text-sm text-gray-700 mt-1 line-clamp-2">{{ proposal.coverLetter }}</p>
+            </div>
 
-          <span class="status-badge mt-3 inline-block" [ngClass]="{
+            <div class="text-right space-y-1 whitespace-nowrap">
+              <p class="text-sm text-gray-600">
+                <span class="font-medium text-gray-800">Deadline:</span> {{ proposal.deadline }}
+              </p>
+              <p class="text-sm text-gray-600">
+                <span class="font-medium text-gray-800">Amount:</span> {{ proposal.proposedAmount | currency }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Status (left) | View (right) -->
+          <div class="flex items-center justify-between">
+            <span class="status-badge inline-block" [ngClass]="{
             'status-completed': proposal.status === 'Accepted',
             'status-inprogress': proposal.status === 'Pending',
             'status-pending': proposal.status === 'Rejected'
-          }">{{ proposal.status }}</span>
-        </div>
+          }">
+              {{ proposal.status }}
+            </span>
 
-        <!-- Meta -->
-        <div class="text-right space-y-1">
-          <p class="text-sm text-gray-600">
-            <span class="font-medium text-gray-800">Deadline:</span> {{ proposal.deadline }}
-          </p>
-          <p class="text-sm text-gray-600">
-            <span class="font-medium text-gray-800">Amount:</span> {{ proposal.proposedAmount | currency }}
-          </p>
+            <a [routerLink]="['/project-details', proposal.projectId]"
+              class="bg-[#D3A72F] hover:bg-[#BD962A] text-white text-sm px-6 py-1 rounded-xl transition duration-300">
+              View
+            </a>
+          </div>
+
         </div>
       </div>
     </div>
   </div>
-</div>

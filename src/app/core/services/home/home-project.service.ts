@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import {environment} from '../../../../environment.prod'
 export interface Skill {
   skillId: number;
   skill: string;
@@ -25,7 +25,7 @@ export interface HomeProject {
 })
 export class HomeProjectService {
 
-  private apiUrl = 'http://localhost:5021/api/FreelancerProject/all/available/projects';
+  private apiUrl = `${environment.apiUrl}/api/FreelancerProject/all/available/projects`;
 
   constructor(private http: HttpClient) {}
 

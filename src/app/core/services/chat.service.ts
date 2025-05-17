@@ -1,82 +1,141 @@
-// src/app/core/services/chat.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { ChatDto, MessageDto, SendMessageDto, CreateChatDto } from '../models/chat.model';
-import { SignalrService } from './signalr.service';
-import { AuthService } from './auth.service';
-
+import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
+import { BehaviorSubject, Observable, from, Subject } from 'rxjs';
+import { MessageDto, ChatDto } from '../models/chat.model';
+import {environment} from '../../../environment.prod'
 @Injectable({
   providedIn: 'root'
 })
-export class ChatService {
-  private apiUrl = 'http://localhost:5021/api';
+export class SignalrService {
+  private hubConnection!: HubConnection;
+  private messageReceivedSubject = new BehaviorSubject<MessageDto | null>(null);
+  private connectionEstablished = new BehaviorSubject<boolean>(false);
   private activeChatSubject = new BehaviorSubject<ChatDto | null>(null);
+  
+  public messageReceived$ = this.messageReceivedSubject.asObservable();
+  public connectionEstablished$ = this.connectionEstablished.asObservable();
   public activeChat$ = this.activeChatSubject.asObservable();
 
-  constructor(
-    private http: HttpClient, 
-    private signalrService: SignalrService,
-    private authService: AuthService
-  ) {
-    // Start SignalR connection when service is initialized
-    this.authService.user$.subscribe(user => {
-      if (user) {
-        this.signalrService.startConnection(user.uid)
-          .then(() => console.log('SignalR connected'))
-          .catch(err => console.error('SignalR connection error:', err));
-      }
+  constructor() {}
+
+  public startConnection(userId: string): Promise<void> {
+    this.hubConnection = new HubConnectionBuilder()
+      .withUrl(`${environment.apiUrl}/chatHub`)
+      .withAutomaticReconnect()
+      .build();
+    
+    // Set up message receiving handler
+    this.hubConnection.on('ReceiveMessage', (message: MessageDto) => {
+      console.log('SignalR received message:', message);
+      message.isFromMe = message.senderId === userId;
+      this.messageReceivedSubject.next(message);
+    });
+
+    return this.hubConnection.start().then(() => {
+      console.log('SignalR Connected!');
+      this.connectionEstablished.next(true);
     });
   }
 
-  setActiveChat(chat: ChatDto | null): void {
-    console.log('Setting active chat:', chat);
-    
-    // Clear current chat first
-    if (this.activeChatSubject.value) {
-      console.log('Leaving chat room:', this.activeChatSubject.value.chatId);
-      this.signalrService.leaveChatRoom(this.activeChatSubject.value.chatId)
-        .catch(err => console.error('Error leaving previous chat room:', err));
-    }
-    
-    // Short pause before setting new chat
-    setTimeout(() => {
-      // Join new chat room if provided
-      if (chat) {
-        console.log('Joining new chat room:', chat.chatId);
-        this.signalrService.joinChatRoom(chat.chatId)
-          .catch(err => console.error('Error joining new chat room:', err));
+  public setActiveChat(chat: ChatDto | null): void {
+    if (this.activeChatSubject.value?.chatId !== chat?.chatId) {
+      // Leave previous chat room if exists
+      if (this.activeChatSubject.value) {
+        this.leaveChatRoom(this.activeChatSubject.value.chatId);
       }
       
-      // Update the active chat
+      // Join new chat room if provided
+      if (chat) {
+        this.joinChatRoom(chat.chatId);
+      }
+      
       this.activeChatSubject.next(chat);
-    }, 100);
+    }
   }
 
-  getUserChats(userId: string): Observable<ChatDto[]> {
-    return this.http.get<ChatDto[]>(`${this.apiUrl}/Chats/user/${userId}`);
+  public joinChatRoom(chatId: number): Promise<void> {
+    if (!this.hubConnection || this.hubConnection.state !== HubConnectionState.Connected) {
+      return Promise.reject('Hub connection not established');
+    }
+    console.log(`Joining chat room: ${chatId}`);
+    return this.hubConnection.invoke('JoinChat', chatId.toString());
   }
 
-  getChatMessages(chatId: number, userId: string): Observable<MessageDto[]> {
-    return this.http.get<MessageDto[]>(`${this.apiUrl}/Chats/${chatId}/messages?userId=${userId}`);
+  public leaveChatRoom(chatId: number): Promise<void> {
+    if (!this.hubConnection || this.hubConnection.state !== HubConnectionState.Connected) {
+      return Promise.reject('Hub connection not established');
+    }
+    console.log(`Leaving chat room: ${chatId}`);
+    return this.hubConnection.invoke('LeaveChat', chatId.toString());
   }
 
-  sendMessage(chatId: number, senderId: string, content: string): Observable<MessageDto> {
-    const message: SendMessageDto = {
-      senderId,
-      content
-    };
-    return this.http.post<MessageDto>(`${this.apiUrl}/Chats/${chatId}/messages`, message);
+  public sendMessage(chatId: number, senderId: string, content: string): Observable<MessageDto> {
+    if (!this.hubConnection || this.hubConnection.state !== HubConnectionState.Connected) {
+      return from(Promise.reject('Hub connection not established'));
+    }
+    
+    const subject = new Subject<MessageDto>();
+    
+    this.hubConnection.invoke('SendMessage', chatId, senderId, content)
+      .then((message: MessageDto) => {
+        subject.next(message);
+        subject.complete();
+      })
+      .catch((err: Error) => {
+        console.error('Error sending message via SignalR:', err);
+        subject.error(err);
+      });
+      
+    return subject.asObservable();
   }
 
-  createChat(clientId: string, freelancerId: string): Observable<ChatDto> {
-    return this.http.post<ChatDto>(`${this.apiUrl}/chats/create`, { 
-      clientId, 
-      freelancerId 
-    });
+  // Add BOTH method names for compatibility
+  public getChatMessages(chatId: number, userId: string): Observable<MessageDto[]> {
+    if (!this.hubConnection || this.hubConnection.state !== HubConnectionState.Connected) {
+      return from(Promise.reject('Hub connection not established'));
+    }
+    
+    return from(this.hubConnection.invoke('GetChatMessages', chatId, userId));
+  }
+  
+  // Alias for compatibility
+  public getChatHistory(chatId: number, userId: string): Observable<MessageDto[]> {
+    return this.getChatMessages(chatId, userId);
+  }
+  
+  public getUserChats(userId: string): Observable<ChatDto[]> {
+    if (!this.hubConnection || this.hubConnection.state !== HubConnectionState.Connected) {
+      return from(Promise.reject('Hub connection not established'));
+    }
+    
+    return from(this.hubConnection.invoke('GetUserChats', userId));
+  }
+  
+  public createChat(clientId: string, freelancerId: string): Observable<ChatDto> {
+    if (!this.hubConnection || this.hubConnection.state !== HubConnectionState.Connected) {
+      return from(Promise.reject('Hub connection not established'));
+    }
+    
+    return from(this.hubConnection.invoke('CreateChat', clientId, freelancerId));
   }
 
-  checkChatExists(clientId: string, freelancerId: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/Chats/check?clientId=${clientId}&freelancerId=${freelancerId}`);
+  public checkChatExists(clientId: string, freelancerId: string): Observable<{exists: boolean, chatId: number}> {
+    if (!this.hubConnection || this.hubConnection.state !== HubConnectionState.Connected) {
+      return from(Promise.reject('Hub connection not established'));
+    }
+    
+    return from(this.hubConnection.invoke('CheckChatExists', clientId, freelancerId));
+  }
+
+  public stopConnection(): Promise<void> {
+    if (!this.hubConnection) {
+      return Promise.resolve();
+    }
+    this.connectionEstablished.next(false);
+    return this.hubConnection.stop();
+  }
+  
+  public isConnected(): boolean {
+    return this.hubConnection?.state === HubConnectionState.Connected;
   }
 }

@@ -2,12 +2,12 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Auth, user, User } from '@angular/fire/auth';
 import { Observable, switchMap, take } from 'rxjs';
-
+import {environment} from '../../../../environment.prod'
 @Injectable({
   providedIn: 'root'
 })
 export class ApprovedProjectService {
-  private readonly apiUrl = 'http://localhost:5021/api/ClientProject/approved';
+  private readonly apiUrl = `${environment.apiUrl}/api/ClientProject/approved`;
   private user$: Observable<User | null>;
 
   constructor(

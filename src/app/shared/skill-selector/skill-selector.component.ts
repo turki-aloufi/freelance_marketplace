@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Subject, debounceTime, retry, takeUntil } from 'rxjs';
-
+import { environment } from '../../../environment.prod';
 interface Skill {
   SkillId: number;
   Skill: string;
@@ -18,8 +18,7 @@ interface Skill {
 })
 export class SkillSelectorComponent implements OnInit, OnDestroy {
   @Input() isDisabled: boolean = false;
-
-  // ✅ Proper input/output for two-way binding
+  @Input() forceFetch: boolean = false; 
   @Input() selectedSkills: Skill[] = [];
   @Output() selectedSkillsChange = new EventEmitter<Skill[]>();
 
@@ -37,9 +36,8 @@ export class SkillSelectorComponent implements OnInit, OnDestroy {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.skills = [...this.selectedSkills]; // ✅ initialize internal state from input
+    this.skills = [...this.selectedSkills];
     this.fetchSkills();
-
     this.skillSearchSubject
       .pipe(debounceTime(300), takeUntil(this.destroy$))
       .subscribe(() => {
@@ -47,30 +45,28 @@ export class SkillSelectorComponent implements OnInit, OnDestroy {
       });
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   fetchSkills() {
-    if (this.availableSkills.length > 0) {
+    // Skip caching if forceFetch is true or availableSkills is empty
+    if (!this.forceFetch && this.availableSkills.length > 0) {
       this.filteredSkills = [...this.availableSkills];
       return;
     }
     this.isLoadingSkills = true;
 
     this.http
-      .get<Skill[]>('http://localhost:5021/api/Skills')
+      .get<Skill[]>(`${environment.apiUrl}/api/Skills`)
       .pipe(retry(2), takeUntil(this.destroy$))
       .subscribe({
         next: (skills) => {
+          console.log('Skills fetched:', skills); // Debug
           this.availableSkills = skills.filter(skill =>
             skill && typeof skill.Skill === 'string' && typeof skill.Category === 'string'
           );
           this.filteredSkills = [...this.availableSkills];
           this.isLoadingSkills = false;
         },
-        error: () => {
+        error: (err) => {
+          console.error('Failed to fetch skills:', err); // Debug
           this.isLoadingSkills = false;
           this.error = 'Failed to load skills. Please try again later.';
         }
@@ -91,7 +87,7 @@ export class SkillSelectorComponent implements OnInit, OnDestroy {
   addSkill(skill: Skill) {
     if (!this.skills.find(s => s.SkillId === skill.SkillId)) {
       this.skills.push(skill);
-      this.selectedSkillsChange.emit(this.skills); // ✅ emit change
+      this.selectedSkillsChange.emit(this.skills);
     }
     this.skillSearch = '';
     this.filteredSkills = [...this.availableSkills];
@@ -99,11 +95,16 @@ export class SkillSelectorComponent implements OnInit, OnDestroy {
 
   removeSkill(skill: Skill) {
     this.skills = this.skills.filter(s => s.SkillId !== skill.SkillId);
-    this.selectedSkillsChange.emit(this.skills); // ✅ emit change
+    this.selectedSkillsChange.emit(this.skills);
   }
 
   retryFetch() {
     this.error = '';
     this.fetchSkills();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

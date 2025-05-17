@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, switchMap, take } from 'rxjs';
 import { Auth, user, User } from '@angular/fire/auth';
-
+import {environment} from '../../../../environment.prod'
 @Injectable({
   providedIn: 'root'
 })
 export class ProposalService {
-  private baseUrl = 'http://localhost:5021/api/FreelancerProposal';
+  private baseUrl = `${environment.apiUrl}/api/FreelancerProposal`;
   private user$: Observable<User | null>;
 
   constructor(private http: HttpClient, private auth: Auth) {

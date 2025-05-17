@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { firstValueFrom, switchMap, take, Observable } from 'rxjs';
+import { firstValueFrom, switchMap, take, Observable ,BehaviorSubject} from 'rxjs';
 import { Auth, user, User } from '@angular/fire/auth';
-
+import {environment} from '../../../../environment.prod'
 export interface BalanceChangeDto {
   amount: number;
 }
@@ -50,14 +50,27 @@ export interface EditProfileDto {
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:5021/api/Auth';
+  private apiUrl = `${environment.apiUrl}/api/Auth`;
   private user$: Observable<User | null>;
   private cachedProfile: UserProfileDto | null = null;
+
+  private userProfileSubject = new BehaviorSubject<UserProfileDto | null>(null);
+  userProfile$ = this.userProfileSubject.asObservable();
+
   constructor(private http: HttpClient, private auth: Auth) {
     this.user$ = user(this.auth);
 
   }
 
+
+async refreshUserProfile(): Promise<void> {
+  const userId = this.getCurrentUserId();
+  if (!userId) return;
+
+  const profile = await firstValueFrom(this.getUserProfile(userId));
+  this.cachedProfile = profile;
+  this.userProfileSubject.next(profile);
+}
   private getAuthToken(): Observable<string> {
     return this.user$.pipe(
       take(1),
@@ -68,9 +81,22 @@ export class UserService {
     );
   }
 
-  getUserProfile(userId: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/users/${userId}`);
-  }
+  getUserProfile(userId: string): Observable<UserProfileDto> {
+  return this.http.get<UserProfileDto>(`${this.apiUrl}/users/${userId}`);
+}
+
+
+loadUserProfile(userId: string): void {
+  this.getUserProfile(userId).subscribe({
+    next: profile => {
+      this.cachedProfile = profile;
+      this.userProfileSubject.next(profile);
+    },
+    error: err => {
+      console.error('Failed to load profile:', err);
+    }
+  });
+}
 
   async updateBalance(amount: number): Promise<void> {
     const token = await firstValueFrom(this.getAuthToken());
@@ -92,21 +118,17 @@ export class UserService {
     this.cachedProfile = null;
   }
 
-  async refreshUserProfile(): Promise<void> {
-    const userId = this.getCurrentUserId();
-    if (!userId) return;
 
-    const profile = await firstValueFrom(this.getUserProfile(userId));
-    this.cachedProfile = profile;
-  }
-  updateUserProfile(data: EditProfileDto): Observable<void> {
-    return this.getAuthToken().pipe(
-      switchMap(token => {
-        const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-        return this.http.put<void>(`${this.apiUrl}/users/profile`, data, { headers });
-      })
-    );
-  }
+updateUserProfile(data: EditProfileDto): Observable<void> {
+  return this.getAuthToken().pipe(
+    switchMap(token => {
+      const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+      return this.http.put<void>(`${this.apiUrl}/users/profile`, data, { headers });
+    })
+  );
+  
+}
+
 
 
 

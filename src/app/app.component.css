@@ -7,3 +7,20 @@
     flex-grow: 1;
     
   }
+  .loader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  background: #f3f4f6; /* Matches bg-gray-50 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader-container i {
+  font-size: 4rem; /* Larger spinner size (64px) */
+  color: #f59e0b; /* Matches text-yellow-500 */
+}

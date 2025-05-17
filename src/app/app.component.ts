@@ -2,15 +2,23 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './shared/navbar/navbar.component';
 import { FooterComponent } from './shared/footer/footer.component';
+import { AuthService } from './core/services/auth.service';
+import { CommonModule } from '@angular/common';
 
-import { SignInComponent } from "./features/auth/sign-in/sign-in.component";
-import { ProfileComponent } from './features/profile/profile.component';
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, SignInComponent,ProfileComponent],
+  standalone: true,
+  imports: [RouterOutlet, NavbarComponent, FooterComponent, CommonModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
   title = 'freelance_marketplace';
+  initialLoading = true;
+
+  constructor(private authService: AuthService) {
+    this.authService.waitForAuthState().then(() => {
+      this.initialLoading = false;
+    });
+  }
 }

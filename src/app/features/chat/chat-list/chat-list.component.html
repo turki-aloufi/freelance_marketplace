@@ -3,8 +3,18 @@
     <i class="fa fa-spinner fa-spin mr-2"></i> Loading conversations...
   </div>
 
+  <div *ngIf="!loading && error" class="p-4 text-center text-red-500">
+    <p>{{ error }}</p>
+    <button
+      (click)="retryLoadChats()"
+      class="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+    >
+      Retry
+    </button>
+  </div>
+
   <div
-    *ngIf="!loading && chats.length === 0"
+    *ngIf="!loading && !error && chats.length === 0"
     class="p-4 text-center text-gray-500"
   >
     No conversations found
@@ -17,11 +27,17 @@
     [class.bg-gray-200]="activeChat?.chatId === chat.chatId"
   >
     <div class="flex items-center">
-      <div class="w-12 h-12 bg-gray-300 rounded-full mr-3 flex-shrink-0">
-        <!-- User avatar placeholder -->
-        <div class="flex items-center justify-center h-full text-gray-600">
-          <i class="fa fa-user"></i>
-        </div>
+      <div class="w-12 h-12 rounded-full mr-3 flex-shrink-0 overflow-hidden">
+        <!-- User profile image -->
+        <img
+          [src]="
+            chat.otherUserImageUrl ||
+            'https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'
+          "
+          alt="{{ chat.otherUserName }}"
+          class="w-full h-full object-cover"
+          onerror="this.src='https://www.svgrepo.com/show/384670/account-avatar-profile-user.svg'"
+        />
       </div>
       <div class="flex-grow min-w-0">
         <div class="flex justify-between items-baseline">
@@ -29,12 +45,16 @@
             {{ chat.otherUserName || "Unknown User" }}
           </h3>
           <span *ngIf="chat.lastMessageTime" class="text-xs text-gray-500">
-            {{ chat.lastMessageTime | date:'shortTime':'UTC+6' }}
+            {{ chat.lastMessageTime | date : "shortTime" : "UTC+6" }}
           </span>
         </div>
         <p class="text-sm text-gray-600 truncate" *ngIf="chat.lastMessage">
-          <span *ngIf="chat.isLastMessageFromMe">You: </span
-          >{{ chat.lastMessage }}
+          <ng-container *ngIf="chat.isLastMessageFromMe"
+            >You: {{ chat.lastMessage }}</ng-container
+          >
+          <ng-container *ngIf="!chat.isLastMessageFromMe">{{
+            chat.lastMessage
+          }}</ng-container>
         </p>
         <p *ngIf="!chat.lastMessage" class="text-sm text-gray-400 italic">
           No messages yet

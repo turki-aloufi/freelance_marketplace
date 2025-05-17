@@ -7,7 +7,7 @@
     <!-- Left Side -->
     <div class="flex items-center space-x-4">
       <a href="#" class="text-white hover:text-[#DEBD63] transition duration-300">
-        <img [src]="proposal.freelancerAvatar" alt="User Profile" class="rounded-full w-10 h-10 object-cover">
+        <img [src]="proposal.profilePictureUrl" alt="User Profile" class="rounded-full w-10 h-10 object-cover">
       </a>
       <div>
         <h5 (click)="navigateToUserProfile(proposal.freelancerId)" class="font-semibold text-lg cursor-pointer underline">{{ proposal.freelancerName }}</h5>

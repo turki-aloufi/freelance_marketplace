@@ -17,7 +17,7 @@
  Please fill in all fields.
 </div>
 <div *ngIf="assignMessage === 'alreadyExists'"
-  class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-300"
+  class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-300"
   role="alert">
   You cannot submit another Proposal. Please delete the previous Proposal first.
 </div>
@@ -92,45 +92,56 @@
 
 
 
+
 <!-- Proposal Section -->
-<div class="space-y-8">
+<div class="space-y-8" >
   <h3 class="text-xl font-bold border-b pb-2">Proposals:</h3>
+
   <div class="space-y-10">
-    <div *ngFor="let proposal of proposals">
-      <!-- If user is not the project owner, only show the proposal card without the accept button -->
-      <app-proposal-card *ngIf="!isProjectOwner" [proposal]="proposal" ></app-proposal-card>
+    <!-- Check if there are proposals -->
+    <ng-container *ngIf="proposals && proposals.length > 0; else noProposals">
+      <div *ngFor="let proposal of proposals">
+        <!-- If user is not the project owner -->
+        <app-proposal-card *ngIf="!isProjectOwner" [proposal]="proposal"></app-proposal-card>
 
-      <!-- If user is the project owner, show the accept button inside the proposal card -->
-      <ng-container *ngIf="isProjectOwner">
-        <app-proposal-card [proposal]="proposal">
-          <!-- Button inside the card (will be rendered inside app-proposal-card using ng-content) -->
-
+        <!-- If user is the project owner -->
+        <ng-container *ngIf="isProjectOwner">
+          <app-proposal-card [proposal]="proposal">
             <button
-      [disabled]="proposal.status === 'Accepted' || acceptedProposalId !== null"
-      [ngClass]="{
-        'bg-gray-400 cursor-not-allowed': proposal.status === 'Accepted' || acceptedProposalId !== null,
-        'bg-yellow-500 hover:bg-yellow-600': proposal.status !== 'Accepted' && acceptedProposalId === null
-      }"
-      class="text-white font-bold py-2 px-6 rounded-lg m-5 transition"
-      (click)="acceptProposal(proposal)"
-    >
-  {{ proposal.status === 'Accepted' ? 'Accepted' : 'Accept' }}
-</button>
+              [disabled]="proposal.status === 'Accepted' || acceptedProposalId !== null"
+              [ngClass]="{
+                'bg-gray-400 cursor-not-allowed': proposal.status === 'Accepted' || acceptedProposalId !== null,
+                'bg-yellow-500 hover:bg-yellow-600': proposal.status !== 'Accepted' && acceptedProposalId === null
+              }"
+              class="text-white font-bold py-2 px-6 rounded-lg m-5 transition"
+              (click)="acceptProposal(proposal)"
+            >
+             
+            {{
+            proposal.proposalId === acceptedProposalId
+              ? 'Accepted'
+              : acceptedProposalId !== null
+                ? 'Rejected'
+                : 'Accept'
+          }}
+            </button>
+          </app-proposal-card>
+        </ng-container>
+      </div>
+    </ng-container>
 
-            </app-proposal-card>
-          </ng-container>
-          
-    </div>
+    <!-- Message if there are no Proposals -->
+    <ng-template #noProposals>
+      <p class="text-center text-gray-500 italic text-xl">There are no Proposals yet.</p>
+    </ng-template>
   </div>
+
   <div class="border-b"></div>
 </div>
 
 
-
-
-
   <!-- Share Proposal Form (Only shows if user is not the project owner) -->
-  <section class="space-y-6" *ngIf="isLoggedInNotOwner">
+     <section class="space-y-6" *ngIf="project.status === 'Open' && isLoggedInNotOwner">
     <h3 class="text-2xl font-bold">Share <span class="text-yellow-500 font-normal">your Proposal</span></h3>
 
     <!-- Proposal Form -->
