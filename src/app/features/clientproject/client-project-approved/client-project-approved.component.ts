@@ -6,6 +6,7 @@ import { RouterModule, Router } from '@angular/router';
 import { ApprovedProjectService } from '../../../core/services/clientProjects/approved-project.service';
 import { UserService } from '../../../core/services/user/user.service';
 import { NotificationService } from '../../../core/services/Notification/notification.service'; 
+import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-client-project-approved',
   imports: [CommonModule, FormsModule, RouterModule],
@@ -72,8 +73,7 @@ export class ClientProjectApprovedComponent implements OnInit {
   }
 
  
-onDoneClick(projectID: string) {
-  
+async onDoneClick(projectID: string) {
   const project = this.allProjects.find(p => String(p.projectId) === String(projectID));
   const freelancerId = project?.freelancer?.freelancerId;
   console.log('Marking project done:', projectID);
@@ -83,30 +83,28 @@ onDoneClick(projectID: string) {
     return;
   }
 
-  this.approvedProjectService.markProjectAsCompleted(projectID).subscribe({
-    next: (response) => {
-      console.log('Project marked as completed:', response);
-      this.message = true;
+  try {
+    const response = await firstValueFrom(this.approvedProjectService.markProjectAsCompleted(projectID));
+    console.log('Project marked as completed:', response);
+    this.message = true;
 
-      setTimeout(() => this.message = false, 5000);
+    setTimeout(() => this.message = false, 5000);
 
-      if (freelancerId) {
-        this.notificationService.addNotification(
-          `Congratulations! The project #${projectID} has been marked as completed. Well done! `,
-          freelancerId
-        );
-      }
-
-      this.loadApprovedProjects();
-      this.userService.getUserProfile(this.userID);
-    },
-    error: (err) => {
-      console.error('Failed to mark the project as complete', err);
-      alert('Error: Could not mark project as completed.');
+    if (freelancerId) {
+      this.notificationService.addNotification(
+        `Congratulations! The project #${projectID} has been marked as completed. Well done! `,
+        freelancerId
+      );
     }
-  });
-}
 
+    this.loadApprovedProjects();
+    await this.userService.refreshUserProfile();
+
+  } catch (err) {
+    console.error('Failed to mark the project as complete', err);
+    alert('Error: Could not mark project as completed.');
+  }
+}
 
   contactFreelancer(freelancerId: string) {
     if (!freelancerId) {
