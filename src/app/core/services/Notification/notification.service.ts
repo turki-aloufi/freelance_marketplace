@@ -17,7 +17,7 @@ export class NotificationService {
 
   constructor() {
     // Load notifications from localStorage when configuring the service
-    if (typeof localStorage !== 'undefined') {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       const savedNotifications = localStorage.getItem('notifications');
       if (savedNotifications) {
         this.notificationsSubject.next(new Map(JSON.parse(savedNotifications)));
@@ -56,7 +56,7 @@ export class NotificationService {
     );
 
     //  Save notifications in localStorage
-    if (typeof localStorage !== 'undefined') {
+   if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       localStorage.setItem('notifications', JSON.stringify(Array.from(this.notificationsSubject.value.entries())));
     }
   }
@@ -71,4 +71,5 @@ export class NotificationService {
     return this.notificationsSubject.value.get(userId) || [];
   }
 }
+
 
