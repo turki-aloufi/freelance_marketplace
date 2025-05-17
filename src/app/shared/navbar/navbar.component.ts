@@ -61,7 +61,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
             }
           });
 
-          // Subscribe to notifications and update the notifications array
+  
+        //Download user notifications from Firestore
+        this.notificationService.loadNotifications(this.userId);
+
         this.notificationService.notifications$
           .pipe(takeUntil(this.destroy$))
           .subscribe((notificationsMap) => {
@@ -69,8 +72,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
               this.notifications = notificationsMap.get(this.userId) || [];
             }
           });
-        }
-      });
+      }
+    });
   }
 
   ngOnDestroy() {
