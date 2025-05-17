@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -6,8 +6,9 @@ import { ProposalCardComponent } from '../../../shared/components/proposal-card/
 import { ProjectService, Project, Proposal, AssignProjectDto } from '../../../core/services/project/project.service';
 import { AuthService } from '../../../core/services/auth.service'; 
 import { NotificationService } from '../../../core/services/Notification/notification.service'; 
-import { UserService } from '../../../core/services/user/user.service';
+import { UserService ,UserProfileDto} from '../../../core/services/user/user.service';
 import { Router } from '@angular/router';
+import { takeUntil,Subject } from 'rxjs';
 import Bugsnag from '@bugsnag/js';
 @Component({
   selector: 'app-project-detail',
@@ -33,7 +34,8 @@ export class ProjectDetailComponent implements OnInit {
   acceptedProposalId: number | null = null;
   isLoggedInNotOwner: boolean = false;
   assignMessage: 'success' | 'error' | 'warning' | 'alreadyExists' | null = null;
-
+  userProfile: UserProfileDto | null = null;
+  private destroy$ = new Subject<void>();
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
@@ -147,7 +149,7 @@ export class ProjectDetailComponent implements OnInit {
   };
 
   this.projectService.assignProject(this.projectId, model).subscribe(
-    () => {
+   async () => {
       
      
       this.proposals = this.proposals.map(p => {
@@ -162,10 +164,13 @@ export class ProjectDetailComponent implements OnInit {
       console.log('Updated proposals:', this.proposals);
       if (this.project) { 
         this.project.status = 'In Progress'; 
+        
         proposal.status = 'Accepted';
         this.acceptedProposalId = proposal.proposalId;
         console.log('Proposal accepted and project assigned successfully.');
 
+        await this.userService.refreshUserProfile();
+        
         this.assignMessage = 'success';
         setTimeout(() => {
           this.assignMessage = null;
@@ -175,9 +180,6 @@ export class ProjectDetailComponent implements OnInit {
             `Congratulations! Your proposal has been accepted for Project No.${this.projectId}`,
             proposal.freelancerId // <== This identifies the recipient.
           );
-          // Clear cached user data
-          this.userService.clearCachedProfile();
-          this.userService.refreshUserProfile();
         }
       },
       (error) => {
